@@ -15,6 +15,7 @@ A Laravel template to be used to ease setup during development
     <li>git clone https://github.com/NthnyVllflrs/laravel-template.git</li>
     <li>composer install</li>
     <li>npm install</li>
+    <li>cp .env.example .env</li>
     <li>php artisan key:generate</li>
     <li>php artisan migrate:fresh</li>
     <li>php artisan passport:install</li>
