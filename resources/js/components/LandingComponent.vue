@@ -1,21 +1,30 @@
 <template>
     <div>
-        <h1>{{ message }}</h1>
+        {{ message }}, {{ appName }}
     </div>
 </template>
 
 <script>
+import {mapGetters, mapActions} from 'vuex'
+
     export default {
         data() {
             return {
-                message: null,
+                message: "Landing Component",
             }
         },
         mounted() {
-            Echo.channel('home')
-                .listen('NewMessage', (e) => {
-                    this.message = e.message
-                })
+            this.changeAppName(" Changed")
         },
+        computed: {
+            ...mapGetters([
+                'appName'
+            ])
+        },
+        methods: {
+            ...mapActions([
+                'changeAppName'
+            ])
+        }
     }
 </script>

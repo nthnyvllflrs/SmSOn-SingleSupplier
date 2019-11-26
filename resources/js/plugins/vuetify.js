@@ -6,7 +6,9 @@ import '@fortawesome/fontawesome-free/css/all.css'
 Vue.use(Vuetify)
 
 const opts = {
-    icons: { iconfont: 'fa',},
+    icons: {
+        iconfont: 'fa',
+    },
 }
 
 export default new Vuetify(opts)

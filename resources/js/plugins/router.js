@@ -11,6 +11,12 @@ const routes = [
         name: 'landing', 
         component: Landing,
     },
+
+    { 
+        path: '/landing', 
+        name: 'landing', 
+        component: Landing,
+    },
 ]
 
 const opts = {
