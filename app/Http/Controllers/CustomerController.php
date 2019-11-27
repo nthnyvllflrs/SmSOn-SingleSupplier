@@ -63,6 +63,6 @@ class CustomerController extends Controller {
 
     public function destroy(Request $request, User $customer) {
         $customer->delete();
-        return response(['success' => ['message' => 'Customer Deleted']], 200);
+        return response(['success' => ['message' => 'Customer Deleted']], 201);
     }
 }

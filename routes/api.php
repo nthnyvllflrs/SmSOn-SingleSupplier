@@ -37,4 +37,11 @@ Route::group(['middleware' => ['json.response']], function () {
                             'index', 'store', 'show', 'update', 'destroy'
                         )
                     ));
+
+    Route::resource('product', 'ProductController',
+                    array(
+                        'only' => array(
+                            'index', 'store', 'show', 'update', 'destroy'
+                        )
+                    ));
 });

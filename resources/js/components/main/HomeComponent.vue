@@ -4,7 +4,7 @@
             <v-list>
                 <v-list-item>
                     <v-list-item-content>
-                        <v-list-item-title class="subtitle-2 font-weight-bold">Cart Items</v-list-item-title>
+                        <v-list-item-title class="subtitle-2 font-weight-bold">Selected Items</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
 
@@ -45,7 +45,7 @@
         <v-app-bar app clipped-right>
             <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
             <v-toolbar-title class="username-letter-spacing">
-                <span class="title font-weight-bold title-letter-spacing">Suppliers Mart</span>
+                <span class="title font-weight-bold title-letter-spacing">SMS ON</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn icon>

@@ -63,6 +63,6 @@ class SupplierController extends Controller
 
     public function destroy(Request $request, User $supplier) {
         $supplier->delete();
-        return response(['success' => ['message' => 'Supplier Deleted']], 200);
+        return response(['success' => ['message' => 'Supplier Deleted']], 201);
     }
 }

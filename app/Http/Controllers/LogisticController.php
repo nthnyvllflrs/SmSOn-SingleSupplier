@@ -45,7 +45,6 @@ class LogisticController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
 
             // logistic Model Data
-            'supplier_id' => 'required|exists:suppliers,id',
             'name' => 'required|min:8|max:255',
             'contact_number' => 'required|max:11|unique:logistics,contact_number,'.$logistic->information->id,
         ]);
@@ -63,6 +62,6 @@ class LogisticController extends Controller
 
     public function destroy(Request $request, User $logistic) {
         $logistic->delete();
-        return response(['success' => ['message' => 'Logistic Deleted']], 200);
+        return response(['success' => ['message' => 'Logistic Deleted']], 201);
     }
 }

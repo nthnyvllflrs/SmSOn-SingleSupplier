@@ -39291,7 +39291,7 @@ var render = function() {
                       _c(
                         "v-list-item-title",
                         { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Cart Items")]
+                        [_vm._v("Selected Items")]
                       )
                     ],
                     1
@@ -39418,7 +39418,7 @@ var render = function() {
             _c(
               "span",
               { staticClass: "title font-weight-bold title-letter-spacing" },
-              [_vm._v("Suppliers Mart")]
+              [_vm._v("SMS ON")]
             )
           ]),
           _vm._v(" "),
