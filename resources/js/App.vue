@@ -1,16 +1,17 @@
 <template>
-    <div id="app">
-        <app-header />
+    <v-app id="app">
         <router-view />
-    </div>
+    </v-app>
 </template>
 
 <script>
-    import Header from './components/HeaderComponent.vue'
     export default {
         name: 'app',
-        components: {
-            'app-header': Header,
-        }
     }
 </script>
+
+<style>
+    a:link {
+        text-decoration: none;
+    }
+</style>

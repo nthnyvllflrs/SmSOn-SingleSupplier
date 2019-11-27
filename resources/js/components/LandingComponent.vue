@@ -1,6 +1,9 @@
 <template>
     <div>
-        {{ message }}, {{ appName }}
+        <v-container>
+            <v-btn small rounded color="success" to="/register">Register</v-btn>
+            <v-btn small rounded color="success" to="/login">Login</v-btn>
+        </v-container>
     </div>
 </template>
 

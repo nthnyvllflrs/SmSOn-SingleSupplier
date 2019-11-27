@@ -9,6 +9,17 @@ const opts = {
     icons: {
         iconfont: 'fa',
     },
+    theme: {
+        dark: false,
+        themes: {
+            light: {
+                primary: '#EF6C00',
+            },
+            dark: {
+                primary: '#FF9800',
+            },
+        },
+    },
 }
 
 export default new Vuetify(opts)
