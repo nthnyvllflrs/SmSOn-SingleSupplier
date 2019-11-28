@@ -46,4 +46,9 @@ class User extends Authenticatable
             }
         });
     }
+
+    // Automatically Hash password on create & update
+    public function setPasswordAttribute($value) {
+        $this->attributes['password'] = \Hash::make($value);
+    }
 }
