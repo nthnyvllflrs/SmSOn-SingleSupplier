@@ -11,13 +11,21 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     public function login (Request $request) {
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-        $user = User::where('email', $request->email)->first();
+        if ($validator->fails()){
+            return response(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::where('username', $request->username)->first();
     
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-                $response = ['token' => $token];
+                $response = ['success' => ['token' => $token, 'role' => $user->role]];
                 return response($response, 200);
             } else {
                 $response = "Password missmatch";

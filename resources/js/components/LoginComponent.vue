@@ -33,8 +33,7 @@ export default {
     data() {
         return {
             loading: false,
-            username: null,
-            password: null,
+            username: null, password: null,
             errorMessage: null,
             formErrors: { username: null, password: null},
         }
@@ -46,25 +45,15 @@ export default {
                 username: this.username, password: this.password
             })
             .then( response => {
-                var token = response.data.token
-                var user_type = response.data.user_type
-                var username = response.data.username
-                var code = response.data.code
-                // Create a local storage item
-                sessionStorage.setItem('user-token', token)
-                sessionStorage.setItem('user-type', user_type)
-                sessionStorage.setItem('user-username', username)
-                sessionStorage.setItem('user-code', code)
-                // Redirect user
-                this.$router.push('dashboard')
+                var data = response.data.success
+                sessionStorage.setItem('user-token', data.token)
+                sessionStorage.setItem('user-role', data.role)
+                this.$router.push('navigation')
             })
             .catch( error => {
                 if(error.response.status == 422) {
                     if(typeof error.response.data == 'object'){
-                        var username = error.response.data.errors.username
-                        var password = error.response.data.errors.password
-                        this.formErrors.username = (typeof username === 'undefined') ? null : username
-                        this.formErrors.password = (typeof password === 'undefined') ? null : password
+                        this.formErrors = error.response.data.errors
                     } else {
                         this.errorMessage = error.response.data
                     }

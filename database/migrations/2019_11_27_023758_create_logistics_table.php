@@ -15,6 +15,7 @@ class CreateLogisticsTable extends Migration
     {
         Schema::create('logistics', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('code')->unique();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('supplier_id');
             $table->string('name');

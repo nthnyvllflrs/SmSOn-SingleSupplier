@@ -11,7 +11,20 @@ use App\Supplier;
 class SupplierController extends Controller
 {
     public function index() {
-        return response(['success' => ['suppliers' => Supplier::all()]], 200);
+        $_suppliers = Supplier::all();
+        $suppliers = [];
+        foreach($_suppliers as $supplier) {
+           $suppliers[] = [
+               'id' => $supplier->user->id,
+               'code' => $supplier->code,
+               'username' => $supplier->user->username,
+               'name' => $supplier->name,
+               'description' => $supplier->description,
+               'address' => $supplier->address,
+               'contact_number' => $supplier->contact_number,
+           ];
+        }
+        return response(['success' => ['suppliers' => $suppliers]], 200);
     }
 
     public function store(Request $request) {
@@ -22,20 +35,29 @@ class SupplierController extends Controller
 
             // Supplier Model Data
             'name' => 'required|min:8|max:255',
+            'description' => 'required|max:500',
             'address' => 'required|min:8|max:255',
             'contact_number' => 'required|max:11|unique:suppliers,contact_number',
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
 
-        $supplier = User::create(array_merge($request->toArray(), ['role' => 'Supplier']));
-        $supplier = supplier::create(array_merge($request->toArray(), ['user_id' => $supplier->id]));
+        $user = User::create(array_merge($request->toArray(), ['role' => 'Supplier']));
+        $supplier = supplier::create(array_merge($request->toArray(), ['user_id' => $user->id]));
 
-        return response(['success' => ['message' => 'New Supplier Created']], 200);
+        return response(['success' => ['user' => $user, 'supplier' => $supplier]], 200);
     }
 
     public function show(Request $request, User $supplier) {
-        return response(['success' => ['user' => $supplier, 'supplier' => $supplier->information]], 200);
+        $supplier = [
+            'name' => $supplier->information->name,
+            'description' => $supplier->information->description,
+            'address' => $supplier->information->address,
+            'product_count' => count($supplier->information->products),
+            'logistic_count' => count($supplier->information->logistics),
+            'products' => $supplier->information->products,
+        ];
+        return response(['success' => ['supplier' => $supplier]], 200);
     }
 
     public function update(Request $request, User $supplier) {
@@ -46,6 +68,7 @@ class SupplierController extends Controller
 
             // supplier Model Data
             'name' => 'required|min:8|max:255',
+            'description' => 'required|max:500',
             'address' => 'required|min:8|max:255',
             'contact_number' => 'required|max:11|unique:suppliers,contact_number,'.$supplier->information->id,
         ]);
@@ -58,7 +81,7 @@ class SupplierController extends Controller
         $supplier->update($updated_data);
         $supplier->information->update($updated_data);
 
-        return response(['success' => ['message' => 'Supplier Updated']], 200);
+        return response(['success' => ['user' => $supplier, 'supplier' => $supplier->information]], 200);
     }
 
     public function destroy(Request $request, User $supplier) {

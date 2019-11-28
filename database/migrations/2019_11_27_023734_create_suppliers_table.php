@@ -15,8 +15,10 @@ class CreateSuppliersTable extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('code')->unique();
             $table->unsignedBigInteger('user_id');
             $table->string('name');
+            $table->string('description');
             $table->string('address')->default('Zamboanga City');
             $table->string('contact_number');
             $table->timestamps();

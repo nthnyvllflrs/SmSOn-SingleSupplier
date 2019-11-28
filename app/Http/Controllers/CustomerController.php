@@ -11,7 +11,19 @@ use App\Customer;
 class CustomerController extends Controller {
  
     public function index() {
-        return response(['success' => ['customers' => Customer::all()]], 200);
+        $_customers = Customer::all();
+        $customers = [];
+        foreach($_customers as $customer) {
+           $customers[] = [
+               'id' => $customer->user->id,
+               'code' => $customer->code,
+               'username' => $customer->user->username,
+               'name' => $customer->name,
+               'address' => $customer->address,
+               'contact_number' => $customer->contact_number,
+           ];
+        }
+        return response(['success' => ['customers' => $customers]], 200);
     }
 
     public function store(Request $request) {
@@ -28,10 +40,10 @@ class CustomerController extends Controller {
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
 
-        $customer = User::create(array_merge($request->toArray(), ['role' => 'Customer']));
-        $customer = Customer::create(array_merge($request->toArray(), ['user_id' => $customer->id]));
+        $user = User::create(array_merge($request->toArray(), ['role' => 'Customer']));
+        $customer = Customer::create(array_merge($request->toArray(), ['user_id' => $user->id]));
 
-        return response(['success' => ['message' => 'New Customer Created']], 200);
+        return response(['success' => ['user' => $user, 'customer' => $customer]], 200);
     }
 
     public function show(Request $request, User $customer) {
@@ -58,7 +70,7 @@ class CustomerController extends Controller {
         $customer->update($updated_data);
         $customer->information->update($updated_data);
 
-        return response(['success' => ['message' => 'Customer Updated']], 200);
+        return response(['success' => ['user' => $customer, 'customer' => $customer]], 200);
     }
 
     public function destroy(Request $request, User $customer) {
