@@ -29,7 +29,7 @@ class CustomerController extends Controller {
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             // User Model Data
-            'username' => 'required|string|min:8|max:16|unique:users,username',
+            'username' => 'required|string|min:8|unique:users,username',
             'password' => 'required|string|min:8|confirmed',
 
             // Customer Model Data
@@ -53,7 +53,7 @@ class CustomerController extends Controller {
     public function update(Request $request, User $customer) {
         $validator = Validator::make($request->all(), [
             // User Model Data
-            'username' => 'required|string|min:8|max:16|unique:users,username,'.$customer->id,
+            'username' => 'required|string|min:8|unique:users,username,'.$customer->id,
             'password' => 'nullable|string|min:8|confirmed',
 
             // Customer Model Data

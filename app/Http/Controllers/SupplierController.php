@@ -30,7 +30,7 @@ class SupplierController extends Controller
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             // User Model Data
-            'username' => 'required|string|min:8|max:16|unique:users,username',
+            'username' => 'required|string|min:8|unique:users,username',
             'password' => 'required|string|min:8|confirmed',
 
             // Supplier Model Data
@@ -63,7 +63,7 @@ class SupplierController extends Controller
     public function update(Request $request, User $supplier) {
         $validator = Validator::make($request->all(), [
             // User Model Data
-            'username' => 'required|string|min:8|max:16|unique:users,username,'.$supplier->id,
+            'username' => 'required|string|min:8|unique:users,username,'.$supplier->id,
             'password' => 'nullable|string|min:8|confirmed',
 
             // supplier Model Data

@@ -38,6 +38,14 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::put('/{product}', 'ProductController@update');
             Route::delete('/{product}', 'ProductController@destroy');
         });
+
+        Route::group(['prefix' => '/logistic'], function($request) {
+            Route::get('/', 'LogisticController@index');
+            Route::post('/', 'LogisticController@store');
+            Route::get('/{logistic}', 'LogisticController@show');
+            Route::put('/{logistic}', 'LogisticController@update');
+            Route::delete('/{logistic}', 'LogisticController@destroy');
+        });
     });
 
     

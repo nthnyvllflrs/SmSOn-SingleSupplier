@@ -1,15 +1,15 @@
 <template>
     <v-container>
         <v-card>
-            <v-data-table :headers="customerTableHeaders" :items="customers" :search="search">
+            <v-data-table :headers="logisticTableHeaders" :items="logistics" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
-                        <v-toolbar-title class="headline">Customers</v-toolbar-title>
+                        <v-toolbar-title class="headline">Logistics</v-toolbar-title>
                         <div class="flex-grow-1"></div>
                         <v-dialog v-model="dialog" max-width="500px" persistent>
                             <template v-slot:activator="{ on }">
                                 <v-btn small color="primary" v-on="on">
-                                    <v-icon small left>fa-plus</v-icon> Add Customer
+                                    <v-icon small left>fa-plus</v-icon> Add Logistic
                                 </v-btn>
                             </template>
 
@@ -23,22 +23,19 @@
                                 <v-card-text>
                                     <v-row no-gutters>
                                         <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.username" v-model="editedCustomerInformation.username" label="Username" />
+                                            <v-text-field :error-messages="formErrors.username" v-model="editedLogisticInformation.username" label="Username" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.password" v-model="editedCustomerInformation.password" label="Password" />
+                                            <v-text-field :error-messages="formErrors.password" v-model="editedLogisticInformation.password" label="Password" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.password_confirmation" v-model="editedCustomerInformation.password_confirmation" label="Password Confirmation" />
+                                            <v-text-field :error-messages="formErrors.password_confirmation" v-model="editedLogisticInformation.password_confirmation" label="Password Confirmation" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.name" v-model="editedCustomerInformation.name" label="Name" />
+                                            <v-text-field :error-messages="formErrors.name" v-model="editedLogisticInformation.name" label="Name" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-textarea :error-messages="formErrors.address" v-model="editedCustomerInformation.address" label="Address" />
-                                        </v-col>
-                                        <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.contact_number" v-model="editedCustomerInformation.contact_number" label="Contact Number" />
+                                            <v-text-field :error-messages="formErrors.contact_number" v-model="editedLogisticInformation.contact_number" label="Contact Number" />
                                         </v-col>
                                     </v-row>
                                 </v-card-text>
@@ -46,15 +43,15 @@
                                 <v-card-actions>
                                     <div class="flex-grow-1" />
                                     <v-btn @click="cancel()">Cancel</v-btn>
-                                    <v-btn class="px-8" color="primary" @click="saveCustomer()">Save</v-btn>
+                                    <v-btn class="px-8" color="primary" @click="saveLogistic()">Save</v-btn>
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
                     </v-toolbar>
                 </template>
                 <template v-slot:item.action="{ item }">
-                    <v-icon class="mx-1" @click="editCustomer(item)">fa-pen</v-icon>
-                    <v-icon class="mx-1" @click="deleteCustomer(item)">fa-trash-alt</v-icon>
+                    <v-icon class="mx-1" @click="editLogistic(item)">fa-pen</v-icon>
+                    <v-icon class="mx-1" @click="deleteLogistic(item)">fa-trash-alt</v-icon>
                 </template>
             </v-data-table>
         </v-card>
@@ -67,56 +64,55 @@
             return {
                 dialog: false, informationDialog: false,
                 loading: false, search: '', editedIndex: -1,
-                customerTableHeaders: [
+                logisticTableHeaders: [
                     { text: 'Code', value: 'code' },
                     { text: 'Username', value: 'username' },
                     { text: 'Name', value: 'name' },
-                    { text: 'Address', value: 'address' },
                     { text: 'Contact Number', value: 'contact_number' },
                     { text: 'Actions', value: 'action', sortable: false },
                 ],
-                customers: [],
+                logistics: [],
 
-                defaultCustomerInformation: { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
-                editedCustomerInformation: { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
-                formErrors: { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null},
+                defaultLogisticInformation: { username: null, name: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
+                editedLogisticInformation: { username: null, name: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
+                formErrors: { username: null, name: null, contact_number: null, password: null, password_confirmation: null},
             }
         },
         mounted() {
-            this.retrieveCustomers()
+            this.retrieveLogistics()
         },
         computed: {
             formTitle () {
-                return this.editedIndex === -1 ? 'New Customer' : 'Edit Customer'
+                return this.editedIndex === -1 ? 'New Logistic' : 'Edit Logistic'
             },
         },
         methods: {
-            retrieveCustomers() {
-                axios.get('/api/customer')
+            retrieveLogistics() {
+                axios.get('/api/logistic')
                 .then( response => {
-                    this.customers = response.data.success.customers
+                    this.logistics = response.data.success.logistics
                 })
                 .catch( error => {
                     toastr.error("An Error Occurred")
                 })
             },
 
-            deleteCustomer(customer) {
-                var customerDeletion = confirm('Are you sure you want to delete this Customer?')
-                if(customerDeletion == true) {
-                    axios.delete('api/customer/' + customer.id)
+            deleteLogistic(logistic) {
+                var logisticDeletion = confirm('Are you sure you want to delete this Logistic?')
+                if(logisticDeletion == true) {
+                    axios.delete('api/logistic/' + logistic.id)
                     .then( response => {
-                        const index = this.customers.indexOf(customer)
-                        this.customers.splice(index, 1)
-                        toastr.success("Customer Deleted")
+                        const index = this.logistics.indexOf(logistic)
+                        this.logistics.splice(index, 1)
+                        toastr.success("Logistic Deleted")
                     })
                     .catch( error => { alert(error)})
                 }
             },
 
-            editCustomer(customer) {
-                this.editedIndex = this.customers.indexOf(customer)
-                this.editedCustomerInformation = Object.assign({}, customer)
+            editLogistic(logistic) {
+                this.editedIndex = this.logistics.indexOf(logistic)
+                this.editedLogisticInformation = Object.assign({}, logistic)
                 this.dialog = true
             },
             
@@ -124,32 +120,32 @@
                 this.dialog = false; this.informationDialog = false
                 setTimeout(() => {
                     this.formErrors = { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null}
-                    this.editedCustomerInformation = Object.assign({}, this.defaultCustomerInformation)
+                    this.editedLogisticInformation = Object.assign({}, this.defaultLogisticInformation)
                     this.editedIndex = -1
                 }, 500)
             },
 
-            saveCustomer() {
+            saveLogistic() {
                 if (this.editedIndex > -1) {
-                    this.updateCustomer()
+                    this.updateLogistic()
                 } else {
-                    this.createCustomer()
+                    this.createLogistic()
                 }
             },
 
-            createCustomer() {
+            createLogistic() {
                 this.loading = true
                 
-                axios.post('/api/customer', {
-                    ...(_.omit(this.editedCustomerInformation, 'code'))
+                axios.post('/api/logistic', {
+                    ...(_.omit(this.editedLogisticInformation, 'code'))
                 })
                 .then( response => {
-                    this.editedCustomerInformation.code = response.data.success.customer.code
-                    this.editedCustomerInformation.id = response.data.success.user.id
-                    this.customers.push(this.editedCustomerInformation)
+                    this.editedLogisticInformation.code = response.data.success.logistic.code
+                    this.editedLogisticInformation.id = response.data.success.user.id
+                    this.logistics.push(this.editedLogisticInformation)
                     this.cancel()
-                    toastr.success("Customers Created")
-                    console.log(this.editedCustomerInformation.id)
+                    toastr.success("Logistics Created")
+                    console.log(this.editedLogisticInformation.id)
                 })
                 .catch( error => {
                     if(error.response.status == 422) {
@@ -165,16 +161,16 @@
                 .finally( x => { this.loading = false})
             },
 
-            updateCustomer() {
+            updateLogistic() {
                 this.loading = true
-                _.omit(this.editedCustomerInformation, 'code')
-                axios.put('/api/customer/' + this.editedCustomerInformation.id, {
-                    ...(_.omit(this.editedCustomerInformation, 'code'))
+                _.omit(this.editedLogisticInformation, 'code')
+                axios.put('/api/logistic/' + this.editedLogisticInformation.id, {
+                    ...(_.omit(this.editedLogisticInformation, 'code'))
                 })
                 .then( response => {
-                    Object.assign(this.customers[this.editedIndex], this.editedCustomerInformation)
+                    Object.assign(this.logistics[this.editedIndex], this.editedLogisticInformation)
                     this.cancel()
-                    toastr.success("Customers Updated")
+                    toastr.success("Logistics Updated")
                 })
                 .catch( error => {
                     if(error.response.status == 422) {

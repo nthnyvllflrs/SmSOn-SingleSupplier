@@ -10,14 +10,32 @@ use App\Logistic;
 
 class LogisticController extends Controller
 {
-    public function index() {
-        return response(['success' => ['logistics' => Logistic::all()]], 200);
+    public function index(Request $request) {
+        if($request->user()->role == 'Administrator') {
+            $_logistics = Logistic::all();
+        } elseif($request->user()->role == 'Supplier') {
+            $_logistics = Logistic::where('supplier_id', $request->user()->information->id)->get();
+        }
+
+        $logistics = [];
+        foreach($_logistics as $logistic) {
+           $logistics[] = [
+               'id' => $logistic->user->id,
+               'code' => $logistic->code,
+               'username' => $logistic->user->username,
+               'name' => $logistic->name,
+               'address' => $logistic->address,
+               'contact_number' => $logistic->contact_number,
+           ];
+        }
+
+        return response(['success' => ['logistics' => $logistics]], 200);
     }
 
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             // User Model Data
-            'username' => 'required|string|min:8|max:16|unique:users,username',
+            'username' => 'required|string|min:8|unique:users,username',
             'password' => 'required|string|min:8|confirmed',
 
             // logistic Model Data
@@ -28,10 +46,10 @@ class LogisticController extends Controller
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
 
-        $logistic = User::create(array_merge($request->toArray(), ['role' => 'Logistic']));
-        $logistic = logistic::create(array_merge($request->toArray(), ['user_id' => $logistic->id]));
+        $user = User::create(array_merge($request->toArray(), ['role' => 'Logistic']));
+        $logistic = logistic::create(array_merge($request->toArray(), ['user_id' => $user->id]));
 
-        return response(['success' => ['message' => 'New Logistic Created']], 200);
+        return response(['success' => ['user' => $user, 'logistic' => $logistic]], 200);
     }
 
     public function show(Request $request, User $logistic) {
@@ -41,7 +59,7 @@ class LogisticController extends Controller
     public function update(Request $request, User $logistic) {
         $validator = Validator::make($request->all(), [
             // User Model Data
-            'username' => 'required|string|min:8|max:16|unique:users,username,'.$logistic->id,
+            'username' => 'required|string|min:8|unique:users,username,'.$logistic->id,
             'password' => 'nullable|string|min:8|confirmed',
 
             // logistic Model Data
@@ -57,7 +75,7 @@ class LogisticController extends Controller
         $logistic->update($updated_data);
         $logistic->information->update($updated_data);
 
-        return response(['success' => ['message' => 'Logistic Updated']], 200);
+        return response(['success' => ['user' => $logistic, 'logistic' => $logistic->information]], 200);
     }
 
     public function destroy(Request $request, User $logistic) {

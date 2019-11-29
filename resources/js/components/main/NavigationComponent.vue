@@ -67,7 +67,7 @@
                 </template>
                 <!-- Supplier -->
                 <template v-if="userRole == 'Supplier'">
-                    <v-list-item>
+                    <v-list-item >
                         <v-list-item-avatar>
                             <v-icon>fa-list</v-icon>
                         </v-list-item-avatar>
@@ -75,7 +75,7 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Order Requests</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item>
+                    <v-list-item to="/products">
                         <v-list-item-avatar>
                             <v-icon>fa-box</v-icon>
                         </v-list-item-avatar>
@@ -83,7 +83,7 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Products</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item>
+                    <v-list-item to="/logistics">
                         <v-list-item-avatar>
                             <v-icon>fa-truck</v-icon>
                         </v-list-item-avatar>

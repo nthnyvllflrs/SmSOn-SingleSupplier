@@ -18,6 +18,7 @@ import Supplier from '../components/administrator/SupplierComponent.vue'
 
 // Supplier
 import Products from '../components/supplier/ProductComponent.vue'
+import Logistics from '../components/supplier/LogisticComponent.vue'
 
 Vue.use(VueRouter)
 
@@ -50,6 +51,7 @@ const routes = [
             { path: '/suppliers', name: 'suppliers', components: { content: Supplier } },
             
             { path: '/products', name: 'products', components: {content: Products}},
+            { path: '/logistics', name: 'logistics', components: {content: Logistics}},
         ]
     }
 ]
