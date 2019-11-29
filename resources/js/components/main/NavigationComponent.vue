@@ -140,6 +140,7 @@
                 .finally(() => {
                     sessionStorage.removeItem('user-token')
                     sessionStorage.removeItem('user-role')
+                    sessionStorage.removeItem('user-information-id')
                     sessionStorage.clear()
                     this.$router.push('/login')
                     toastr.success("Logout Successfull")

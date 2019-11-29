@@ -48,6 +48,7 @@ export default {
                 var data = response.data.success
                 sessionStorage.setItem('user-token', data.token)
                 sessionStorage.setItem('user-role', data.role)
+                sessionStorage.setItem('user-information-id', data.information_id)
                 this.$router.push('navigation')
             })
             .catch( error => {

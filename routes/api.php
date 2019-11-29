@@ -14,23 +14,33 @@ Route::group(['middleware' => ['json.response']], function () {
         Route::get('/user', function (Request $request) {
             return $request->user(); // Return current logged in user
         });
+
+        Route::group(['prefix' => '/supplier'], function($request) {
+            Route::get('/', 'SupplierController@index');
+            Route::post('/', 'SupplierController@store');
+            Route::get('/{supplier}', 'SupplierController@show');
+            Route::put('/{supplier}', 'SupplierController@update');
+            Route::delete('/{supplier}', 'SupplierController@destroy');
+        });
+    
+        Route::group(['prefix' => '/customer'], function($request) {
+            Route::get('/', 'CustomerController@index');
+            Route::post('/', 'CustomerController@store');
+            Route::get('/{customer}', 'CustomerController@show');
+            Route::put('/{customer}', 'CustomerController@update');
+            Route::delete('/{customer}', 'CustomerController@destroy');
+        });
+    
+        Route::group(['prefix' => '/product'], function($request) {
+            Route::get('/', 'ProductController@index');
+            Route::post('/', 'ProductController@store');
+            Route::get('/{product}', 'ProductController@show');
+            Route::put('/{product}', 'ProductController@update');
+            Route::delete('/{product}', 'ProductController@destroy');
+        });
     });
 
-    Route::group(['prefix' => '/supplier'], function($request) {
-        Route::get('/', 'SupplierController@index');
-        Route::post('/', 'SupplierController@store');
-        Route::get('/{supplier}', 'SupplierController@show');
-        Route::put('/{supplier}', 'SupplierController@update');
-        Route::delete('/{supplier}', 'SupplierController@destroy');
-    });
-
-    Route::group(['prefix' => '/customer'], function($request) {
-        Route::get('/', 'CustomerController@index');
-        Route::post('/', 'CustomerController@store');
-        Route::get('/{customer}', 'CustomerController@show');
-        Route::put('/{customer}', 'CustomerController@update');
-        Route::delete('/{customer}', 'CustomerController@destroy');
-    });
+    
 
     // Route::resource('customer', 'CustomerController',
     //                 array(

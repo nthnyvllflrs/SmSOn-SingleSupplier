@@ -25,7 +25,12 @@ class AuthController extends Controller
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-                $response = ['success' => ['token' => $token, 'role' => $user->role]];
+                $response = ['success' => [
+                    'token' => $token, 
+                    'role' => $user->role,
+                    'information_id' => $user->role != 'Administrator' ? $user->information->id : null,
+                    ]
+                ];
                 return response($response, 200);
             } else {
                 $response = "Password missmatch";

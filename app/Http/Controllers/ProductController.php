@@ -10,8 +10,15 @@ use App\Product;
 
 class ProductController extends Controller
 {
-    public function index() {
-        return response(['success' => ['products' => Product::all()]], 200);
+    public function index(Request $request) {
+        if($request->user()->role == 'Administrator') {
+            return response(['success' => ['products' => Product::all()]], 200);
+        } elseif($request->user()->role == 'Supplier') {
+            return response(['success' => [
+                'products' => Product::where('supplier_id', $request->user()->information->id)->get()
+                ]
+            ], 200);
+        }
     }
 
     public function store(Request $request) {
@@ -27,7 +34,7 @@ class ProductController extends Controller
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
         $product = Product::create($request->toArray());
-        return response(['success' => ['message' => 'New Product Created']], 200);
+        return response(['success' => ['product' => $product]], 200);
     }
 
     public function show(Request $request, Product $product) {
@@ -37,7 +44,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product) {
         $validator = Validator::make($request->all(), [
             // Product Model Data
-            'code' => 'required|string|unique:products,code',
+            'code' => 'required|string|unique:products,code,'.$product->id,
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'unit' => 'required|string|max:10',
@@ -46,7 +53,7 @@ class ProductController extends Controller
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
         $product->update($request->toArray());
-        return response(['success' => ['message' => 'Product Updated']], 200);
+        return response(['success' => ['product' => $product]], 200);
     }
 
     public function destroy(Request $request, Product $product) {

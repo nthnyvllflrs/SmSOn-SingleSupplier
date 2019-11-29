@@ -12,8 +12,12 @@ import VueRouter from 'vue-router'
 import Login from '../components/LoginComponent.vue'
 import Navigation from '../components/main/NavigationComponent.vue'
 
+// Administrator
 import Customer from '../components/administrator/CustomerComponent.vue'
 import Supplier from '../components/administrator/SupplierComponent.vue'
+
+// Supplier
+import Products from '../components/supplier/ProductComponent.vue'
 
 Vue.use(VueRouter)
 
@@ -43,7 +47,9 @@ const routes = [
         component: Navigation,
         children: [
             { path: '/customers', name: 'customers', components: {content: Customer}},
-            { path: '/suppliers', name: 'suppliers', components: {content: Supplier}},
+            { path: '/suppliers', name: 'suppliers', components: { content: Supplier } },
+            
+            { path: '/products', name: 'products', components: {content: Products}},
         ]
     }
 ]
