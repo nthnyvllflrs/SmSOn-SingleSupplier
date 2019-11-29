@@ -16,9 +16,12 @@ import Navigation from '../components/main/NavigationComponent.vue'
 import Customer from '../components/administrator/CustomerComponent.vue'
 import Supplier from '../components/administrator/SupplierComponent.vue'
 
-// Supplier
-import Products from '../components/supplier/ProductComponent.vue'
+// Suppliers
+import SupplierProducts from '../components/supplier/ProductComponent.vue'
 import Logistics from '../components/supplier/LogisticComponent.vue'
+
+// Customers
+import Products from '../components/customer/ProductComponent.vue'
 
 Vue.use(VueRouter)
 
@@ -47,11 +50,16 @@ const routes = [
         name: 'navigation',
         component: Navigation,
         children: [
+            // Administrator
             { path: '/customers', name: 'customers', components: {content: Customer}},
             { path: '/suppliers', name: 'suppliers', components: { content: Supplier } },
             
+            // Suppliers
+            { path: '/supplier-products', name: 'supplier-products', components: {content: SupplierProducts}},
+            { path: '/logistics', name: 'logistics', components: { content: Logistics } },
+            
+            // Customers
             { path: '/products', name: 'products', components: {content: Products}},
-            { path: '/logistics', name: 'logistics', components: {content: Logistics}},
         ]
     }
 ]

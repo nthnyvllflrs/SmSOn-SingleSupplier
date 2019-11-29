@@ -4,35 +4,46 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
-    strict: true,
     state: {
-        appName: 'Laravel',
-        cart: [
-            {name: "Product 1", supplier: "Uniliver", price: "Php 1200", quantity: 5}
-        ],
+        cart: [],
     },
+
     getters: { // this.$tore.getters.getter
-        appName: state => {
-            return state.appName
-        },
-        cartItems: state => {
+        cartProducts: state => {
             return state.cart
+        },
+        cartTotal: state => {
+            return state.cart.reduce((accumulator, currentValue) => Number(accumulator) + (Number(currentValue.quantity) * Number(currentValue.price)) , 0.0);
         }
     }, 
+
     mutations: { // this.$tore.commit("mutation")
-        changeAppName: (state, payload) => {
-            state.appName += payload
+        addCartProduct: (state, payload) => {
+            var productDoesntExist = true
+            state.cart.forEach(product => {
+                if (product.product_id == payload.product_id) {
+                    product.quantity = Number(product.quantity) + Number(payload.quantity)
+                    productDoesntExist = false
+                }
+            })
+            if (productDoesntExist) {
+                state.cart.push(payload)
+            }
         },
-        addCartItem: (state, payload) => {
-            state.cart.push(payload)
+        removeCartProduct: (state, payload) => {
+            if (state.cart.includes(payload)) {
+                var index = state.cart.indexOf(payload)
+                state.cart.splice(index, 1)
+            }
         }
     }, 
+
     actions: { // this.$tore.dispatch("action") // asynchronous tasks
-        changeAppName: (context, payload) => {
-            context.commit("changeAppName", payload)
+        addCartProduct: (context, payload) => {
+            context.commit('addCartProduct', payload)
         },
-        addCartItem: (context, payload) => {
-            context.commit('addCartItem', payload)
+        removeCartProduct: (context, payload) => {
+            context.commit('removeCartProduct', payload)
         }
     } 
 })

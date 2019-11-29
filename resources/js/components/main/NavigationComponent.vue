@@ -1,5 +1,80 @@
 <template>
     <div>
+        <v-navigation-drawer app clipped right v-model="cartDrawer" width="300">
+            <v-list>
+                <v-list-item>
+                    <v-list-item-content>
+                        <v-list-item-title class="subtitle-2 font-weight-bold">Selected Products</v-list-item-title>
+                        <v-list-item-subtitle class="subtitle-1">Total Amount: Php {{cartTotal}}</v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-list-item three-line v-for="(product, index) in cartProducts" :key="index">
+                    <v-list-item-content>
+                        <v-list-item-title>
+                            <span class="font-weight-bold">{{product.name}}</span>
+                            <v-chip small class="px-2" color="primary">{{product.quantity}}</v-chip>
+                        </v-list-item-title>
+                        <v-list-item-subtitle>
+                            <v-row no-gutters>
+                                <v-col cols=6>
+                                    <span class="body-2 font-weight-medium">{{product.supplier}}</span>
+                                </v-col>
+                                <v-col cols=6>
+                                    <span class="body-2 font-weight-medium">Php {{product.price}}</span>
+                                </v-col>
+                            </v-row>
+                        </v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-list-item-action>
+                        <v-btn @click="removeCartProduct(product)" small icon color="error">
+                            <v-icon small>fa-times</v-icon>
+                        </v-btn>
+                    </v-list-item-action>
+                </v-list-item>
+            </v-list>
+            <template v-slot:append>
+                <v-container>
+                    <v-btn @click="confirmationDialog = true" block color="primary">Send Requests</v-btn>
+                    <v-dialog scrollable v-model="confirmationDialog" max-width="750px">
+                        <v-card>
+                            <v-card-title primary-title>
+                                Order Request Confirmation
+                            </v-card-title>
+                            <v-card-text>
+                                <v-row>
+                                    <v-col cols=12 md=4 v-for="(product, index) in cartProducts" :key="index">
+                                        <v-list-item three-line>
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    <span class="font-weight-bold">{{product.name}}</span>
+                                                    <v-chip small class="px-2" color="primary">{{product.quantity}}</v-chip>
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    <v-row no-gutters>
+                                                        <v-col cols=6>
+                                                            <span class="body-2 font-weight-medium">{{product.supplier}}</span>
+                                                        </v-col>
+                                                        <v-col cols=6>
+                                                            <span class="body-2 font-weight-medium">Php {{product.price}}</span>
+                                                        </v-col>
+                                                    </v-row>
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-col>
+                                </v-row>
+                            </v-card-text>
+                            <v-card-actions>
+                                <div class="flex-grow-1" />
+                                <v-btn>Cancel</v-btn>
+                                <v-btn class="px-8" color="primary">Confirm Order Requests</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                </v-container>
+            </template>
+        </v-navigation-drawer>
+
         <v-app-bar app clipped-right>
             <v-app-bar-nav-icon @click.stop="sideNavigationBar = !sideNavigationBar"></v-app-bar-nav-icon>
             <v-toolbar-title class="username-letter-spacing">
@@ -12,7 +87,7 @@
             <v-btn icon>
                 <v-icon>fa-bell</v-icon>
             </v-btn>
-            <v-btn icon>
+            <v-btn icon @click.stop="cartDrawer = !cartDrawer" v-if="userRole == 'Customer'">
                 <v-icon>fa-shopping-cart</v-icon>
             </v-btn>
         </v-app-bar>
@@ -48,7 +123,7 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Order Requests</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item>
+                    <v-list-item to="/products">
                         <v-list-item-avatar>
                             <v-icon>fa-box</v-icon>
                         </v-list-item-avatar>
@@ -75,7 +150,7 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Order Requests</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item to="/products">
+                    <v-list-item to="/supplier-products">
                         <v-list-item-avatar>
                             <v-icon>fa-box</v-icon>
                         </v-list-item-avatar>
@@ -124,15 +199,23 @@
 </template>
 
 <script>
+import {mapGetters, mapActions} from 'vuex'
+import { parse } from 'path'
     export default {
         data() {
             return {
                 userRole: sessionStorage.getItem('user-role'),
-                sideNavigationBar: true,
+                sideNavigationBar: true, cartDrawer: false, confirmationDialog: false,
             }
         },
 
+        computed: {
+            ...mapGetters(['cartProducts', 'cartTotal'])
+        },
+
         methods: {
+            ...mapActions(['removeCartProduct']),
+
             logout() {
                 axios.get('api/logout')
                 .then(() => {})
@@ -145,7 +228,7 @@
                     this.$router.push('/login')
                     toastr.success("Logout Successfull")
                 })
-            }   
+            },
         }
     }
 </script>

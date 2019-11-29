@@ -15,9 +15,24 @@ class ProductController extends Controller
             return response(['success' => ['products' => Product::all()]], 200);
         } elseif($request->user()->role == 'Supplier') {
             return response(['success' => [
-                'products' => Product::where('supplier_id', $request->user()->information->id)->get()
-                ]
+                'products' => Product::where('supplier_id', $request->user()->information->id)->get()]
             ], 200);
+        } elseif($request->user()->role == 'Customer') {
+            $_products = Product::all();
+            $products = [];
+            foreach($_products as $product) {
+                $products[] = [
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'code' => $product->code,
+                    'supplier_id' => $product->supplier->id,
+                    'supplier' => $product->supplier->name,
+                    'description' => $product->description,
+                    'unit' => $product->unit,
+                    'price' => $product->price,
+                ];
+            }
+            return response(['success' => ['products' => $products]], 200);
         }
     }
 
