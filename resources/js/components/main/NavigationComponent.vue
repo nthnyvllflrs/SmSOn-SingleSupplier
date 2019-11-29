@@ -103,7 +103,7 @@
             </v-list>
             <template v-slot:append>
                 <v-list>
-                    <v-list-item>
+                    <v-list-item @click="logout()">
                         <v-list-item-avatar>
                             <v-icon>fa-sign-out-alt</v-icon>
                         </v-list-item-avatar>
@@ -131,5 +131,20 @@
                 sideNavigationBar: true,
             }
         },
+
+        methods: {
+            logout() {
+                axios.get('api/logout')
+                .then(() => {})
+                .catch(() => {})
+                .finally(() => {
+                    sessionStorage.removeItem('user-token')
+                    sessionStorage.removeItem('user-role')
+                    sessionStorage.clear()
+                    this.$router.push('/login')
+                    toastr.success("Logout Successfull")
+                })
+            }   
+        }
     }
 </script>

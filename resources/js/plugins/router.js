@@ -1,17 +1,15 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+// import Home from '../components/main/HomeComponent.vue'
 // import Landing from '../components/LandingComponent.vue'
-import Login from '../components/LoginComponent.vue'
 // import Register from '../components/RegisterComponent.vue'
-
-import Home from '../components/main/HomeComponent.vue'
 // import Suppliers from '../components/main/SupplierComponent.vue'
 // import SupplierProfile from '../components/main/SupplierProfileComponent.vue'
 // import Orders from '../components/main/OrderComponent.vue'
 // import Products from '../components/main/ProductComponent.vue'
 
-
+import Login from '../components/LoginComponent.vue'
 import Navigation from '../components/main/NavigationComponent.vue'
 
 import Customer from '../components/administrator/CustomerComponent.vue'
