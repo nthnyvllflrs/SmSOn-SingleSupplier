@@ -23,10 +23,12 @@ export const store = new Vuex.Store({
             state.cart.forEach(product => {
                 if (product.product_id == payload.product_id) {
                     product.quantity = Number(product.quantity) + Number(payload.quantity)
+                    product.total = Number(product.quantity) * Number(product.price)
                     productDoesntExist = false
                 }
             })
-            if (productDoesntExist) {
+            if (productDoesntExist ) {
+                payload.total = Number(payload.quantity) * Number(payload.price)
                 state.cart.push(payload)
             }
         },
@@ -35,6 +37,10 @@ export const store = new Vuex.Store({
                 var index = state.cart.indexOf(payload)
                 state.cart.splice(index, 1)
             }
+        },
+        resetCart: (state) => {
+            state.cart.length = 0
+            state.cart.total = 0
         }
     }, 
 
@@ -44,6 +50,9 @@ export const store = new Vuex.Store({
         },
         removeCartProduct: (context, payload) => {
             context.commit('removeCartProduct', payload)
+        },
+        resetCart: (context) => {
+            context.commit('resetCart')
         }
     } 
 })

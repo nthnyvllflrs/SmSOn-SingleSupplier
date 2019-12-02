@@ -15,6 +15,7 @@ class CreateOrderRequestsTable extends Migration
     {
         Schema::create('order_requests', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('code')->unique();
             $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('supplier_id');
             $table->string('status')->default('Pending');

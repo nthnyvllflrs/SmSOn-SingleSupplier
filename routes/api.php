@@ -46,6 +46,10 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::put('/{logistic}', 'LogisticController@update');
             Route::delete('/{logistic}', 'LogisticController@destroy');
         });
+
+        Route::group(['prefix' => 'order-request'], function($request) {
+            Route::post('/', 'OrderRequestController@store');
+        });
     });
 
     

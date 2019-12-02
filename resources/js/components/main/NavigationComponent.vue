@@ -35,7 +35,10 @@
             <template v-slot:append>
                 <v-container>
                     <v-btn @click="confirmationDialog = true" block color="primary">Send Requests</v-btn>
-                    <v-dialog scrollable v-model="confirmationDialog" max-width="750px">
+                    <v-dialog scrollable v-model="confirmationDialog" max-width="750px" persistent>
+                        <v-overlay :value="loading">
+                            <v-progress-circular :size="100" :width="5" color="primary" indeterminate></v-progress-circular>
+                        </v-overlay>
                         <v-card>
                             <v-card-title primary-title>
                                 Order Request Confirmation
@@ -66,10 +69,26 @@
                             </v-card-text>
                             <v-card-actions>
                                 <div class="flex-grow-1" />
-                                <v-btn>Cancel</v-btn>
-                                <v-btn class="px-8" color="primary">Confirm Order Requests</v-btn>
+                                <v-btn @click="confirmationDialog = false">Cancel</v-btn>
+                                <v-btn class="px-8" color="primary" @click="submitOrderRequest()">Confirm Order Requests</v-btn>
                             </v-card-actions>
                         </v-card>
+                        <v-dialog v-model="orderRequestCodeDialog" max-width="400px">
+                            <v-card tile>
+                                <v-card-title>Order Request Reference Codes</v-card-title>
+                                <v-card-text>
+                                    <v-row align="center" justify="center">
+                                        <v-col cols=12 md=6 v-for="(code, index) in orderRequestCodes" :key="index">
+                                            <v-chip class="font-weight-medium pa-5" color="primary">{{ code }}</v-chip>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                                <v-card-actions>
+                                <div class="flex-grow-1" />
+                                <v-btn @click="closeDialog()">Close</v-btn>
+                            </v-card-actions>
+                            </v-card>
+                        </v-dialog>
                     </v-dialog>
                 </v-container>
             </template>
@@ -200,12 +219,12 @@
 
 <script>
 import {mapGetters, mapActions} from 'vuex'
-import { parse } from 'path'
     export default {
         data() {
             return {
                 userRole: sessionStorage.getItem('user-role'),
-                sideNavigationBar: true, cartDrawer: false, confirmationDialog: false,
+                sideNavigationBar: true, cartDrawer: false, confirmationDialog: false, orderRequestCodeDialog: false, loading: false,
+                orderRequestCodes: [],
             }
         },
 
@@ -214,7 +233,33 @@ import { parse } from 'path'
         },
 
         methods: {
-            ...mapActions(['removeCartProduct']),
+            ...mapActions(['removeCartProduct', 'resetCart']),
+
+            closeDialog() {
+                this.orderRequestCodeDialog = false
+                this.confirmationDialog = false
+            },
+
+            submitOrderRequest() {
+                if(this.cartProducts.length > 0) {
+                    this.loading = true
+                    axios.post('/api/order-request', {
+                        ...this.cartProducts
+                    })
+                    .then( response => {
+                        this.orderRequestCodes = response.data.success.order_request_codes
+                        this.resetCart()
+                        this.cartDrawer = false
+                        this.orderRequestCodeDialog = true
+                    })
+                    .catch( error => {
+                        console.error(error.response.data)
+                    })
+                    .finally(() => {
+                        this.loading = false
+                    })
+                }
+            },
 
             logout() {
                 axios.get('api/logout')
