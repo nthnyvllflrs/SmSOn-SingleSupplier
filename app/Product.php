@@ -13,4 +13,8 @@ class Product extends Model
     public function supplier() {
         return $this->belongsTo('App\Supplier', 'supplier_id');
     }
+
+    public function orderRequestDetail() {
+        return $this->hasMany('App\OrderRequestDetail', 'product_id');
+    }
 }

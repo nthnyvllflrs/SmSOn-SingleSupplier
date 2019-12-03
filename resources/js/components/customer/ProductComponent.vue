@@ -7,6 +7,9 @@
                         <v-toolbar-title class="headline">Products</v-toolbar-title>
                     </v-toolbar>
                 </template>
+                <template v-slot:item.price="{ item }">
+                    Php {{ Number(item.price).toLocaleString() }}
+                </template>
                 <template v-slot:item.action="{ item }">
                     <v-btn @click="selectProduct(item)" x-small class="mx-2" fab dark color="primary">
                         <v-icon small dark>fa-plus</v-icon>

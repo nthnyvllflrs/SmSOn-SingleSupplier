@@ -22,6 +22,10 @@ class Supplier extends Model
         return $this->hasMany('App\Logistic', 'supplier_id');
     }
 
+    public function orderRequests() {
+        return $this->hasMany('App\Supplier', 'supplier_id');
+    }
+
     public static function boot()
     {
         parent::boot();

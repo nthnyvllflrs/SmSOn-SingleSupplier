@@ -49,6 +49,9 @@ Route::group(['middleware' => ['json.response']], function () {
 
         Route::group(['prefix' => 'order-request'], function($request) {
             Route::post('/', 'OrderRequestController@store');
+            Route::get('/', 'OrderRequestController@index');
+            Route::get('/{order_request}', 'OrderRequestController@show');
+            Route::delete('/{order_request}', 'OrderRequestController@destroy');
         });
     });
 

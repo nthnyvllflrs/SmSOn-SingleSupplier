@@ -75,11 +75,12 @@
                         </v-card>
                         <v-dialog v-model="orderRequestCodeDialog" max-width="400px">
                             <v-card tile>
-                                <v-card-title>Order Request Reference Codes</v-card-title>
+                                <v-card-title>Order Request Successful</v-card-title>
                                 <v-card-text>
-                                    <v-row align="center" justify="center">
+                                    <v-row>
+                                        <v-col cols=12>Order Request(s) Reference Code(s)</v-col>
                                         <v-col cols=12 md=6 v-for="(code, index) in orderRequestCodes" :key="index">
-                                            <v-chip class="font-weight-medium pa-5" color="primary">{{ code }}</v-chip>
+                                            <v-chip class="font-weight-medium" color="primary">{{ code }}</v-chip>
                                         </v-col>
                                     </v-row>
                                 </v-card-text>
@@ -113,8 +114,6 @@
 
         <v-navigation-drawer app v-model="sideNavigationBar" width="250">
             <v-list>
-                <!-- Administrator -->
-                <template v-if="userRole == 'Administrator'">
                     <v-list-item to="/customers">
                         <v-list-item-avatar>
                             <v-icon>fa-users</v-icon>
@@ -131,10 +130,7 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Suppliers</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                </template>
-                <!-- Customer -->
-                <template v-if="userRole == 'Customer'">
-                    <v-list-item>
+                    <v-list-item to="/order-requests">
                         <v-list-item-avatar>
                             <v-icon>fa-list</v-icon>
                         </v-list-item-avatar>
@@ -150,33 +146,6 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Products</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item>
-                        <v-list-item-avatar>
-                            <v-icon>fa-boxes</v-icon>
-                        </v-list-item-avatar>
-                        <v-list-item-content>
-                            <v-list-item-title class="subtitle-2 font-weight-bold">Suppliers</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                </template>
-                <!-- Supplier -->
-                <template v-if="userRole == 'Supplier'">
-                    <v-list-item >
-                        <v-list-item-avatar>
-                            <v-icon>fa-list</v-icon>
-                        </v-list-item-avatar>
-                        <v-list-item-content>
-                            <v-list-item-title class="subtitle-2 font-weight-bold">Order Requests</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item to="/supplier-products">
-                        <v-list-item-avatar>
-                            <v-icon>fa-box</v-icon>
-                        </v-list-item-avatar>
-                        <v-list-item-content>
-                            <v-list-item-title class="subtitle-2 font-weight-bold">Products</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
                     <v-list-item to="/logistics">
                         <v-list-item-avatar>
                             <v-icon>fa-truck</v-icon>
@@ -185,7 +154,7 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Logistics</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item>
+                    <v-list-item to="/manifests">
                         <v-list-item-avatar>
                             <v-icon>fa-clipboard-list</v-icon>
                         </v-list-item-avatar>
@@ -193,7 +162,6 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Manifest</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                </template>
             </v-list>
             <template v-slot:append>
                 <v-list>

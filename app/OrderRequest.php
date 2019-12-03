@@ -10,8 +10,16 @@ class OrderRequest extends Model
         'customer_id', 'supplier_id', 'status'
     ];
 
+    public function customer() {
+        return $this->belongsTo('App\Customer', 'customer_id');
+    }
+
+    public function supplier() {
+        return $this->belongsTo('App\Supplier', 'supplier_id');
+    }
+
     public function details() {
-        return $this->hasMany('App\OrderRequestDetails', 'order_request_id');
+        return $this->hasMany('App\OrderRequestDetail', 'order_request_id');
     }
     
     public static function boot()

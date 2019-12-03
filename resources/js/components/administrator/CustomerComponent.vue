@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-card>
-            <v-data-table :headers="customerTableHeaders" :items="customers" :search="search">
+            <v-data-table :loading="loading" loading-text="Loading... Please wait" :headers="customerTableHeaders" :items="customers" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
                         <v-toolbar-title class="headline">Customers</v-toolbar-title>
@@ -92,6 +92,7 @@
         },
         methods: {
             retrieveCustomers() {
+                this.loading = true
                 axios.get('/api/customer')
                 .then( response => {
                     this.customers = response.data.success.customers
@@ -99,6 +100,7 @@
                 .catch( error => {
                     toastr.error("An Error Occurred")
                 })
+                .finally(() => { this.loading = false})
             },
 
             deleteCustomer(customer) {

@@ -14,6 +14,10 @@ class Customer extends Model
         return $this->belongsTo('App\User', 'user_id');
     }
 
+    public function orderRequests() {
+        return $this->hasMany('App\OrderRequest', 'customer_id');
+    }
+
     public static function boot()
     {
         parent::boot();

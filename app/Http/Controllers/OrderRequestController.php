@@ -10,6 +10,29 @@ use App\OrderRequestDetail;
 
 class OrderRequestController extends Controller
 {
+    public function index(Request $request) {
+        $validator = Validator::make($request->all(),  [
+            'status' => 'required|in:Pending,Approved,Receivable,Delivered'
+        ]);
+        if($validator->fails()) { return response(['errors' => $validator->errors()], 422);}
+
+        $information_id = $request->user()->information->id;
+
+        $order_requests = OrderRequest::where([['customer_id', $information_id], ['status', $request->status]])->orderBy('created_at', 'desc')->get();
+
+        $data = [];
+        foreach($order_requests as $order_request) {
+            $data[] = [
+                'id' => $order_request->id,
+                'code' => $order_request->code,
+                'supplier' => $order_request->supplier->name,
+                'datetime' => date('d-m-Y H:m:s', strtotime($order_request->created_at)),
+            ];
+        }
+
+        return response(['success' => ['order_requests' => $data]], 200);
+    }
+
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             '*.supplier_id' => 'required|exists:suppliers,id',
@@ -33,6 +56,36 @@ class OrderRequestController extends Controller
         }
 
         return response(['success' => ['order_request_codes' => $order_requests_code]], 200);
+    }
+
+    public function show(Request $request, OrderRequest $order_request) {
+        $total = 0; $details = [];
+        foreach($order_request->details as $order) {
+            $details[] = [
+                'id' => $order->id,
+                'code' => $order->product->code,
+                'name' => $order->product->name,
+                'unit' => $order->product->unit,
+                'quantity' => $order->quantity,
+                'total' => $order->total,
+            ];
+            $total += (double) $order->total;
+        }
+
+        return response(['success' => [
+            'order_request_information' => [
+                'supplier' => $order_request->supplier->name,
+                'total' => $total,
+                'datetime' => date('d-m-Y H:m:s', strtotime($order_request->created_at)),
+                'details' => $details,
+                ]
+            ]
+        ], 200);
+    }
+
+    public function destroy(Request $request, OrderRequest $order_request) {
+        $order_request->delete();
+        return response(['success' => ['message' => 'Order Request Deleted']], 201);
     }
 
     private function filter_order_requests($order_requests) {

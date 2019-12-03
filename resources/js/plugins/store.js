@@ -39,8 +39,7 @@ export const store = new Vuex.Store({
             }
         },
         resetCart: (state) => {
-            state.cart.length = 0
-            state.cart.total = 0
+            state.cart = []
         }
     }, 
 

@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-card>
-            <v-data-table :headers="supplierTableHeaders" :items="suppliers" :search="search">
+            <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="supplierTableHeaders" :items="suppliers" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
                         <v-toolbar-title class="headline">Suppliers</v-toolbar-title>
@@ -60,7 +60,7 @@
                     <v-icon class="mx-1" @click="editSupplier(item)">fa-pen</v-icon>
                     <v-icon class="mx-1" @click="deleteSupplier(item)">fa-trash-alt</v-icon>
 
-                    <v-dialog v-model="informationDialog" max-width="1000px" persistent>
+                    <v-dialog v-model="informationDialog" max-width="1200px" persistent>
                         <v-card>
                             <v-overlay :value="loading">
                                 <v-progress-circular :size="100" :width="5" color="primary" indeterminate></v-progress-circular>
@@ -94,7 +94,7 @@
                                             <v-card-title>
                                                 <span class="title">{{ product.name }}</span><span class="caption ml-2">({{ product.code }})</span>
                                                 <v-spacer></v-spacer>
-                                                <span class="subtitle-2">{{ product.price }}</span>
+                                                <span class="subtitle-2">Php {{ Number(product.price).toLocaleString() }}</span>
                                                 </v-card-title>
                                             <v-card-text class="body-2">
                                                 <v-row no-gutters>
@@ -151,6 +151,7 @@
         },
         methods: {
             retrieveSuppliers() {
+                this.loading = true
                 axios.get('/api/supplier')
                 .then( response => {
                     this.suppliers = response.data.success.suppliers
@@ -158,6 +159,7 @@
                 .catch( error => {
                     toastr.error("An Error Occurred")
                 })
+                .finally(() => { this.loading = false})
             },
 
             retrieveSupplierInformation(supplier) {
