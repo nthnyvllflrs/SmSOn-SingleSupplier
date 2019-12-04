@@ -4,7 +4,7 @@
             <v-tabs grow>
                 <v-tab @click="retrieveOrderRequests('Pending')">Pending</v-tab>
                 <v-tab @click="retrieveOrderRequests('Approved')">Approved</v-tab>
-                <v-tab @click="retrieveOrderRequests('Receivable')">Receivable</v-tab>
+                <v-tab @click="retrieveOrderRequests('Receivable')">Receivables</v-tab>
                 <v-tab @click="retrieveOrderRequests('Delivered')">Delivered</v-tab>
 
                 <!-- Pending Orders -->

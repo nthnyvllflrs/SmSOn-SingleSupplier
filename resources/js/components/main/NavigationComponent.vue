@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-navigation-drawer app clipped right v-model="cartDrawer" width="300">
+        <v-navigation-drawer app clipped right v-model="cartDrawer" width="300" v-if="userRole == 'Customer'">
             <v-list>
                 <v-list-item>
                     <v-list-item-content>

@@ -16,8 +16,10 @@ Route::group(['middleware' => ['json.response']], function () {
         });
 
         Route::group(['prefix' => '/supplier'], function($request) {
-            Route::get('/', 'SupplierController@index');
             Route::post('/', 'SupplierController@store');
+            Route::get('/', 'SupplierController@index');
+            Route::get('/logistics', 'SupplierController@supplier_logistics');
+            Route::get('/order-requests', 'SupplierController@supplier_order_requests');
             Route::get('/{supplier}', 'SupplierController@show');
             Route::put('/{supplier}', 'SupplierController@update');
             Route::delete('/{supplier}', 'SupplierController@destroy');
@@ -51,7 +53,9 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::post('/', 'OrderRequestController@store');
             Route::get('/', 'OrderRequestController@index');
             Route::get('/{order_request}', 'OrderRequestController@show');
+            Route::put('/{order_request}/status', 'OrderRequestController@update_status');
             Route::delete('/{order_request}', 'OrderRequestController@destroy');
+            
         });
     });
 

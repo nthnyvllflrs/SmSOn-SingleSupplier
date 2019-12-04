@@ -3849,9 +3849,164 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
-    return {};
+    return {
+      dialog: false,
+      loading: false,
+      editedIndex: -1,
+      menu: false,
+      expanded: [],
+      singleExpand: false,
+      dataTableHeaders: [{
+        text: 'Code',
+        value: 'code',
+        align: 'center'
+      }, {
+        text: 'Logistic',
+        value: 'logistic',
+        align: 'center'
+      }, {
+        text: 'Delivery Date',
+        value: 'datetime',
+        align: 'center'
+      }, {
+        text: 'Actions',
+        value: 'action',
+        align: 'center',
+        sortable: false
+      }],
+      manifests: [],
+      logistics: [],
+      order_requests: [],
+      defaultManifest: {
+        logistic: null,
+        delivery_date: new Date().toISOString().substr(0, 10),
+        order_requests: []
+      },
+      editedManifest: {
+        logistic: null,
+        delivery_date: new Date().toISOString().substr(0, 10),
+        order_requests: []
+      },
+      selectedOrderRequestId: 0
+    };
+  },
+  computed: {
+    formTitle: function formTitle() {
+      return this.editedIndex === -1 ? 'New Manifest' : 'Edit Manifest';
+    }
+  },
+  mounted: function mounted() {
+    this.retrieveSupplierLogistics();
+    this.retrieveSupplierOrderRequests();
+  },
+  methods: {
+    retrieveSupplierLogistics: function retrieveSupplierLogistics() {
+      var _this = this;
+
+      axios.get('/api/supplier/logistics').then(function (response) {
+        _this.logistics = response.data.success.logistics;
+      })["catch"](function () {});
+    },
+    retrieveSupplierOrderRequests: function retrieveSupplierOrderRequests() {
+      var _this2 = this;
+
+      axios.get('/api/supplier/order-requests').then(function (response) {
+        _this2.order_requests = response.data.success.order_requests;
+      })["catch"](function () {});
+    },
+    selectOrderRequest: function selectOrderRequest() {
+      if (this.selectedOrderRequestId > 0) {
+        var index = this.order_requests.map(function (order) {
+          return order.id;
+        }).indexOf(this.selectedOrderRequestId);
+        this.editedManifest.order_requests.push(this.order_requests[index]);
+        this.order_requests.splice(index, 1);
+        this.selectedOrderRequestId = 0;
+      }
+    },
+    unselectOrderRequest: function unselectOrderRequest(order) {
+      var index = this.editedManifest.order_requests.indexOf(order);
+      this.order_requests.push(order);
+      this.order_requests.sort(function (a, b) {
+        return a.code.localeCompare(b.code);
+      });
+      this.editedManifest.order_requests.splice(index, 1);
+    }
   }
 });
 
@@ -3907,16 +4062,89 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      actionHeaders: [{
+      tabModel: 'pending-tab',
+      order_request_information_dialog: false,
+      loading: false,
+      table_headers: [{
         text: 'Code',
         value: 'code',
         align: 'center'
       }, {
-        text: 'Supplier',
-        value: 'supplier',
+        text: 'Customer',
+        value: 'customer',
         align: 'center'
       }, {
         text: 'Date and Time',
@@ -3924,23 +4152,57 @@ __webpack_require__.r(__webpack_exports__);
         align: 'center'
       }, {
         text: 'Actions',
+        value: 'action',
         align: 'center',
         sortable: false
       }],
-      noActionHeaders: [{
-        text: 'Code',
-        value: 'code',
-        align: 'center'
-      }, {
-        text: 'Supplier',
-        value: 'supplier',
-        align: 'center'
-      }, {
-        text: 'Date and Time',
-        value: 'datetime',
-        align: 'center'
-      }]
+      order_requests: [],
+      order_request_information: {
+        supplier: null,
+        total: 0,
+        datetime: null,
+        details: []
+      }
     };
+  },
+  mounted: function mounted() {
+    this.retrieveOrderRequests('Pending');
+  },
+  methods: {
+    retrieveOrderRequests: function retrieveOrderRequests(status) {
+      var _this = this;
+
+      this.loading = true;
+      this.order_requests = [];
+      axios.get('/api/order-request', {
+        params: {
+          status: status
+        }
+      }).then(function (response) {
+        _this.order_requests = response.data.success.order_requests;
+      })["catch"](function () {})["finally"](function () {
+        _this.loading = false;
+      });
+    },
+    retrieveOrderRequestInformation: function retrieveOrderRequestInformation(order_request) {
+      var _this2 = this;
+
+      axios.get('/api/order-request/' + order_request.id).then(function (response) {
+        _this2.order_request_information = response.data.success.order_request_information;
+        _this2.order_request_information_dialog = true;
+      })["catch"](function () {});
+    },
+    updatedRequestStatus: function updatedRequestStatus(order_request, status) {
+      var _this3 = this;
+
+      axios.put('/api/order-request/' + order_request.id + '/status', {
+        status: status
+      }).then(function (response) {
+        var index = _this3.order_requests.indexOf(order_request);
+
+        _this3.order_requests.splice(index, 1);
+      })["catch"](function () {});
+    }
   }
 });
 
@@ -42032,7 +42294,7 @@ var render = function() {
                     }
                   }
                 },
-                [_vm._v("Receivable")]
+                [_vm._v("Receivables")]
               ),
               _vm._v(" "),
               _c(
@@ -42984,451 +43246,506 @@ var render = function() {
   return _c(
     "div",
     [
-      _c(
-        "v-navigation-drawer",
-        {
-          attrs: { app: "", clipped: "", right: "", width: "300" },
-          scopedSlots: _vm._u([
+      _vm.userRole == "Customer"
+        ? _c(
+            "v-navigation-drawer",
             {
-              key: "append",
-              fn: function() {
-                return [
+              attrs: { app: "", clipped: "", right: "", width: "300" },
+              scopedSlots: _vm._u(
+                [
+                  {
+                    key: "append",
+                    fn: function() {
+                      return [
+                        _c(
+                          "v-container",
+                          [
+                            _c(
+                              "v-btn",
+                              {
+                                attrs: { block: "", color: "primary" },
+                                on: {
+                                  click: function($event) {
+                                    _vm.confirmationDialog = true
+                                  }
+                                }
+                              },
+                              [_vm._v("Send Requests")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "v-dialog",
+                              {
+                                attrs: {
+                                  scrollable: "",
+                                  "max-width": "750px",
+                                  persistent: ""
+                                },
+                                model: {
+                                  value: _vm.confirmationDialog,
+                                  callback: function($$v) {
+                                    _vm.confirmationDialog = $$v
+                                  },
+                                  expression: "confirmationDialog"
+                                }
+                              },
+                              [
+                                _c(
+                                  "v-overlay",
+                                  { attrs: { value: _vm.loading } },
+                                  [
+                                    _c("v-progress-circular", {
+                                      attrs: {
+                                        size: 100,
+                                        width: 5,
+                                        color: "primary",
+                                        indeterminate: ""
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-card",
+                                  [
+                                    _c(
+                                      "v-card-title",
+                                      { attrs: { "primary-title": "" } },
+                                      [
+                                        _vm._v(
+                                          "\n                            Order Request Confirmation\n                        "
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "v-card-text",
+                                      [
+                                        _c(
+                                          "v-row",
+                                          _vm._l(_vm.cartProducts, function(
+                                            product,
+                                            index
+                                          ) {
+                                            return _c(
+                                              "v-col",
+                                              {
+                                                key: index,
+                                                attrs: { cols: "12", md: "4" }
+                                              },
+                                              [
+                                                _c(
+                                                  "v-list-item",
+                                                  {
+                                                    attrs: { "three-line": "" }
+                                                  },
+                                                  [
+                                                    _c(
+                                                      "v-list-item-content",
+                                                      [
+                                                        _c(
+                                                          "v-list-item-title",
+                                                          [
+                                                            _c(
+                                                              "span",
+                                                              {
+                                                                staticClass:
+                                                                  "font-weight-bold"
+                                                              },
+                                                              [
+                                                                _vm._v(
+                                                                  _vm._s(
+                                                                    product.name
+                                                                  )
+                                                                )
+                                                              ]
+                                                            ),
+                                                            _vm._v(" "),
+                                                            _c(
+                                                              "v-chip",
+                                                              {
+                                                                staticClass:
+                                                                  "px-2",
+                                                                attrs: {
+                                                                  small: "",
+                                                                  color:
+                                                                    "primary"
+                                                                }
+                                                              },
+                                                              [
+                                                                _vm._v(
+                                                                  _vm._s(
+                                                                    product.quantity
+                                                                  )
+                                                                )
+                                                              ]
+                                                            )
+                                                          ],
+                                                          1
+                                                        ),
+                                                        _vm._v(" "),
+                                                        _c(
+                                                          "v-list-item-subtitle",
+                                                          [
+                                                            _c(
+                                                              "v-row",
+                                                              {
+                                                                attrs: {
+                                                                  "no-gutters":
+                                                                    ""
+                                                                }
+                                                              },
+                                                              [
+                                                                _c(
+                                                                  "v-col",
+                                                                  {
+                                                                    attrs: {
+                                                                      cols: "6"
+                                                                    }
+                                                                  },
+                                                                  [
+                                                                    _c(
+                                                                      "span",
+                                                                      {
+                                                                        staticClass:
+                                                                          "body-2 font-weight-medium"
+                                                                      },
+                                                                      [
+                                                                        _vm._v(
+                                                                          _vm._s(
+                                                                            product.supplier
+                                                                          )
+                                                                        )
+                                                                      ]
+                                                                    )
+                                                                  ]
+                                                                ),
+                                                                _vm._v(" "),
+                                                                _c(
+                                                                  "v-col",
+                                                                  {
+                                                                    attrs: {
+                                                                      cols: "6"
+                                                                    }
+                                                                  },
+                                                                  [
+                                                                    _c(
+                                                                      "span",
+                                                                      {
+                                                                        staticClass:
+                                                                          "body-2 font-weight-medium"
+                                                                      },
+                                                                      [
+                                                                        _vm._v(
+                                                                          "Php " +
+                                                                            _vm._s(
+                                                                              product.price
+                                                                            )
+                                                                        )
+                                                                      ]
+                                                                    )
+                                                                  ]
+                                                                )
+                                                              ],
+                                                              1
+                                                            )
+                                                          ],
+                                                          1
+                                                        )
+                                                      ],
+                                                      1
+                                                    )
+                                                  ],
+                                                  1
+                                                )
+                                              ],
+                                              1
+                                            )
+                                          }),
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "v-card-actions",
+                                      [
+                                        _c("div", {
+                                          staticClass: "flex-grow-1"
+                                        }),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-btn",
+                                          {
+                                            on: {
+                                              click: function($event) {
+                                                _vm.confirmationDialog = false
+                                              }
+                                            }
+                                          },
+                                          [_vm._v("Cancel")]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-btn",
+                                          {
+                                            staticClass: "px-8",
+                                            attrs: { color: "primary" },
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.submitOrderRequest()
+                                              }
+                                            }
+                                          },
+                                          [_vm._v("Confirm Order Requests")]
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-dialog",
+                                  {
+                                    attrs: { "max-width": "400px" },
+                                    model: {
+                                      value: _vm.orderRequestCodeDialog,
+                                      callback: function($$v) {
+                                        _vm.orderRequestCodeDialog = $$v
+                                      },
+                                      expression: "orderRequestCodeDialog"
+                                    }
+                                  },
+                                  [
+                                    _c(
+                                      "v-card",
+                                      { attrs: { tile: "" } },
+                                      [
+                                        _c("v-card-title", [
+                                          _vm._v("Order Request Successful")
+                                        ]),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-card-text",
+                                          [
+                                            _c(
+                                              "v-row",
+                                              [
+                                                _c(
+                                                  "v-col",
+                                                  { attrs: { cols: "12" } },
+                                                  [
+                                                    _vm._v(
+                                                      "Order Request(s) Reference Code(s)"
+                                                    )
+                                                  ]
+                                                ),
+                                                _vm._v(" "),
+                                                _vm._l(
+                                                  _vm.orderRequestCodes,
+                                                  function(code, index) {
+                                                    return _c(
+                                                      "v-col",
+                                                      {
+                                                        key: index,
+                                                        attrs: {
+                                                          cols: "12",
+                                                          md: "6"
+                                                        }
+                                                      },
+                                                      [
+                                                        _c(
+                                                          "v-chip",
+                                                          {
+                                                            staticClass:
+                                                              "font-weight-medium",
+                                                            attrs: {
+                                                              color: "primary"
+                                                            }
+                                                          },
+                                                          [_vm._v(_vm._s(code))]
+                                                        )
+                                                      ],
+                                                      1
+                                                    )
+                                                  }
+                                                )
+                                              ],
+                                              2
+                                            )
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-card-actions",
+                                          [
+                                            _c("div", {
+                                              staticClass: "flex-grow-1"
+                                            }),
+                                            _vm._v(" "),
+                                            _c(
+                                              "v-btn",
+                                              {
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.closeDialog()
+                                                  }
+                                                }
+                                              },
+                                              [_vm._v("Close")]
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          ],
+                          1
+                        )
+                      ]
+                    },
+                    proxy: true
+                  }
+                ],
+                null,
+                false,
+                1487467620
+              ),
+              model: {
+                value: _vm.cartDrawer,
+                callback: function($$v) {
+                  _vm.cartDrawer = $$v
+                },
+                expression: "cartDrawer"
+              }
+            },
+            [
+              _c(
+                "v-list",
+                [
                   _c(
-                    "v-container",
+                    "v-list-item",
                     [
                       _c(
-                        "v-btn",
-                        {
-                          attrs: { block: "", color: "primary" },
-                          on: {
-                            click: function($event) {
-                              _vm.confirmationDialog = true
-                            }
-                          }
-                        },
-                        [_vm._v("Send Requests")]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "v-dialog",
-                        {
-                          attrs: {
-                            scrollable: "",
-                            "max-width": "750px",
-                            persistent: ""
-                          },
-                          model: {
-                            value: _vm.confirmationDialog,
-                            callback: function($$v) {
-                              _vm.confirmationDialog = $$v
-                            },
-                            expression: "confirmationDialog"
-                          }
-                        },
+                        "v-list-item-content",
                         [
                           _c(
-                            "v-overlay",
-                            { attrs: { value: _vm.loading } },
-                            [
-                              _c("v-progress-circular", {
-                                attrs: {
-                                  size: 100,
-                                  width: 5,
-                                  color: "primary",
-                                  indeterminate: ""
-                                }
-                              })
-                            ],
-                            1
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Selected Products")]
                           ),
                           _vm._v(" "),
                           _c(
-                            "v-card",
+                            "v-list-item-subtitle",
+                            { staticClass: "subtitle-1" },
                             [
-                              _c(
-                                "v-card-title",
-                                { attrs: { "primary-title": "" } },
-                                [
-                                  _vm._v(
-                                    "\n                            Order Request Confirmation\n                        "
-                                  )
-                                ]
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "v-card-text",
-                                [
-                                  _c(
-                                    "v-row",
-                                    _vm._l(_vm.cartProducts, function(
-                                      product,
-                                      index
-                                    ) {
-                                      return _c(
-                                        "v-col",
-                                        {
-                                          key: index,
-                                          attrs: { cols: "12", md: "4" }
-                                        },
-                                        [
-                                          _c(
-                                            "v-list-item",
-                                            { attrs: { "three-line": "" } },
-                                            [
-                                              _c(
-                                                "v-list-item-content",
-                                                [
-                                                  _c(
-                                                    "v-list-item-title",
-                                                    [
-                                                      _c(
-                                                        "span",
-                                                        {
-                                                          staticClass:
-                                                            "font-weight-bold"
-                                                        },
-                                                        [
-                                                          _vm._v(
-                                                            _vm._s(product.name)
-                                                          )
-                                                        ]
-                                                      ),
-                                                      _vm._v(" "),
-                                                      _c(
-                                                        "v-chip",
-                                                        {
-                                                          staticClass: "px-2",
-                                                          attrs: {
-                                                            small: "",
-                                                            color: "primary"
-                                                          }
-                                                        },
-                                                        [
-                                                          _vm._v(
-                                                            _vm._s(
-                                                              product.quantity
-                                                            )
-                                                          )
-                                                        ]
-                                                      )
-                                                    ],
-                                                    1
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "v-list-item-subtitle",
-                                                    [
-                                                      _c(
-                                                        "v-row",
-                                                        {
-                                                          attrs: {
-                                                            "no-gutters": ""
-                                                          }
-                                                        },
-                                                        [
-                                                          _c(
-                                                            "v-col",
-                                                            {
-                                                              attrs: {
-                                                                cols: "6"
-                                                              }
-                                                            },
-                                                            [
-                                                              _c(
-                                                                "span",
-                                                                {
-                                                                  staticClass:
-                                                                    "body-2 font-weight-medium"
-                                                                },
-                                                                [
-                                                                  _vm._v(
-                                                                    _vm._s(
-                                                                      product.supplier
-                                                                    )
-                                                                  )
-                                                                ]
-                                                              )
-                                                            ]
-                                                          ),
-                                                          _vm._v(" "),
-                                                          _c(
-                                                            "v-col",
-                                                            {
-                                                              attrs: {
-                                                                cols: "6"
-                                                              }
-                                                            },
-                                                            [
-                                                              _c(
-                                                                "span",
-                                                                {
-                                                                  staticClass:
-                                                                    "body-2 font-weight-medium"
-                                                                },
-                                                                [
-                                                                  _vm._v(
-                                                                    "Php " +
-                                                                      _vm._s(
-                                                                        product.price
-                                                                      )
-                                                                  )
-                                                                ]
-                                                              )
-                                                            ]
-                                                          )
-                                                        ],
-                                                        1
-                                                      )
-                                                    ],
-                                                    1
-                                                  )
-                                                ],
-                                                1
-                                              )
-                                            ],
-                                            1
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    }),
-                                    1
-                                  )
-                                ],
-                                1
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "v-card-actions",
-                                [
-                                  _c("div", { staticClass: "flex-grow-1" }),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-btn",
-                                    {
-                                      on: {
-                                        click: function($event) {
-                                          _vm.confirmationDialog = false
-                                        }
-                                      }
-                                    },
-                                    [_vm._v("Cancel")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-btn",
-                                    {
-                                      staticClass: "px-8",
-                                      attrs: { color: "primary" },
-                                      on: {
-                                        click: function($event) {
-                                          return _vm.submitOrderRequest()
-                                        }
-                                      }
-                                    },
-                                    [_vm._v("Confirm Order Requests")]
-                                  )
-                                ],
-                                1
+                              _vm._v(
+                                "Total Amount: Php " + _vm._s(_vm.cartTotal)
                               )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c(
-                            "v-dialog",
-                            {
-                              attrs: { "max-width": "400px" },
-                              model: {
-                                value: _vm.orderRequestCodeDialog,
-                                callback: function($$v) {
-                                  _vm.orderRequestCodeDialog = $$v
-                                },
-                                expression: "orderRequestCodeDialog"
-                              }
-                            },
-                            [
-                              _c(
-                                "v-card",
-                                { attrs: { tile: "" } },
-                                [
-                                  _c("v-card-title", [
-                                    _vm._v("Order Request Successful")
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-card-text",
-                                    [
-                                      _c(
-                                        "v-row",
-                                        [
-                                          _c(
-                                            "v-col",
-                                            { attrs: { cols: "12" } },
-                                            [
-                                              _vm._v(
-                                                "Order Request(s) Reference Code(s)"
-                                              )
-                                            ]
-                                          ),
-                                          _vm._v(" "),
-                                          _vm._l(
-                                            _vm.orderRequestCodes,
-                                            function(code, index) {
-                                              return _c(
-                                                "v-col",
-                                                {
-                                                  key: index,
-                                                  attrs: { cols: "12", md: "6" }
-                                                },
-                                                [
-                                                  _c(
-                                                    "v-chip",
-                                                    {
-                                                      staticClass:
-                                                        "font-weight-medium",
-                                                      attrs: {
-                                                        color: "primary"
-                                                      }
-                                                    },
-                                                    [_vm._v(_vm._s(code))]
-                                                  )
-                                                ],
-                                                1
-                                              )
-                                            }
-                                          )
-                                        ],
-                                        2
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-card-actions",
-                                    [
-                                      _c("div", { staticClass: "flex-grow-1" }),
-                                      _vm._v(" "),
-                                      _c(
-                                        "v-btn",
-                                        {
-                                          on: {
-                                            click: function($event) {
-                                              return _vm.closeDialog()
-                                            }
-                                          }
-                                        },
-                                        [_vm._v("Close")]
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            ],
-                            1
+                            ]
                           )
                         ],
                         1
                       )
                     ],
                     1
-                  )
-                ]
-              },
-              proxy: true
-            }
-          ]),
-          model: {
-            value: _vm.cartDrawer,
-            callback: function($$v) {
-              _vm.cartDrawer = $$v
-            },
-            expression: "cartDrawer"
-          }
-        },
-        [
-          _c(
-            "v-list",
-            [
-              _c(
-                "v-list-item",
-                [
-                  _c(
-                    "v-list-item-content",
-                    [
-                      _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Selected Products")]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "v-list-item-subtitle",
-                        { staticClass: "subtitle-1" },
-                        [_vm._v("Total Amount: Php " + _vm._s(_vm.cartTotal))]
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _vm._l(_vm.cartProducts, function(product, index) {
-                return _c(
-                  "v-list-item",
-                  { key: index, attrs: { "three-line": "" } },
-                  [
-                    _c(
-                      "v-list-item-content",
+                  ),
+                  _vm._v(" "),
+                  _vm._l(_vm.cartProducts, function(product, index) {
+                    return _c(
+                      "v-list-item",
+                      { key: index, attrs: { "three-line": "" } },
                       [
                         _c(
-                          "v-list-item-title",
+                          "v-list-item-content",
                           [
-                            _c("span", { staticClass: "font-weight-bold" }, [
-                              _vm._v(_vm._s(product.name))
-                            ]),
+                            _c(
+                              "v-list-item-title",
+                              [
+                                _c(
+                                  "span",
+                                  { staticClass: "font-weight-bold" },
+                                  [_vm._v(_vm._s(product.name))]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-chip",
+                                  {
+                                    staticClass: "px-2",
+                                    attrs: { small: "", color: "primary" }
+                                  },
+                                  [_vm._v(_vm._s(product.quantity))]
+                                )
+                              ],
+                              1
+                            ),
                             _vm._v(" "),
                             _c(
-                              "v-chip",
-                              {
-                                staticClass: "px-2",
-                                attrs: { small: "", color: "primary" }
-                              },
-                              [_vm._v(_vm._s(product.quantity))]
+                              "v-list-item-subtitle",
+                              [
+                                _c(
+                                  "v-row",
+                                  { attrs: { "no-gutters": "" } },
+                                  [
+                                    _c("v-col", { attrs: { cols: "6" } }, [
+                                      _c(
+                                        "span",
+                                        {
+                                          staticClass:
+                                            "body-2 font-weight-medium"
+                                        },
+                                        [_vm._v(_vm._s(product.supplier))]
+                                      )
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("v-col", { attrs: { cols: "6" } }, [
+                                      _c(
+                                        "span",
+                                        {
+                                          staticClass:
+                                            "body-2 font-weight-medium"
+                                        },
+                                        [_vm._v("Php " + _vm._s(product.price))]
+                                      )
+                                    ])
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
                             )
                           ],
                           1
                         ),
                         _vm._v(" "),
                         _c(
-                          "v-list-item-subtitle",
+                          "v-list-item-action",
                           [
                             _c(
-                              "v-row",
-                              { attrs: { "no-gutters": "" } },
+                              "v-btn",
+                              {
+                                attrs: { small: "", icon: "", color: "error" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.removeCartProduct(product)
+                                  }
+                                }
+                              },
                               [
-                                _c("v-col", { attrs: { cols: "6" } }, [
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass: "body-2 font-weight-medium"
-                                    },
-                                    [_vm._v(_vm._s(product.supplier))]
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c("v-col", { attrs: { cols: "6" } }, [
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass: "body-2 font-weight-medium"
-                                    },
-                                    [_vm._v("Php " + _vm._s(product.price))]
-                                  )
+                                _c("v-icon", { attrs: { small: "" } }, [
+                                  _vm._v("fa-times")
                                 ])
                               ],
                               1
@@ -43438,41 +43755,15 @@ var render = function() {
                         )
                       ],
                       1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "v-list-item-action",
-                      [
-                        _c(
-                          "v-btn",
-                          {
-                            attrs: { small: "", icon: "", color: "error" },
-                            on: {
-                              click: function($event) {
-                                return _vm.removeCartProduct(product)
-                              }
-                            }
-                          },
-                          [
-                            _c("v-icon", { attrs: { small: "" } }, [
-                              _vm._v("fa-times")
-                            ])
-                          ],
-                          1
-                        )
-                      ],
-                      1
                     )
-                  ],
-                  1
-                )
-              })
+                  })
+                ],
+                2
+              )
             ],
-            2
+            1
           )
-        ],
-        1
-      ),
+        : _vm._e(),
       _vm._v(" "),
       _c(
         "v-app-bar",
@@ -44247,7 +44538,494 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("v-container", [_c("h1", [_vm._v("Manifest")])])
+  return _c(
+    "v-container",
+    [
+      _c(
+        "v-card",
+        [
+          _c("v-data-table", {
+            attrs: {
+              headers: _vm.dataTableHeaders,
+              items: _vm.manifests,
+              "single-expand": "",
+              "show-expand": ""
+            },
+            scopedSlots: _vm._u([
+              {
+                key: "top",
+                fn: function() {
+                  return [
+                    _c(
+                      "v-toolbar",
+                      { attrs: { flat: "", color: "white" } },
+                      [
+                        _c("v-toolbar-title", { staticClass: "headline" }, [
+                          _vm._v("Manifests")
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "flex-grow-1" }),
+                        _vm._v(" "),
+                        _c(
+                          "v-dialog",
+                          {
+                            attrs: { "max-width": "1000px", persistent: "" },
+                            scopedSlots: _vm._u([
+                              {
+                                key: "activator",
+                                fn: function(ref) {
+                                  var on = ref.on
+                                  return [
+                                    _c(
+                                      "v-btn",
+                                      _vm._g(
+                                        {
+                                          attrs: { small: "", color: "primary" }
+                                        },
+                                        on
+                                      ),
+                                      [
+                                        _c(
+                                          "v-icon",
+                                          { attrs: { small: "", left: "" } },
+                                          [_vm._v("fa-plus")]
+                                        ),
+                                        _vm._v(
+                                          " Add Manifest\n                            "
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ]
+                                }
+                              }
+                            ]),
+                            model: {
+                              value: _vm.dialog,
+                              callback: function($$v) {
+                                _vm.dialog = $$v
+                              },
+                              expression: "dialog"
+                            }
+                          },
+                          [
+                            _vm._v(" "),
+                            _c(
+                              "v-card",
+                              [
+                                _c(
+                                  "v-overlay",
+                                  { attrs: { value: _vm.loading } },
+                                  [
+                                    _c("v-progress-circular", {
+                                      attrs: {
+                                        size: 100,
+                                        width: 5,
+                                        color: "primary",
+                                        indeterminate: ""
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-card-title",
+                                  [
+                                    _c("span", { staticClass: "headline" }, [
+                                      _vm._v(_vm._s(_vm.formTitle))
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("v-spacer"),
+                                    _vm._v(" "),
+                                    _c(
+                                      "v-btn",
+                                      {
+                                        attrs: {
+                                          fab: "",
+                                          dark: "",
+                                          "x-small": "",
+                                          color: "error"
+                                        },
+                                        on: {
+                                          click: function($event) {
+                                            _vm.dialog = false
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "v-icon",
+                                          {
+                                            attrs: { "x-small": "", dark: "" }
+                                          },
+                                          [_vm._v("fa-times")]
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-card-text",
+                                  [
+                                    _c(
+                                      "v-container",
+                                      [
+                                        _c(
+                                          "v-row",
+                                          [
+                                            _c(
+                                              "v-col",
+                                              {
+                                                attrs: { cols: "12", md: "4" }
+                                              },
+                                              [
+                                                _c("v-select", {
+                                                  attrs: {
+                                                    items: _vm.logistics,
+                                                    "item-text": "name",
+                                                    "item-value": "id",
+                                                    label: "Logistic"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      _vm.editedManifest
+                                                        .logistic,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        _vm.editedManifest,
+                                                        "logistic",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "editedManifest.logistic"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "v-col",
+                                              {
+                                                attrs: { cols: "12", md: "4" }
+                                              },
+                                              [
+                                                _c(
+                                                  "v-menu",
+                                                  {
+                                                    attrs: {
+                                                      "close-on-content-click": false,
+                                                      transition:
+                                                        "scale-transition",
+                                                      "min-width": "290px"
+                                                    },
+                                                    scopedSlots: _vm._u([
+                                                      {
+                                                        key: "activator",
+                                                        fn: function(ref) {
+                                                          var on = ref.on
+                                                          return [
+                                                            _c(
+                                                              "v-text-field",
+                                                              _vm._g(
+                                                                {
+                                                                  attrs: {
+                                                                    label:
+                                                                      "Delivery Date",
+                                                                    readonly: ""
+                                                                  },
+                                                                  model: {
+                                                                    value:
+                                                                      _vm
+                                                                        .editedManifest
+                                                                        .delivery_date,
+                                                                    callback: function(
+                                                                      $$v
+                                                                    ) {
+                                                                      _vm.$set(
+                                                                        _vm.editedManifest,
+                                                                        "delivery_date",
+                                                                        $$v
+                                                                      )
+                                                                    },
+                                                                    expression:
+                                                                      "editedManifest.delivery_date"
+                                                                  }
+                                                                },
+                                                                on
+                                                              )
+                                                            )
+                                                          ]
+                                                        }
+                                                      }
+                                                    ]),
+                                                    model: {
+                                                      value: _vm.menu,
+                                                      callback: function($$v) {
+                                                        _vm.menu = $$v
+                                                      },
+                                                      expression: "menu"
+                                                    }
+                                                  },
+                                                  [
+                                                    _vm._v(" "),
+                                                    _c("v-date-picker", {
+                                                      attrs: {
+                                                        color: "primary",
+                                                        min: new Date()
+                                                          .toISOString()
+                                                          .substr(0, 10)
+                                                      },
+                                                      on: {
+                                                        input: function(
+                                                          $event
+                                                        ) {
+                                                          _vm.menu = false
+                                                        }
+                                                      },
+                                                      model: {
+                                                        value:
+                                                          _vm.editedManifest
+                                                            .delivery_date,
+                                                        callback: function(
+                                                          $$v
+                                                        ) {
+                                                          _vm.$set(
+                                                            _vm.editedManifest,
+                                                            "delivery_date",
+                                                            $$v
+                                                          )
+                                                        },
+                                                        expression:
+                                                          "editedManifest.delivery_date"
+                                                      }
+                                                    })
+                                                  ],
+                                                  1
+                                                )
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "v-col",
+                                              { attrs: { cols: "9", md: "3" } },
+                                              [
+                                                _c("v-select", {
+                                                  attrs: {
+                                                    items: _vm.order_requests,
+                                                    "item-text": "code",
+                                                    "item-value": "id",
+                                                    label: "Order Requests"
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      _vm.selectedOrderRequestId,
+                                                    callback: function($$v) {
+                                                      _vm.selectedOrderRequestId = $$v
+                                                    },
+                                                    expression:
+                                                      "selectedOrderRequestId"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "v-col",
+                                              {
+                                                attrs: {
+                                                  cols: "3",
+                                                  md: "1",
+                                                  align: "center",
+                                                  justify: "center"
+                                                }
+                                              },
+                                              [
+                                                _c(
+                                                  "v-btn",
+                                                  {
+                                                    attrs: {
+                                                      color: "primary",
+                                                      dark: "",
+                                                      small: "",
+                                                      fab: ""
+                                                    },
+                                                    on: {
+                                                      click: function($event) {
+                                                        return _vm.selectOrderRequest()
+                                                      }
+                                                    }
+                                                  },
+                                                  [
+                                                    _c(
+                                                      "v-icon",
+                                                      {
+                                                        attrs: {
+                                                          dark: "",
+                                                          small: ""
+                                                        }
+                                                      },
+                                                      [_vm._v("fa-plus")]
+                                                    )
+                                                  ],
+                                                  1
+                                                )
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _vm._l(
+                                              _vm.editedManifest.order_requests,
+                                              function(order, index) {
+                                                return _c(
+                                                  "v-col",
+                                                  {
+                                                    key: index,
+                                                    attrs: {
+                                                      cols: "12",
+                                                      md: "4"
+                                                    }
+                                                  },
+                                                  [
+                                                    _c(
+                                                      "v-card",
+                                                      [
+                                                        _c(
+                                                          "v-card-title",
+                                                          {
+                                                            staticClass:
+                                                              "subtitle-2"
+                                                          },
+                                                          [
+                                                            _vm._v(
+                                                              "\n                                                    " +
+                                                                _vm._s(
+                                                                  order.code
+                                                                ) +
+                                                                "\n                                                    "
+                                                            ),
+                                                            _c("v-spacer"),
+                                                            _vm._v(" "),
+                                                            _c(
+                                                              "v-icon",
+                                                              {
+                                                                attrs: {
+                                                                  small: "",
+                                                                  dark: "",
+                                                                  color: "error"
+                                                                },
+                                                                on: {
+                                                                  click: function(
+                                                                    $event
+                                                                  ) {
+                                                                    return _vm.unselectOrderRequest(
+                                                                      order
+                                                                    )
+                                                                  }
+                                                                }
+                                                              },
+                                                              [
+                                                                _vm._v(
+                                                                  "fa-times"
+                                                                )
+                                                              ]
+                                                            )
+                                                          ],
+                                                          1
+                                                        ),
+                                                        _vm._v(" "),
+                                                        _c("v-card-text", [
+                                                          _vm._v(
+                                                            _vm._s(
+                                                              order.customer
+                                                            ) +
+                                                              ", " +
+                                                              _vm._s(
+                                                                order.address
+                                                              )
+                                                          )
+                                                        ])
+                                                      ],
+                                                      1
+                                                    )
+                                                  ],
+                                                  1
+                                                )
+                                              }
+                                            ),
+                                            _vm._v(" "),
+                                            _vm.editedManifest.order_requests
+                                              .length > 0
+                                              ? _c(
+                                                  "v-col",
+                                                  {
+                                                    attrs: {
+                                                      cols: "12",
+                                                      sm: "12",
+                                                      "offset-sm": "0",
+                                                      md: "4",
+                                                      "offset-md": "8"
+                                                    }
+                                                  },
+                                                  [
+                                                    _c(
+                                                      "v-btn",
+                                                      {
+                                                        attrs: {
+                                                          color: "primary",
+                                                          block: ""
+                                                        }
+                                                      },
+                                                      [_vm._v("Submit")]
+                                                    )
+                                                  ],
+                                                  1
+                                                )
+                                              : _vm._e()
+                                          ],
+                                          2
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          ],
+                          1
+                        )
+                      ],
+                      1
+                    )
+                  ]
+                },
+                proxy: true
+              },
+              {
+                key: "expanded-item",
+                fn: function(ref) {
+                  var item = ref.item
+                  return [_c("td", [_vm._v(_vm._s(item))])]
+                }
+              }
+            ])
+          })
+        ],
+        1
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -44279,24 +45057,152 @@ var render = function() {
         [
           _c(
             "v-tabs",
-            { attrs: { grow: "" } },
+            {
+              attrs: { grow: "" },
+              model: {
+                value: _vm.tabModel,
+                callback: function($$v) {
+                  _vm.tabModel = $$v
+                },
+                expression: "tabModel"
+              }
+            },
             [
-              _c("v-tab", [_vm._v("Pending")]),
-              _vm._v(" "),
-              _c("v-tab", [_vm._v("Approved")]),
-              _vm._v(" "),
-              _c("v-tab", [_vm._v("Receivable")]),
-              _vm._v(" "),
-              _c("v-tab", [_vm._v("Delivered")]),
+              _c(
+                "v-tab",
+                {
+                  attrs: { href: "#disapproved-tab" },
+                  on: {
+                    click: function($event) {
+                      return _vm.retrieveOrderRequests("Disapproved")
+                    }
+                  }
+                },
+                [_vm._v("Disapproved")]
+              ),
               _vm._v(" "),
               _c(
+                "v-tab",
+                {
+                  attrs: { href: "#pending-tab", "active-class": "" },
+                  on: {
+                    click: function($event) {
+                      return _vm.retrieveOrderRequests("Pending")
+                    }
+                  }
+                },
+                [_vm._v("Pending")]
+              ),
+              _vm._v(" "),
+              _c(
+                "v-tab",
+                {
+                  attrs: { href: "#aprroved-tab" },
+                  on: {
+                    click: function($event) {
+                      return _vm.retrieveOrderRequests("Approved")
+                    }
+                  }
+                },
+                [_vm._v("Approved")]
+              ),
+              _vm._v(" "),
+              _c(
+                "v-tab",
+                {
+                  attrs: { href: "#deliverable-tab" },
+                  on: {
+                    click: function($event) {
+                      return _vm.retrieveOrderRequests("Receivable")
+                    }
+                  }
+                },
+                [_vm._v("Deliverables")]
+              ),
+              _vm._v(" "),
+              _c(
+                "v-tab",
+                {
+                  attrs: { href: "#delivered-tab" },
+                  on: {
+                    click: function($event) {
+                      return _vm.retrieveOrderRequests("Delivered")
+                    }
+                  }
+                },
+                [_vm._v("Delivered")]
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "v-tabs-items",
+            {
+              model: {
+                value: _vm.tabModel,
+                callback: function($$v) {
+                  _vm.tabModel = $$v
+                },
+                expression: "tabModel"
+              }
+            },
+            [
+              _c(
                 "v-tab-item",
+                { attrs: { value: "disapproved-tab" } },
                 [
                   _c(
                     "v-container",
                     [
                       _c("v-data-table", {
-                        attrs: { headers: _vm.actionHeaders }
+                        attrs: {
+                          loading: _vm.loading,
+                          "loading-text": "Loading... Please wait",
+                          headers: _vm.table_headers,
+                          items: _vm.order_requests
+                        },
+                        scopedSlots: _vm._u([
+                          {
+                            key: "item.action",
+                            fn: function(ref) {
+                              var item = ref.item
+                              return [
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.retrieveOrderRequestInformation(
+                                          item
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-info-circle")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "success" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Approved"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-check-square")]
+                                )
+                              ]
+                            }
+                          }
+                        ])
                       })
                     ],
                     1
@@ -44307,12 +45213,76 @@ var render = function() {
               _vm._v(" "),
               _c(
                 "v-tab-item",
+                { attrs: { value: "pending-tab" } },
                 [
                   _c(
                     "v-container",
                     [
                       _c("v-data-table", {
-                        attrs: { headers: _vm.noActionHeaders }
+                        attrs: {
+                          loading: _vm.loading,
+                          "loading-text": "Loading... Please wait",
+                          headers: _vm.table_headers,
+                          items: _vm.order_requests
+                        },
+                        scopedSlots: _vm._u([
+                          {
+                            key: "item.action",
+                            fn: function(ref) {
+                              var item = ref.item
+                              return [
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.retrieveOrderRequestInformation(
+                                          item
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-info-circle")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "success" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Approved"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-check-square")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "error" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Disapproved"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-times-circle")]
+                                )
+                              ]
+                            }
+                          }
+                        ])
                       })
                     ],
                     1
@@ -44323,12 +45293,76 @@ var render = function() {
               _vm._v(" "),
               _c(
                 "v-tab-item",
+                { attrs: { value: "aprroved-tab" } },
                 [
                   _c(
                     "v-container",
                     [
                       _c("v-data-table", {
-                        attrs: { headers: _vm.actionHeaders }
+                        attrs: {
+                          loading: _vm.loading,
+                          "loading-text": "Loading... Please wait",
+                          headers: _vm.table_headers,
+                          items: _vm.order_requests
+                        },
+                        scopedSlots: _vm._u([
+                          {
+                            key: "item.action",
+                            fn: function(ref) {
+                              var item = ref.item
+                              return [
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.retrieveOrderRequestInformation(
+                                          item
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-info-circle")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "success" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Receivable"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-check-square")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "error" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Pending"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-times-circle")]
+                                )
+                              ]
+                            }
+                          }
+                        ])
                       })
                     ],
                     1
@@ -44339,13 +45373,291 @@ var render = function() {
               _vm._v(" "),
               _c(
                 "v-tab-item",
+                { attrs: { value: "deliverable-tab" } },
                 [
                   _c(
                     "v-container",
                     [
                       _c("v-data-table", {
-                        attrs: { headers: _vm.noActionHeaders }
+                        attrs: {
+                          loading: _vm.loading,
+                          "loading-text": "Loading... Please wait",
+                          headers: _vm.table_headers,
+                          items: _vm.order_requests
+                        },
+                        scopedSlots: _vm._u([
+                          {
+                            key: "item.action",
+                            fn: function(ref) {
+                              var item = ref.item
+                              return [
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.retrieveOrderRequestInformation(
+                                          item
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-info-circle")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "success" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Delivered"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-check-square")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "error" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Approved"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-times-circle")]
+                                )
+                              ]
+                            }
+                          }
+                        ])
                       })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "v-tab-item",
+                { attrs: { value: "delivered-tab" } },
+                [
+                  _c(
+                    "v-container",
+                    [
+                      _c("v-data-table", {
+                        attrs: {
+                          loading: _vm.loading,
+                          "loading-text": "Loading... Please wait",
+                          headers: _vm.table_headers,
+                          items: _vm.order_requests
+                        },
+                        scopedSlots: _vm._u([
+                          {
+                            key: "item.action",
+                            fn: function(ref) {
+                              var item = ref.item
+                              return [
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.retrieveOrderRequestInformation(
+                                          item
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-info-circle")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-icon",
+                                  {
+                                    staticClass: "mx-1",
+                                    attrs: { color: "error" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.updatedRequestStatus(
+                                          item,
+                                          "Receivable"
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("fa-times-circle")]
+                                )
+                              ]
+                            }
+                          }
+                        ])
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "v-dialog",
+            {
+              attrs: { "max-width": "750" },
+              model: {
+                value: _vm.order_request_information_dialog,
+                callback: function($$v) {
+                  _vm.order_request_information_dialog = $$v
+                },
+                expression: "order_request_information_dialog"
+              }
+            },
+            [
+              _c(
+                "v-card",
+                [
+                  _c("v-card-title", [_vm._v("Order Request Details")]),
+                  _vm._v(" "),
+                  _c(
+                    "v-card-text",
+                    [
+                      _c(
+                        "v-row",
+                        [
+                          _c("v-col", { attrs: { cols: "12", md: "6" } }, [
+                            _c(
+                              "span",
+                              { staticClass: "ml-3 font-weight-bold" },
+                              [
+                                _vm._v(
+                                  "Supplier: " +
+                                    _vm._s(
+                                      _vm.order_request_information.supplier
+                                    )
+                                )
+                              ]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("v-col", { attrs: { cols: "12", md: "6" } }, [
+                            _c(
+                              "span",
+                              { staticClass: "ml-3 font-weight-bold" },
+                              [
+                                _vm._v(
+                                  "Total: Php " +
+                                    _vm._s(
+                                      Number(
+                                        _vm.order_request_information.total
+                                      ).toLocaleString()
+                                    )
+                                )
+                              ]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "v-col",
+                            { attrs: { cols: "12" } },
+                            [
+                              _c(
+                                "v-row",
+                                _vm._l(
+                                  _vm.order_request_information.details,
+                                  function(order, index) {
+                                    return _c(
+                                      "v-col",
+                                      {
+                                        key: index,
+                                        attrs: { cols: "12", md: "6" }
+                                      },
+                                      [
+                                        _c(
+                                          "v-card",
+                                          [
+                                            _c(
+                                              "v-card-title",
+                                              { staticClass: "subtitle-2" },
+                                              [
+                                                _c("span", [
+                                                  _vm._v(_vm._s(order.name))
+                                                ]),
+                                                _c(
+                                                  "span",
+                                                  {
+                                                    staticClass: "caption ml-2"
+                                                  },
+                                                  [
+                                                    _vm._v(
+                                                      "(" +
+                                                        _vm._s(order.code) +
+                                                        ")"
+                                                    )
+                                                  ]
+                                                ),
+                                                _vm._v(" "),
+                                                _c("v-spacer"),
+                                                _vm._v(" "),
+                                                _c("span", [
+                                                  _vm._v(
+                                                    "Php " +
+                                                      _vm._s(
+                                                        Number(
+                                                          order.total
+                                                        ).toLocaleString()
+                                                      )
+                                                  )
+                                                ])
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "v-card-text",
+                                              { staticClass: "body-2" },
+                                              [
+                                                _vm._v(
+                                                  "\n                                            " +
+                                                    _vm._s(order.quantity) +
+                                                    " " +
+                                                    _vm._s(order.unit) +
+                                                    "(s)\n                                        "
+                                                )
+                                              ]
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  }
+                                ),
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
                     ],
                     1
                   )

@@ -12,19 +12,28 @@ class OrderRequestController extends Controller
 {
     public function index(Request $request) {
         $validator = Validator::make($request->all(),  [
-            'status' => 'required|in:Pending,Approved,Receivable,Delivered'
+            'status' => 'required|in:Disapproved,Pending,Approved,Receivable,Delivered'
         ]);
         if($validator->fails()) { return response(['errors' => $validator->errors()], 422);}
 
-        $information_id = $request->user()->information->id;
-
-        $order_requests = OrderRequest::where([['customer_id', $information_id], ['status', $request->status]])->orderBy('created_at', 'desc')->get();
-
+        if($request->user()->role == 'Customer') {
+            $order_requests = OrderRequest::where([
+                ['customer_id', $request->user()->information->id], 
+                ['status', $request->status]
+            ])->orderBy('created_at', 'desc')->get();
+        } elseif ($request->user()->role == 'Supplier') {
+            $order_requests = OrderRequest::where([
+                ['supplier_id', $request->user()->information->id], 
+                ['status', $request->status]
+            ])->orderBy('created_at', 'desc')->get();
+        }
+        
         $data = [];
         foreach($order_requests as $order_request) {
             $data[] = [
                 'id' => $order_request->id,
                 'code' => $order_request->code,
+                'customer' => $order_request->customer->name,
                 'supplier' => $order_request->supplier->name,
                 'datetime' => date('d-m-Y H:m:s', strtotime($order_request->created_at)),
             ];
@@ -86,6 +95,11 @@ class OrderRequestController extends Controller
     public function destroy(Request $request, OrderRequest $order_request) {
         $order_request->delete();
         return response(['success' => ['message' => 'Order Request Deleted']], 201);
+    }
+
+    public function update_status(Request $request, OrderRequest $order_request) {
+        $order_request->update($request->toArray());
+        return response(['success' => ['message' => $order_request->code." Status Updated"]], 200);
     }
 
     private function filter_order_requests($order_requests) {
