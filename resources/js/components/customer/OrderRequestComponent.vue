@@ -4,7 +4,7 @@
             <v-tabs grow>
                 <v-tab @click="retrieveOrderRequests('Pending')">Pending</v-tab>
                 <v-tab @click="retrieveOrderRequests('Approved')">Approved</v-tab>
-                <v-tab @click="retrieveOrderRequests('Receivable')">Receivables</v-tab>
+                <v-tab @click="retrieveReceivables()">Receivables</v-tab>
                 <v-tab @click="retrieveOrderRequests('Delivered')">Delivered</v-tab>
 
                 <!-- Pending Orders -->
@@ -33,7 +33,7 @@
                 <!-- Reveivable Orders -->
                 <v-tab-item>
                     <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="reveivable_table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                             </template>
@@ -47,7 +47,6 @@
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
-                                
                             </template>
                         </v-data-table>
                     </v-container>
@@ -101,6 +100,14 @@
                     {text: 'Actions', value: 'action', align: 'center', sortable: false},
                 ],
 
+                reveivable_table_headers: [
+                    {text: 'Code', value: 'code', align: 'center'},
+                    {text: 'Delivery Date', value: 'delivery_date', align: 'center'},
+                    {text: 'Supplier', value: 'supplier', align: 'center'},
+                    {text: 'Logistic', value: 'logistic', align: 'center'},
+                    {text: 'Actions', value: 'action', align: 'center', sortable: false},
+                ],
+
                 order_requests: [],
                 order_request_information: {supplier: null, total: 0, datetime: null, details: []},
             }
@@ -120,6 +127,16 @@
                 })
                 .catch(() => {})
                 .finally(() => { this.loading = false})
+            },
+
+            retrieveReceivables() {
+                axios.get('/api/order-request/receivables')
+                .then( response => {
+                    this.order_requests = response.data.success.order_requests
+                })
+                .catch( error => {
+                    console.log(error.response.data)
+                })
             },
 
             retrieveOrderRequestInformation(order_request) {

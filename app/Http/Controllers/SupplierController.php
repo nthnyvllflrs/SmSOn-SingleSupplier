@@ -90,25 +90,4 @@ class SupplierController extends Controller
         $supplier->delete();
         return response(['success' => ['message' => 'Supplier Deleted']], 201);
     }
-
-    public function supplier_logistics(Request $request) {
-        $supplier_logistics = Logistic::where('supplier_id', $request->user()->information->id)->get();
-        return response(['success' => ['logistics' => $supplier_logistics]], 200);
-    }
-
-    public function supplier_order_requests(Request $request) {
-        $supplier_order_requests = OrderRequest::where([['supplier_id', $request->user()->information->id], ['status', 'Approved']])->get();
-        $order_requests = [];
-
-        foreach($supplier_order_requests as $order_request) {
-            $order_requests[] = [
-                'id' => $order_request->id,
-                'code' => $order_request->code,
-                'customer' => $order_request->customer->name,
-                'address' => $order_request->customer->address,
-            ];
-        }
-
-        return response(['success' => ['order_requests' => $order_requests]], 200);
-    }
 }

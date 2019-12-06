@@ -47,7 +47,13 @@ class CustomerController extends Controller {
     }
 
     public function show(Request $request, User $customer) {
-        return response(['success' => ['user' => $customer, 'customer' => $customer->information]], 200);
+        return response(['success' => [
+            'profile' => [
+                'code' => $customer->code, 'username' => $customer->username,
+                'name' => $customer->information->name, 'contact_number' => $customer->information->contact_number,
+                'address' => $customer->information->address,
+            ]
+        ]], 200);
     }
 
     public function update(Request $request, User $customer) {

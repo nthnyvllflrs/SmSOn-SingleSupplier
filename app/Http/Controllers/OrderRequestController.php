@@ -12,7 +12,7 @@ class OrderRequestController extends Controller
 {
     public function index(Request $request) {
         $validator = Validator::make($request->all(),  [
-            'status' => 'required|in:Disapproved,Pending,Approved,Receivable,Delivered'
+            'status' => 'required|in:Disapproved,Pending,Approved,Delivered'
         ]);
         if($validator->fails()) { return response(['errors' => $validator->errors()], 422);}
 
@@ -40,6 +40,18 @@ class OrderRequestController extends Controller
         }
 
         return response(['success' => ['order_requests' => $data]], 200);
+    }
+
+    public function receivables(Request $request) {
+        $receivable_list = \DB::table('order_requests')
+                            ->join('suppliers', 'suppliers.id', 'order_requests.supplier_id')
+                            ->join('manifest_details', 'manifest_details.order_request_id', 'order_requests.id')
+                            ->join('manifests', 'manifests.id', 'manifest_details.manifest_id')
+                            ->join('logistics', 'logistics.id', 'manifests.logistic_id')
+                            ->where('order_requests.customer_id', $request->user()->information->id)
+                            ->select('order_requests.id', 'order_requests.code', 'manifests.delivery_date', 
+                                    'suppliers.name as supplier', 'logistics.name as logistic')->get();
+        return response(['success' => ['order_requests' => $receivable_list]], 200);
     }
 
     public function store(Request $request) {

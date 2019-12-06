@@ -82,7 +82,6 @@
             }
         },
         mounted() {
-            console.log(this.supplierID)
             this.retrieveProducts()
         },
         computed: {

@@ -1,8 +1,8 @@
 <template>
-    <v-container>
+    <div>
         <supplier-product v-if="userRole == 'Supplier'" />
         <customer-product v-if="userRole == 'Customer'" />
-    </v-container>
+    </div>
 </template>
 
 <script>

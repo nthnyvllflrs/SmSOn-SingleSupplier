@@ -10,16 +10,17 @@ Route::group(['middleware' => ['json.response']], function () {
     // private routes
     Route::middleware('auth:api')->group(function () {
         Route::get('/logout', 'AuthController@logout');
+        
+        Route::get('/user', function (Request $request) { return $request->user();}); // Return current logged in user
 
-        Route::get('/user', function (Request $request) {
-            return $request->user(); // Return current logged in user
+        Route::group(['prefix' => '/administrator'], function($request) {
+            Route::get('/{administrator}', 'AuthController@show');
+            Route::put('/{administrator}', 'AuthController@update');
         });
 
         Route::group(['prefix' => '/supplier'], function($request) {
             Route::post('/', 'SupplierController@store');
             Route::get('/', 'SupplierController@index');
-            Route::get('/logistics', 'SupplierController@supplier_logistics');
-            Route::get('/order-requests', 'SupplierController@supplier_order_requests');
             Route::get('/{supplier}', 'SupplierController@show');
             Route::put('/{supplier}', 'SupplierController@update');
             Route::delete('/{supplier}', 'SupplierController@destroy');
@@ -52,10 +53,21 @@ Route::group(['middleware' => ['json.response']], function () {
         Route::group(['prefix' => 'order-request'], function($request) {
             Route::post('/', 'OrderRequestController@store');
             Route::get('/', 'OrderRequestController@index');
+            Route::get('/receivables', 'OrderRequestController@receivables');
             Route::get('/{order_request}', 'OrderRequestController@show');
             Route::put('/{order_request}/status', 'OrderRequestController@update_status');
             Route::delete('/{order_request}', 'OrderRequestController@destroy');
             
+        });
+
+        Route::group(['prefix' => 'manifest'], function($request) {
+            Route::post('/', 'ManifestController@store');
+            Route::get('/', 'ManifestController@index');
+            Route::get('/logistics', 'ManifestController@supplier_logistics');
+            Route::get('/order-requests', 'ManifestController@supplier_order_requests');
+            Route::get('/{manifest}/edit', 'ManifestController@edit');
+            Route::put('/{manifest}', 'ManifestController@update');
+            Route::delete('/{manifest}', 'ManifestController@destroy');
         });
     });
 

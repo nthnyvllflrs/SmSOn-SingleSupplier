@@ -5,7 +5,7 @@
                 <v-tab :href="`#disapproved-tab`" @click="retrieveOrderRequests('Disapproved')">Disapproved</v-tab>
                 <v-tab :href="`#pending-tab`" @click="retrieveOrderRequests('Pending')" active-class>Pending</v-tab>
                 <v-tab :href="`#aprroved-tab`" @click="retrieveOrderRequests('Approved')">Approved</v-tab>
-                <v-tab :href="`#deliverable-tab`" @click="retrieveOrderRequests('Receivable')">Deliverables</v-tab>
+                <!-- <v-tab :href="`#deliverable-tab`" @click="retrieveOrderRequests('Receivable')">Deliverables</v-tab> -->
                 <v-tab :href="`#delivered-tab`" @click="retrieveOrderRequests('Delivered')">Delivered</v-tab>
             </v-tabs>
 
@@ -16,7 +16,7 @@
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
-                                <v-icon color="success" class="mx-1" @click="updatedRequestStatus(item, 'Approved')">fa-check-square</v-icon>
+                                <v-icon color="success" class="mx-1" @click="updatedRequestStatus(item, 'Pending')">fa-check-square</v-icon>
                             </template>
                         </v-data-table>
                     </v-container>
@@ -41,7 +41,7 @@
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
-                                <v-icon color="success" class="mx-1" @click="updatedRequestStatus(item, 'Receivable')">fa-check-square</v-icon>
+                                <v-icon color="success" class="mx-1" @click="updatedRequestStatus(item, 'Delivered')">fa-check-square</v-icon>
                                 <v-icon color="error" class="mx-1" @click="updatedRequestStatus(item, 'Pending')">fa-times-circle</v-icon>
                             </template>
                         </v-data-table>
@@ -49,7 +49,7 @@
                 </v-tab-item>
 
                 <!-- Deliverables Orders -->
-                <v-tab-item :value="`deliverable-tab`">
+                <!-- <v-tab-item :value="`deliverable-tab`">
                     <v-container>
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
@@ -59,7 +59,7 @@
                             </template>
                         </v-data-table>
                     </v-container>
-                </v-tab-item>
+                </v-tab-item> -->
 
                 <!-- Delivered Orders -->
                 <v-tab-item :value="`delivered-tab`">
@@ -67,7 +67,7 @@
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
-                                <v-icon color="error" class="mx-1" @click="updatedRequestStatus(item, 'Receivable')">fa-times-circle</v-icon>
+                                <v-icon color="error" class="mx-1" @click="updatedRequestStatus(item, 'Approved')">fa-times-circle</v-icon>
                             </template>
                         </v-data-table>
                     </v-container>
@@ -76,30 +76,24 @@
 
             <v-dialog max-width="750" v-model="order_request_information_dialog">
                 <v-card>
-                    <v-card-title>Order Request Details</v-card-title>
+                    <v-card-title>
+                        Order Request Details
+                        <v-spacer />
+                        <span class="ml-3 font-weight-bold">Total: Php {{ Number(order_request_information.total).toLocaleString() }}</span>
+                    </v-card-title>
                     <v-card-text>
                         <v-row>
-                            <v-col cols=12 md=6>
-                                <span class="ml-3 font-weight-bold">Supplier: {{ order_request_information.supplier }}</span>
-                            </v-col>
-                            <v-col cols=12 md=6>
-                                <span class="ml-3 font-weight-bold">Total: Php {{ Number(order_request_information.total).toLocaleString() }}</span>
-                            </v-col>
-                            <v-col cols=12>
-                                <v-row>
-                                    <v-col cols=12 md=6 v-for="(order, index) in order_request_information.details" :key="index">
-                                        <v-card>
-                                            <v-card-title class="subtitle-2">
-                                                <span>{{ order.name }}</span><span class="caption ml-2">({{ order.code }})</span>
-                                                <v-spacer></v-spacer>
-                                                <span>Php {{ Number(order.total).toLocaleString() }}</span>
-                                                </v-card-title>
-                                            <v-card-text class="body-2">
-                                                {{ order.quantity}} {{ order.unit }}(s)
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
+                            <v-col cols=12 md=6 v-for="(order, index) in order_request_information.details" :key="index">
+                                <v-card>
+                                    <v-card-title class="subtitle-2">
+                                        <span>{{ order.name }}</span><span class="caption ml-2">({{ order.code }})</span>
+                                        <v-spacer></v-spacer>
+                                        <span>Php {{ Number(order.total).toLocaleString() }}</span>
+                                        </v-card-title>
+                                    <v-card-text class="body-2">
+                                        {{ order.quantity}} {{ order.unit }}(s)
+                                    </v-card-text>
+                                </v-card>
                             </v-col>
                         </v-row>
                     </v-card-text>

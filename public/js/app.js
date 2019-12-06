@@ -2111,6 +2111,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
         var data = response.data.success;
         sessionStorage.setItem('user-token', data.token);
         sessionStorage.setItem('user-role', data.role);
+        sessionStorage.setItem('user-id', data.user_id);
         sessionStorage.setItem('user-information-id', data.information_id);
 
         _this.$router.push('navigation');
@@ -2847,7 +2848,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2864,6 +2864,28 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         text: 'Date and Time',
         value: 'datetime',
+        align: 'center'
+      }, {
+        text: 'Actions',
+        value: 'action',
+        align: 'center',
+        sortable: false
+      }],
+      reveivable_table_headers: [{
+        text: 'Code',
+        value: 'code',
+        align: 'center'
+      }, {
+        text: 'Delivery Date',
+        value: 'delivery_date',
+        align: 'center'
+      }, {
+        text: 'Supplier',
+        value: 'supplier',
+        align: 'center'
+      }, {
+        text: 'Logistic',
+        value: 'logistic',
         align: 'center'
       }, {
         text: 'Actions',
@@ -2899,24 +2921,33 @@ __webpack_require__.r(__webpack_exports__);
         _this.loading = false;
       });
     },
-    retrieveOrderRequestInformation: function retrieveOrderRequestInformation(order_request) {
+    retrieveReceivables: function retrieveReceivables() {
       var _this2 = this;
 
+      axios.get('/api/order-request/receivables').then(function (response) {
+        _this2.order_requests = response.data.success.order_requests;
+      })["catch"](function (error) {
+        console.log(error.response.data);
+      });
+    },
+    retrieveOrderRequestInformation: function retrieveOrderRequestInformation(order_request) {
+      var _this3 = this;
+
       axios.get('/api/order-request/' + order_request.id).then(function (response) {
-        _this2.order_request_information = response.data.success.order_request_information;
-        _this2.order_request_information_dialog = true;
+        _this3.order_request_information = response.data.success.order_request_information;
+        _this3.order_request_information_dialog = true;
       })["catch"](function () {});
     },
     cancelOrderRequest: function cancelOrderRequest(order_request) {
-      var _this3 = this;
+      var _this4 = this;
 
       var itemDeletion = confirm('Are you sure you want to cancel order request?');
 
       if (itemDeletion == true) {
         axios["delete"]('/api/order-request/' + order_request.id).then(function (response) {
-          var index = _this3.order_requests.indexOf(order_request);
+          var index = _this4.order_requests.indexOf(order_request);
 
-          _this3.order_requests.splice(index, 1);
+          _this4.order_requests.splice(index, 1);
         })["catch"](function () {});
       }
     }
@@ -3229,6 +3260,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -3422,46 +3455,151 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       userRole: sessionStorage.getItem('user-role'),
+      userId: sessionStorage.getItem('user-id'),
+      userInformationId: sessionStorage.getItem('user-information-id'),
       sideNavigationBar: true,
       cartDrawer: false,
+      profileDialog: false,
       confirmationDialog: false,
       orderRequestCodeDialog: false,
       loading: false,
-      orderRequestCodes: []
+      orderRequestCodes: [],
+      userProfile: {
+        code: null,
+        username: null,
+        password: null,
+        password_confirmation: null,
+        name: null,
+        address: null,
+        contact_number: null,
+        description: null
+      },
+      formErrors: {
+        code: null,
+        username: null,
+        password: null,
+        password_confirmation: null,
+        name: null,
+        address: null,
+        contact_number: null,
+        description: null
+      }
     };
   },
   computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['cartProducts', 'cartTotal'])),
+  mounted: function mounted() {
+    this.retrieveUserProfile();
+  },
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapActions"])(['removeCartProduct', 'resetCart']), {
+    retrieveUserProfile: function retrieveUserProfile() {
+      var _this = this;
+
+      axios.get('/api/' + this.userRole.toLowerCase() + '/' + this.userId).then(function (response) {
+        _this.userProfile = response.data.success.profile;
+      })["catch"](function (error) {
+        console.log(error.response.data);
+      });
+    },
+    updateUserProfile: function updateUserProfile() {
+      var _this2 = this;
+
+      this.loading = true;
+      axios.put('/api/' + this.userRole.toLowerCase() + '/' + this.userId, _objectSpread({}, this.userProfile)).then(function (response) {
+        _this2.profileDialog = false;
+
+        _this2.retrieveUserProfile();
+
+        toastr.success("Profile Updated");
+      })["catch"](function (error) {
+        if (error.response.status == 422) {
+          if (_typeof(error.response.data) == 'object') {
+            _this2.formErrors = error.response.data.errors;
+          } else {
+            _this2.errorMessage = error.response.data;
+          }
+        } else {
+          toastr.error("An Error Occurred");
+        }
+      })["finally"](function () {
+        _this2.loading = false;
+      });
+    },
     closeDialog: function closeDialog() {
       this.orderRequestCodeDialog = false;
       this.confirmationDialog = false;
+      this.profileDialog = false;
+      this.retrieveUserProfile();
     },
     submitOrderRequest: function submitOrderRequest() {
-      var _this = this;
+      var _this3 = this;
 
       if (this.cartProducts.length > 0) {
         this.loading = true;
         axios.post('/api/order-request', _objectSpread({}, this.cartProducts)).then(function (response) {
-          _this.orderRequestCodes = response.data.success.order_request_codes;
+          _this3.orderRequestCodes = response.data.success.order_request_codes;
 
-          _this.resetCart();
+          _this3.resetCart();
 
-          _this.cartDrawer = false;
-          _this.orderRequestCodeDialog = true;
+          _this3.cartDrawer = false;
+          _this3.orderRequestCodeDialog = true;
         })["catch"](function (error) {
           console.error(error.response.data);
         })["finally"](function () {
-          _this.loading = false;
+          _this3.loading = false;
         });
       }
     },
     logout: function logout() {
-      var _this2 = this;
+      var _this4 = this;
 
       axios.get('api/logout').then(function () {})["catch"](function () {})["finally"](function () {
         sessionStorage.removeItem('user-token');
@@ -3469,10 +3607,45 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         sessionStorage.removeItem('user-information-id');
         sessionStorage.clear();
 
-        _this2.$router.push('/login');
+        _this4.$router.push('/login');
 
         toastr.success("Logout Successfull");
       });
+    },
+    userPermission: function userPermission(module) {
+      var modules = {
+        customers: true,
+        suppliers: true,
+        order_requests: true,
+        products: true,
+        logistics: true,
+        manifests: true
+      };
+      var permissions = {
+        Administrator: _objectSpread({}, modules, {
+          order_requests: false,
+          products: false,
+          logistics: false,
+          manifests: false
+        }),
+        Customer: _objectSpread({}, modules, {
+          customers: false,
+          logistics: false,
+          manifests: false
+        }),
+        Supplier: _objectSpread({}, modules, {
+          customers: false,
+          suppliers: false
+        }),
+        Logistic: _objectSpread({}, modules, {
+          customers: false,
+          suppliers: false,
+          order_request: false,
+          products: false,
+          logistics: false
+        })
+      };
+      return permissions[this.userRole][module];
     }
   })
 });
@@ -3843,6 +4016,32 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3941,28 +4140,37 @@ __webpack_require__.r(__webpack_exports__);
         align: 'center'
       }, {
         text: 'Delivery Date',
-        value: 'datetime',
+        value: 'delivery_date',
         align: 'center'
       }, {
         text: 'Actions',
         value: 'action',
         align: 'center',
         sortable: false
+      }, {
+        value: 'data-table-expand'
       }],
       manifests: [],
       logistics: [],
       order_requests: [],
       defaultManifest: {
-        logistic: null,
+        supplier_id: sessionStorage.getItem('user-information-id'),
+        logistic_id: null,
         delivery_date: new Date().toISOString().substr(0, 10),
         order_requests: []
       },
       editedManifest: {
-        logistic: null,
+        supplier_id: sessionStorage.getItem('user-information-id'),
+        logistic_id: null,
         delivery_date: new Date().toISOString().substr(0, 10),
         order_requests: []
       },
-      selectedOrderRequestId: 0
+      selectedOrderRequestId: 0,
+      formErrors: {
+        supplier_id: null,
+        logistic_id: null,
+        delivery_date: null
+      }
     };
   },
   computed: {
@@ -3970,23 +4178,38 @@ __webpack_require__.r(__webpack_exports__);
       return this.editedIndex === -1 ? 'New Manifest' : 'Edit Manifest';
     }
   },
+  watch: {
+    dialog: function dialog(val) {
+      val || this.cancel();
+    }
+  },
   mounted: function mounted() {
+    this.retrieveManifests();
     this.retrieveSupplierLogistics();
     this.retrieveSupplierOrderRequests();
   },
   methods: {
-    retrieveSupplierLogistics: function retrieveSupplierLogistics() {
+    retrieveManifests: function retrieveManifests() {
       var _this = this;
 
-      axios.get('/api/supplier/logistics').then(function (response) {
-        _this.logistics = response.data.success.logistics;
+      axios.get('/api/manifest').then(function (response) {
+        _this.manifests = response.data.success.manifests;
+      })["catch"](function (error) {
+        console.log(error.response.data);
+      });
+    },
+    retrieveSupplierLogistics: function retrieveSupplierLogistics() {
+      var _this2 = this;
+
+      axios.get('/api/manifest/logistics').then(function (response) {
+        _this2.logistics = response.data.success.logistics;
       })["catch"](function () {});
     },
     retrieveSupplierOrderRequests: function retrieveSupplierOrderRequests() {
-      var _this2 = this;
+      var _this3 = this;
 
-      axios.get('/api/supplier/order-requests').then(function (response) {
-        _this2.order_requests = response.data.success.order_requests;
+      axios.get('/api/manifest/order-requests').then(function (response) {
+        _this3.order_requests = response.data.success.order_requests;
       })["catch"](function () {});
     },
     selectOrderRequest: function selectOrderRequest() {
@@ -4006,6 +4229,91 @@ __webpack_require__.r(__webpack_exports__);
         return a.code.localeCompare(b.code);
       });
       this.editedManifest.order_requests.splice(index, 1);
+    },
+    cancel: function cancel() {
+      var _this4 = this;
+
+      this.dialog = false;
+      setTimeout(function () {
+        _this4.editedManifest = Object.assign({}, _this4.defaultManifest);
+        _this4.editedIndex = -1;
+      }, 500);
+    },
+    saveManifest: function saveManifest() {
+      if (this.editedIndex > -1) {
+        this.updateManifest();
+      } else {
+        this.createManifest();
+      }
+    },
+    createManifest: function createManifest() {
+      var _this5 = this;
+
+      this.loading = true;
+      axios.post('/api/manifest', _objectSpread({}, this.editedManifest)).then(function (response) {
+        _this5.retrieveManifests();
+
+        _this5.retrieveSupplierOrderRequests();
+
+        _this5.cancel();
+
+        toastr.success("New Manifest Created");
+      })["catch"](function (error) {
+        if (error.response.status == 422) {
+          if (_typeof(error.response.data) == 'object') {
+            _this5.formErrors = error.response.data.errors;
+          } else {
+            _this5.errorMessage = error.response.data;
+          }
+        } else {
+          toastr.error("An Error Occurred");
+        }
+      })["finally"](function () {
+        _this5.loading = false;
+      });
+    },
+    updateManifest: function updateManifest() {
+      var _this6 = this;
+
+      this.loading = true;
+      axios.put('/api/manifest/' + this.editedManifest.id, _objectSpread({}, this.editedManifest)).then(function (response) {
+        _this6.retrieveManifests();
+
+        _this6.retrieveSupplierOrderRequests();
+
+        _this6.cancel();
+
+        toastr.success("Manifest Updated");
+      })["catch"](function (error) {
+        if (error.response.status == 422) {
+          if (_typeof(error.response.data) == 'object') {
+            _this6.formErrors = error.response.data.errors;
+          } else {
+            _this6.errorMessage = error.response.data;
+          }
+        } else {
+          toastr.error("An Error Occurred");
+        }
+      })["finally"](function () {
+        _this6.loading = false;
+      });
+    },
+    editManifest: function editManifest(manifest) {
+      var _this7 = this;
+
+      this.dialog = true;
+      this.loading = true;
+      this.editedIndex = this.manifests.indexOf(manifest);
+      axios.get('/api/manifest/' + manifest.id + '/edit').then(function (response) {
+        _this7.editedManifest = Object.assign({}, response.data.success.manifest);
+      })["catch"](function (error) {
+        console.log(error.response.data);
+      })["finally"](function () {
+        _this7.loading = false;
+      });
+    },
+    deleteManifest: function deleteManifest(manifest) {
+      console.log(manifest.id);
     }
   }
 });
@@ -4021,12 +4329,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -4341,7 +4643,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     };
   },
   mounted: function mounted() {
-    console.log(this.supplierID);
     this.retrieveProducts();
   },
   computed: {
@@ -42290,7 +42591,7 @@ var render = function() {
                 {
                   on: {
                     click: function($event) {
-                      return _vm.retrieveOrderRequests("Receivable")
+                      return _vm.retrieveReceivables()
                     }
                   }
                 },
@@ -42423,7 +42724,7 @@ var render = function() {
                         attrs: {
                           loading: _vm.loading,
                           "loading-text": "Loading... Please wait",
-                          headers: _vm.table_headers,
+                          headers: _vm.reveivable_table_headers,
                           items: _vm.order_requests
                         },
                         scopedSlots: _vm._u([
@@ -43790,7 +44091,14 @@ var render = function() {
           _vm._v(" "),
           _c(
             "v-btn",
-            { attrs: { icon: "" } },
+            {
+              attrs: { icon: "" },
+              on: {
+                click: function($event) {
+                  _vm.profileDialog = !_vm.profileDialog
+                }
+              }
+            },
             [_c("v-icon", [_vm._v("fa-user-circle")])],
             1
           ),
@@ -43884,24 +44192,408 @@ var render = function() {
           _c(
             "v-list",
             [
-              _c(
-                "v-list-item",
-                { attrs: { to: "/customers" } },
-                [
-                  _c(
-                    "v-list-item-avatar",
-                    [_c("v-icon", [_vm._v("fa-users")])],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-list-item-content",
+              _vm.userPermission("customers")
+                ? _c(
+                    "v-list-item",
+                    { attrs: { to: "/customers" } },
                     [
                       _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Customers")]
+                        "v-list-item-avatar",
+                        [_c("v-icon", [_vm._v("fa-users")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Customers")]
+                          )
+                        ],
+                        1
                       )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.userPermission("suppliers")
+                ? _c(
+                    "v-list-item",
+                    { attrs: { to: "/suppliers" } },
+                    [
+                      _c(
+                        "v-list-item-avatar",
+                        [_c("v-icon", [_vm._v("fa-boxes")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Suppliers")]
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.userPermission("order_requests")
+                ? _c(
+                    "v-list-item",
+                    { attrs: { to: "/order-requests" } },
+                    [
+                      _c(
+                        "v-list-item-avatar",
+                        [_c("v-icon", [_vm._v("fa-list")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Order Requests")]
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.userPermission("products")
+                ? _c(
+                    "v-list-item",
+                    { attrs: { to: "/products" } },
+                    [
+                      _c(
+                        "v-list-item-avatar",
+                        [_c("v-icon", [_vm._v("fa-box")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Products")]
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.userPermission("logistics")
+                ? _c(
+                    "v-list-item",
+                    { attrs: { to: "/logistics" } },
+                    [
+                      _c(
+                        "v-list-item-avatar",
+                        [_c("v-icon", [_vm._v("fa-truck")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Logistics")]
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.userPermission("manifests")
+                ? _c(
+                    "v-list-item",
+                    { attrs: { to: "/manifests" } },
+                    [
+                      _c(
+                        "v-list-item-avatar",
+                        [_c("v-icon", [_vm._v("fa-clipboard-list")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            { staticClass: "subtitle-2 font-weight-bold" },
+                            [_vm._v("Manifest")]
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                : _vm._e()
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { "max-width": "600", persistent: "" },
+          model: {
+            value: _vm.profileDialog,
+            callback: function($$v) {
+              _vm.profileDialog = $$v
+            },
+            expression: "profileDialog"
+          }
+        },
+        [
+          _c(
+            "v-card",
+            [
+              _c(
+                "v-overlay",
+                { attrs: { value: _vm.loading } },
+                [
+                  _c("v-progress-circular", {
+                    attrs: {
+                      size: 100,
+                      width: 5,
+                      color: "light-green accent-4",
+                      indeterminate: ""
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("v-card-title", { staticClass: "headline" }, [
+                _vm._v("Profile Information")
+              ]),
+              _vm._v(" "),
+              _c(
+                "v-card-text",
+                [
+                  _c(
+                    "v-row",
+                    [
+                      _c(
+                        "v-col",
+                        { attrs: { cols: "12", md: "6" } },
+                        [
+                          _c("v-text-field", {
+                            attrs: {
+                              "error-messages": _vm.formErrors.code,
+                              label: "User Code",
+                              readonly: ""
+                            },
+                            model: {
+                              value: _vm.userProfile.code,
+                              callback: function($$v) {
+                                _vm.$set(_vm.userProfile, "code", $$v)
+                              },
+                              expression: "userProfile.code"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-col",
+                        { attrs: { cols: "12", md: "6" } },
+                        [
+                          _c("v-text-field", {
+                            attrs: {
+                              "error-messages": _vm.formErrors.username,
+                              label: "Username"
+                            },
+                            model: {
+                              value: _vm.userProfile.username,
+                              callback: function($$v) {
+                                _vm.$set(_vm.userProfile, "username", $$v)
+                              },
+                              expression: "userProfile.username"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-col",
+                        { attrs: { cols: "12", md: "6" } },
+                        [
+                          _c("v-text-field", {
+                            attrs: {
+                              "error-messages": _vm.formErrors.password,
+                              label: "Password",
+                              type: "password"
+                            },
+                            model: {
+                              value: _vm.userProfile.password,
+                              callback: function($$v) {
+                                _vm.$set(_vm.userProfile, "password", $$v)
+                              },
+                              expression: "userProfile.password"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-col",
+                        { attrs: { cols: "12", md: "6" } },
+                        [
+                          _c("v-text-field", {
+                            attrs: {
+                              "error-messages":
+                                _vm.formErrors.password_confirmation,
+                              label: "Password Confirmation",
+                              type: "password"
+                            },
+                            model: {
+                              value: _vm.userProfile.password_confirmation,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.userProfile,
+                                  "password_confirmation",
+                                  $$v
+                                )
+                              },
+                              expression: "userProfile.password_confirmation"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _vm.userRole == "Customer" || _vm.userRole == "Supplier"
+                        ? _c(
+                            "v-col",
+                            { attrs: { cols: "12", md: "6" } },
+                            [
+                              _c("v-text-field", {
+                                attrs: {
+                                  "error-messages": _vm.formErrors.name,
+                                  label: "Fullname"
+                                },
+                                model: {
+                                  value: _vm.userProfile.name,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.userProfile, "name", $$v)
+                                  },
+                                  expression: "userProfile.name"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.userRole == "Customer" || _vm.userRole == "Supplier"
+                        ? _c(
+                            "v-col",
+                            { attrs: { cols: "12", md: "6" } },
+                            [
+                              _c("v-text-field", {
+                                attrs: {
+                                  "error-messages":
+                                    _vm.formErrors.contact_number,
+                                  label: "Phone Number"
+                                },
+                                model: {
+                                  value: _vm.userProfile.contact_number,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.userProfile,
+                                      "contact_number",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "userProfile.contact_number"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.userRole == "Customer" || _vm.userRole == "Supplier"
+                        ? _c(
+                            "v-col",
+                            { attrs: { cols: "12" } },
+                            [
+                              _c("v-textarea", {
+                                attrs: {
+                                  "error-messages": _vm.formErrors.address,
+                                  label: "Address"
+                                },
+                                model: {
+                                  value: _vm.userProfile.address,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.userProfile, "address", $$v)
+                                  },
+                                  expression: "userProfile.address"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.userRole == "Supplier"
+                        ? _c(
+                            "v-col",
+                            { attrs: { cols: "12" } },
+                            [
+                              _c("v-textarea", {
+                                attrs: {
+                                  "error-messages": _vm.formErrors.description,
+                                  label: "Description"
+                                },
+                                model: {
+                                  value: _vm.userProfile.description,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.userProfile,
+                                      "description",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "userProfile.description"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        : _vm._e()
                     ],
                     1
                   )
@@ -43910,125 +44602,34 @@ var render = function() {
               ),
               _vm._v(" "),
               _c(
-                "v-list-item",
-                { attrs: { to: "/suppliers" } },
+                "v-card-actions",
                 [
+                  _c("v-spacer"),
+                  _vm._v(" "),
                   _c(
-                    "v-list-item-avatar",
-                    [_c("v-icon", [_vm._v("fa-boxes")])],
-                    1
+                    "v-btn",
+                    {
+                      on: {
+                        click: function($event) {
+                          return _vm.closeDialog()
+                        }
+                      }
+                    },
+                    [_vm._v("Cancel")]
                   ),
                   _vm._v(" "),
                   _c(
-                    "v-list-item-content",
-                    [
-                      _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Suppliers")]
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "v-list-item",
-                { attrs: { to: "/order-requests" } },
-                [
-                  _c(
-                    "v-list-item-avatar",
-                    [_c("v-icon", [_vm._v("fa-list")])],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-list-item-content",
-                    [
-                      _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Order Requests")]
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "v-list-item",
-                { attrs: { to: "/products" } },
-                [
-                  _c(
-                    "v-list-item-avatar",
-                    [_c("v-icon", [_vm._v("fa-box")])],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-list-item-content",
-                    [
-                      _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Products")]
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "v-list-item",
-                { attrs: { to: "/logistics" } },
-                [
-                  _c(
-                    "v-list-item-avatar",
-                    [_c("v-icon", [_vm._v("fa-truck")])],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-list-item-content",
-                    [
-                      _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Logistics")]
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "v-list-item",
-                { attrs: { to: "/manifests" } },
-                [
-                  _c(
-                    "v-list-item-avatar",
-                    [_c("v-icon", [_vm._v("fa-clipboard-list")])],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "v-list-item-content",
-                    [
-                      _c(
-                        "v-list-item-title",
-                        { staticClass: "subtitle-2 font-weight-bold" },
-                        [_vm._v("Manifest")]
-                      )
-                    ],
-                    1
+                    "v-btn",
+                    {
+                      staticClass: "px-8",
+                      attrs: { color: "primary" },
+                      on: {
+                        click: function($event) {
+                          return _vm.updateUserProfile()
+                        }
+                      }
+                    },
+                    [_vm._v("Save")]
                   )
                 ],
                 1
@@ -44110,7 +44711,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c(
-    "v-container",
+    "div",
     [
       _vm.userRole == "Supplier" ? _c("supplier-product") : _vm._e(),
       _vm._v(" "),
@@ -44548,8 +45149,9 @@ var render = function() {
             attrs: {
               headers: _vm.dataTableHeaders,
               items: _vm.manifests,
+              "show-expand": "",
               "single-expand": "",
-              "show-expand": ""
+              "expanded.sync": ""
             },
             scopedSlots: _vm._u([
               {
@@ -44683,26 +45285,28 @@ var render = function() {
                                                 attrs: { cols: "12", md: "4" }
                                               },
                                               [
-                                                _c("v-select", {
+                                                _c("v-autocomplete", {
                                                   attrs: {
                                                     items: _vm.logistics,
                                                     "item-text": "name",
                                                     "item-value": "id",
-                                                    label: "Logistic"
+                                                    label: "Logistic",
+                                                    "error-messages":
+                                                      _vm.formErrors.logistic_id
                                                   },
                                                   model: {
                                                     value:
                                                       _vm.editedManifest
-                                                        .logistic,
+                                                        .logistic_id,
                                                     callback: function($$v) {
                                                       _vm.$set(
                                                         _vm.editedManifest,
-                                                        "logistic",
+                                                        "logistic_id",
                                                         $$v
                                                       )
                                                     },
                                                     expression:
-                                                      "editedManifest.logistic"
+                                                      "editedManifest.logistic_id"
                                                   }
                                                 })
                                               ],
@@ -44737,7 +45341,12 @@ var render = function() {
                                                                   attrs: {
                                                                     label:
                                                                       "Delivery Date",
-                                                                    readonly: ""
+                                                                    readonly:
+                                                                      "",
+                                                                    "error-messages":
+                                                                      _vm
+                                                                        .formErrors
+                                                                        .delivery_date
                                                                   },
                                                                   model: {
                                                                     value:
@@ -44816,7 +45425,7 @@ var render = function() {
                                               "v-col",
                                               { attrs: { cols: "9", md: "3" } },
                                               [
-                                                _c("v-select", {
+                                                _c("v-autocomplete", {
                                                   attrs: {
                                                     items: _vm.order_requests,
                                                     "item-text": "code",
@@ -44981,6 +45590,13 @@ var render = function() {
                                                         attrs: {
                                                           color: "primary",
                                                           block: ""
+                                                        },
+                                                        on: {
+                                                          click: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.saveManifest()
+                                                          }
                                                         }
                                                       },
                                                       [_vm._v("Submit")]
@@ -45012,10 +45628,101 @@ var render = function() {
                 proxy: true
               },
               {
+                key: "item.action",
+                fn: function(ref) {
+                  var item = ref.item
+                  return [
+                    _c(
+                      "v-icon",
+                      {
+                        staticClass: "mx-1",
+                        on: {
+                          click: function($event) {
+                            return _vm.editManifest(item)
+                          }
+                        }
+                      },
+                      [_vm._v("fa-pen")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "v-icon",
+                      {
+                        staticClass: "mx-1",
+                        on: {
+                          click: function($event) {
+                            return _vm.deleteManifest(item)
+                          }
+                        }
+                      },
+                      [_vm._v("fa-trash-alt")]
+                    )
+                  ]
+                }
+              },
+              {
                 key: "expanded-item",
                 fn: function(ref) {
                   var item = ref.item
-                  return [_c("td", [_vm._v(_vm._s(item))])]
+                  var headers = ref.headers
+                  return [
+                    _c(
+                      "td",
+                      { attrs: { colspan: headers.length } },
+                      [
+                        _c(
+                          "v-row",
+                          { attrs: { align: "center", justify: "center" } },
+                          _vm._l(item.order_requests, function(
+                            order_request,
+                            index
+                          ) {
+                            return _c(
+                              "v-col",
+                              {
+                                key: index,
+                                attrs: { cols: "12", sm: "4", md: "3" }
+                              },
+                              [
+                                _c(
+                                  "v-card",
+                                  [
+                                    _c(
+                                      "v-card-title",
+                                      { staticClass: "subtitle-2" },
+                                      [
+                                        _c("span", [
+                                          _vm._v(_vm._s(order_request.code))
+                                        ])
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "v-card-text",
+                                      { staticClass: "body-2" },
+                                      [
+                                        _vm._v(
+                                          "\n                                    " +
+                                            _vm._s(order_request.customer) +
+                                            ", " +
+                                            _vm._s(order_request.address) +
+                                            "\n                                "
+                                        )
+                                      ]
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          }),
+                          1
+                        )
+                      ],
+                      1
+                    )
+                  ]
                 }
               }
             ])
@@ -45110,19 +45817,6 @@ var render = function() {
               _c(
                 "v-tab",
                 {
-                  attrs: { href: "#deliverable-tab" },
-                  on: {
-                    click: function($event) {
-                      return _vm.retrieveOrderRequests("Receivable")
-                    }
-                  }
-                },
-                [_vm._v("Deliverables")]
-              ),
-              _vm._v(" "),
-              _c(
-                "v-tab",
-                {
                   attrs: { href: "#delivered-tab" },
                   on: {
                     click: function($event) {
@@ -45192,7 +45886,7 @@ var render = function() {
                                       click: function($event) {
                                         return _vm.updatedRequestStatus(
                                           item,
-                                          "Approved"
+                                          "Pending"
                                         )
                                       }
                                     }
@@ -45335,86 +46029,6 @@ var render = function() {
                                       click: function($event) {
                                         return _vm.updatedRequestStatus(
                                           item,
-                                          "Receivable"
-                                        )
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("fa-check-square")]
-                                ),
-                                _vm._v(" "),
-                                _c(
-                                  "v-icon",
-                                  {
-                                    staticClass: "mx-1",
-                                    attrs: { color: "error" },
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.updatedRequestStatus(
-                                          item,
-                                          "Pending"
-                                        )
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("fa-times-circle")]
-                                )
-                              ]
-                            }
-                          }
-                        ])
-                      })
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "v-tab-item",
-                { attrs: { value: "deliverable-tab" } },
-                [
-                  _c(
-                    "v-container",
-                    [
-                      _c("v-data-table", {
-                        attrs: {
-                          loading: _vm.loading,
-                          "loading-text": "Loading... Please wait",
-                          headers: _vm.table_headers,
-                          items: _vm.order_requests
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "item.action",
-                            fn: function(ref) {
-                              var item = ref.item
-                              return [
-                                _c(
-                                  "v-icon",
-                                  {
-                                    staticClass: "mx-1",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.retrieveOrderRequestInformation(
-                                          item
-                                        )
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("fa-info-circle")]
-                                ),
-                                _vm._v(" "),
-                                _c(
-                                  "v-icon",
-                                  {
-                                    staticClass: "mx-1",
-                                    attrs: { color: "success" },
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.updatedRequestStatus(
-                                          item,
                                           "Delivered"
                                         )
                                       }
@@ -45432,7 +46046,7 @@ var render = function() {
                                       click: function($event) {
                                         return _vm.updatedRequestStatus(
                                           item,
-                                          "Approved"
+                                          "Pending"
                                         )
                                       }
                                     }
@@ -45495,7 +46109,7 @@ var render = function() {
                                       click: function($event) {
                                         return _vm.updatedRequestStatus(
                                           item,
-                                          "Receivable"
+                                          "Approved"
                                         )
                                       }
                                     }
@@ -45533,129 +46147,87 @@ var render = function() {
               _c(
                 "v-card",
                 [
-                  _c("v-card-title", [_vm._v("Order Request Details")]),
+                  _c(
+                    "v-card-title",
+                    [
+                      _vm._v(
+                        "\n                    Order Request Details\n                    "
+                      ),
+                      _c("v-spacer"),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "ml-3 font-weight-bold" }, [
+                        _vm._v(
+                          "Total: Php " +
+                            _vm._s(
+                              Number(
+                                _vm.order_request_information.total
+                              ).toLocaleString()
+                            )
+                        )
+                      ])
+                    ],
+                    1
+                  ),
                   _vm._v(" "),
                   _c(
                     "v-card-text",
                     [
                       _c(
                         "v-row",
-                        [
-                          _c("v-col", { attrs: { cols: "12", md: "6" } }, [
-                            _c(
-                              "span",
-                              { staticClass: "ml-3 font-weight-bold" },
-                              [
-                                _vm._v(
-                                  "Supplier: " +
-                                    _vm._s(
-                                      _vm.order_request_information.supplier
-                                    )
-                                )
-                              ]
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("v-col", { attrs: { cols: "12", md: "6" } }, [
-                            _c(
-                              "span",
-                              { staticClass: "ml-3 font-weight-bold" },
-                              [
-                                _vm._v(
-                                  "Total: Php " +
-                                    _vm._s(
-                                      Number(
-                                        _vm.order_request_information.total
-                                      ).toLocaleString()
-                                    )
-                                )
-                              ]
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c(
+                        _vm._l(_vm.order_request_information.details, function(
+                          order,
+                          index
+                        ) {
+                          return _c(
                             "v-col",
-                            { attrs: { cols: "12" } },
+                            { key: index, attrs: { cols: "12", md: "6" } },
                             [
                               _c(
-                                "v-row",
-                                _vm._l(
-                                  _vm.order_request_information.details,
-                                  function(order, index) {
-                                    return _c(
-                                      "v-col",
-                                      {
-                                        key: index,
-                                        attrs: { cols: "12", md: "6" }
-                                      },
-                                      [
-                                        _c(
-                                          "v-card",
-                                          [
-                                            _c(
-                                              "v-card-title",
-                                              { staticClass: "subtitle-2" },
-                                              [
-                                                _c("span", [
-                                                  _vm._v(_vm._s(order.name))
-                                                ]),
-                                                _c(
-                                                  "span",
-                                                  {
-                                                    staticClass: "caption ml-2"
-                                                  },
-                                                  [
-                                                    _vm._v(
-                                                      "(" +
-                                                        _vm._s(order.code) +
-                                                        ")"
-                                                    )
-                                                  ]
-                                                ),
-                                                _vm._v(" "),
-                                                _c("v-spacer"),
-                                                _vm._v(" "),
-                                                _c("span", [
-                                                  _vm._v(
-                                                    "Php " +
-                                                      _vm._s(
-                                                        Number(
-                                                          order.total
-                                                        ).toLocaleString()
-                                                      )
-                                                  )
-                                                ])
-                                              ],
-                                              1
-                                            ),
-                                            _vm._v(" "),
-                                            _c(
-                                              "v-card-text",
-                                              { staticClass: "body-2" },
-                                              [
-                                                _vm._v(
-                                                  "\n                                            " +
-                                                    _vm._s(order.quantity) +
-                                                    " " +
-                                                    _vm._s(order.unit) +
-                                                    "(s)\n                                        "
-                                                )
-                                              ]
+                                "v-card",
+                                [
+                                  _c(
+                                    "v-card-title",
+                                    { staticClass: "subtitle-2" },
+                                    [
+                                      _c("span", [_vm._v(_vm._s(order.name))]),
+                                      _c(
+                                        "span",
+                                        { staticClass: "caption ml-2" },
+                                        [_vm._v("(" + _vm._s(order.code) + ")")]
+                                      ),
+                                      _vm._v(" "),
+                                      _c("v-spacer"),
+                                      _vm._v(" "),
+                                      _c("span", [
+                                        _vm._v(
+                                          "Php " +
+                                            _vm._s(
+                                              Number(
+                                                order.total
+                                              ).toLocaleString()
                                             )
-                                          ],
-                                          1
                                         )
-                                      ],
-                                      1
+                                      ])
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("v-card-text", { staticClass: "body-2" }, [
+                                    _vm._v(
+                                      "\n                                    " +
+                                        _vm._s(order.quantity) +
+                                        " " +
+                                        _vm._s(order.unit) +
+                                        "(s)\n                                "
                                     )
-                                  }
-                                ),
+                                  ])
+                                ],
                                 1
                               )
                             ],
                             1
                           )
-                        ],
+                        }),
                         1
                       )
                     ],
