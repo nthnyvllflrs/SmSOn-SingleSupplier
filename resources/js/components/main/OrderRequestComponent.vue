@@ -19,6 +19,5 @@
             'supplier-order-request' : SupplierOrderRequest, 
             'customer-order-request' : CustomerOrderRequest
         }
-
     }
 </script>

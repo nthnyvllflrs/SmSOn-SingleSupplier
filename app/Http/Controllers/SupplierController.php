@@ -52,12 +52,15 @@ class SupplierController extends Controller
 
     public function show(Request $request, User $supplier) {
         $supplier = [
-            'name' => $supplier->information->name,
-            'description' => $supplier->information->description,
-            'address' => $supplier->information->address,
-            'product_count' => count($supplier->information->products),
-            'logistic_count' => count($supplier->information->logistics),
-            'products' => $supplier->information->products,
+            'profile' => [
+                'code' => $logistic->code, 'username' => $logistic->username,
+                'name' => $logistic->information->name, 'contact_number' => $logistic->information->contact_number,
+                'address' => $logistic->information->address,
+            ],
+
+            'name' => $supplier->information->name, 'description' => $supplier->information->description,
+            'address' => $supplier->information->address, 'product_count' => count($supplier->information->products),
+            'logistic_count' => count($supplier->information->logistics), 'products' => $supplier->information->products,
         ];
         return response(['success' => ['supplier' => $supplier]], 200);
     }

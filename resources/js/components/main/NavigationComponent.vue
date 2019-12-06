@@ -198,10 +198,10 @@
                             <v-text-field :error-messages="formErrors.password_confirmation" v-model="userProfile.password_confirmation" label="Password Confirmation" type="password" />
                         </v-col>
                         
-                        <v-col cols=12 md=6 v-if="userRole == 'Customer' || userRole == 'Supplier'">
+                        <v-col cols=12 md=6 v-if="userRole == 'Customer' || userRole == 'Supplier' || userRole == 'Logistic'">
                             <v-text-field :error-messages="formErrors.name" v-model="userProfile.name" label="Fullname" />
                         </v-col>
-                        <v-col cols=12 md=6 v-if="userRole == 'Customer' || userRole == 'Supplier'">
+                        <v-col cols=12 md=6 v-if="userRole == 'Customer' || userRole == 'Supplier' || userRole == 'Logistic'">
                             <v-text-field :error-messages="formErrors.contact_number" v-model="userProfile.contact_number" label="Phone Number" />
                         </v-col>
                         <v-col cols=12 v-if="userRole == 'Customer' || userRole == 'Supplier'">
@@ -361,7 +361,7 @@ import {mapGetters, mapActions} from 'vuex'
                     },
                     Logistic: {
                         ...modules,
-                        customers: false, suppliers: false, order_request: false, products: false, logistics: false,
+                        customers: false, suppliers: false, order_requests: false, products: false, logistics: false,
                     }
                 }
                 return permissions[this.userRole][module]

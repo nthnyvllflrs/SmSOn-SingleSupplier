@@ -19,6 +19,5 @@
             'supplier-product' : SupplierProduct, 
             'customer-product' : CustomerProduct
         }
-
     }
 </script>

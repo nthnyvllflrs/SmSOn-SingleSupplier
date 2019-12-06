@@ -53,7 +53,13 @@ class LogisticController extends Controller
     }
 
     public function show(Request $request, User $logistic) {
-        return response(['success' => ['user' => $logistic, 'logistic' => $logistic->information]], 200);
+        return response(['success' => [
+            'profile' => [
+                'code' => $logistic->code, 'username' => $logistic->username,
+                'name' => $logistic->information->name, 'contact_number' => $logistic->information->contact_number,
+                'address' => $logistic->information->address,
+            ]
+        ]], 200);
     }
 
     public function update(Request $request, User $logistic) {

@@ -9,7 +9,7 @@ import Supplier from '../components/main/SupplierComponent.vue'
 import OrderRequests from '../components/main/OrderRequestComponent.vue'
 import Products from '../components/main/ProductComponent.vue'
 import Logistics from '../components/supplier/LogisticComponent.vue'
-import Manifests from '../components/supplier/ManifestComponent.vue'
+import Manifests from '../components/main/ManifestComponent.vue'
 
 
 Vue.use(VueRouter)

@@ -17,6 +17,10 @@ class ManifestController extends Controller
             $_manifests = Manifest::all();
         } elseif($request->user()->role == 'Supplier') {
             $_manifests = Manifest::where('supplier_id', $request->user()->information->id)->get();
+        } elseif($request->user()->role == 'Logistic') {
+            $_manifests = Manifest::where('logistic_id', $request->user()->information->id)->get();
+        } else {
+            $_manifests = [];
         }
 
         $manifests = [];
