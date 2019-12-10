@@ -32,6 +32,8 @@ class ManifestController extends Controller
                     'code' => $manifest_detail->orderRequest->code, 
                     'customer' => $manifest_detail->orderRequest->customer->name, 
                     'address' => $manifest_detail->orderRequest->customer->address, 
+                    'latitude' => $manifest_detail->orderRequest->customer->latitude, 
+                    'longitude' => $manifest_detail->orderRequest->customer->longitude, 
                 ];
             }
             $manifests[] = [

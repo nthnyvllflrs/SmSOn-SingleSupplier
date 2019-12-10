@@ -21,17 +21,14 @@
                                         <v-list-item-action>
                                             <v-row no-gutters>
                                                 <v-col cols=6>
-                                                    <v-dialog v-model="dialog" max-width="750">
-                                                        <template v-slot:activator="{ on }">
-                                                            <v-btn fab x-small color="primary" class="mx-1" v-on="on">
-                                                                <v-icon x-small>fa-map-marker-alt</v-icon>
-                                                            </v-btn>
-                                                        </template>
-
+                                                    <v-btn fab x-small color="primary" class="mx-1" @click="openMapDialog(order_request)">
+                                                        <v-icon x-small>fa-map-marker-alt</v-icon>
+                                                    </v-btn>
+                                                    <v-dialog v-model="mapDialog" max-width="750">
                                                         <v-card>
                                                             <v-container>
                                                                 <GmapMap
-                                                                    ref="mapRef"
+                                                                    :ref="'mapRef' + order_request.id"
                                                                     :options="mapOptions"
                                                                     :center="logisticCoordinates"
                                                                     :zoom="15"
@@ -39,7 +36,7 @@
                                                                     style="width: 100%; height: 50vh;">
                                                                     <GmapMarker :position="logisticCoordinates" />
                                                                 </GmapMap>
-                                                                <v-btn block color="success" class="mt-3" @click="getDirection()">Show Directions</v-btn>
+                                                                <v-btn block color="success" class="mt-3" @click="getDirection(order_request)">Show Directions</v-btn>
                                                                 <div class="mt-3 text-center" id="directionPanel" width="100%"></div>
                                                             </v-container>
                                                         </v-card>
@@ -68,7 +65,7 @@
     export default {
         data () {
             return {
-                dialog: false,
+                mapDialog: false,
                 dataTableHeaders: [
                     { text: 'Code', value: 'code', align: 'center'},
                     { text: 'Logistic', value: 'logistic', align: 'center'},
@@ -79,15 +76,23 @@
 
                 formErrors: { supplier_id: null, logistic_id: null, delivery_date: null},
                 
-                logisticCoordinates: { lat: -7.824374, lng: 110.262371},
+                logisticCoordinates: { lat: 6.9214, lng: 122.079},
+                customerCoordinates: { lat: 6.9161, lng: 122.0866},
                 mapOptions: {
                     zoomControl: false, mapTypeControl: false, scaleControl: false,
                     streetViewControl: false, rotateControl: false, fullscreenControl: false, disableDefaultUi: true
                 },
 
-                coords: { lat: -7.824374, lng: 110.262371},
-                destination: { lat: -7.925665, lng: 110.298115}
+                // coords: { lat: -7.824374, lng: 110.262371},
+                // destination: { lat: -7.925665, lng: 110.298115}
+                mapRef: null, directionsService: null, directionsDisplay: null,
             }
+        },
+
+        watch: {
+            mapDialog (val) {
+                val || this.resetMapDirections()
+            },
         },
 
         computed: {
@@ -109,15 +114,23 @@
                 })
             },
 
-            sample() {
-                console.log(this.google)
+            openMapDialog(order_request) {
+                this.mapDialog = true
+                this.customerCoordinates = { lat: Number(order_request.latitude), lng: Number(order_request.longitude)}
             },
 
-            getDirection() {
-                var directionsService = this.google && new google.maps.DirectionsService;
-                var directionsDisplay = this.google && new google.maps.DirectionsRenderer;
-                directionsDisplay.setMap(this.$refs.mapRef[0].$mapObject);
-                directionsDisplay.setPanel(document.getElementById('directionPanel'));
+            resetMapDirections() {
+                this.directionsDisplay.setMap(null);
+                this.directionsDisplay.setPanel(null);
+            },
+
+            getDirection(order_request) {
+                this.mapRef = 'mapRef' + order_request.id
+                
+                this.directionsService = this.google && new google.maps.DirectionsService;
+                this.directionsDisplay = this.google && new google.maps.DirectionsRenderer;
+                this.directionsDisplay.setMap(this.$refs[this.mapRef][0].$mapObject);
+                this.directionsDisplay.setPanel(document.getElementById('directionPanel'));
 
                 //google maps API's direction service
                 function calculateAndDisplayRoute(directionsService, directionsDisplay, start, destination) {
@@ -133,7 +146,7 @@
                     });
                 }
 
-                calculateAndDisplayRoute(directionsService, directionsDisplay, this.coords, this.destination);
+                calculateAndDisplayRoute(this.directionsService, this.directionsDisplay, this.logisticCoordinates, this.customerCoordinates);
             },
         }
     }

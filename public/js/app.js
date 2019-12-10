@@ -3323,14 +3323,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      dialog: false,
+      mapDialog: false,
       dataTableHeaders: [{
         text: 'Code',
         value: 'code',
@@ -3353,8 +3350,12 @@ __webpack_require__.r(__webpack_exports__);
         delivery_date: null
       },
       logisticCoordinates: {
-        lat: -7.824374,
-        lng: 110.262371
+        lat: 6.9214,
+        lng: 122.079
+      },
+      customerCoordinates: {
+        lat: 6.9161,
+        lng: 122.0866
       },
       mapOptions: {
         zoomControl: false,
@@ -3365,15 +3366,17 @@ __webpack_require__.r(__webpack_exports__);
         fullscreenControl: false,
         disableDefaultUi: true
       },
-      coords: {
-        lat: -7.824374,
-        lng: 110.262371
-      },
-      destination: {
-        lat: -7.925665,
-        lng: 110.298115
-      }
+      // coords: { lat: -7.824374, lng: 110.262371},
+      // destination: { lat: -7.925665, lng: 110.298115}
+      mapRef: null,
+      directionsService: null,
+      directionsDisplay: null
     };
+  },
+  watch: {
+    mapDialog: function mapDialog(val) {
+      val || this.resetMapDirections();
+    }
   },
   computed: {
     google: vue2_google_maps__WEBPACK_IMPORTED_MODULE_0__["gmapApi"]
@@ -3391,14 +3394,23 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error.response.data);
       });
     },
-    sample: function sample() {
-      console.log(this.google);
+    openMapDialog: function openMapDialog(order_request) {
+      this.mapDialog = true;
+      this.customerCoordinates = {
+        lat: Number(order_request.latitude),
+        lng: Number(order_request.longitude)
+      };
     },
-    getDirection: function getDirection() {
-      var directionsService = this.google && new google.maps.DirectionsService();
-      var directionsDisplay = this.google && new google.maps.DirectionsRenderer();
-      directionsDisplay.setMap(this.$refs.mapRef[0].$mapObject);
-      directionsDisplay.setPanel(document.getElementById('directionPanel')); //google maps API's direction service
+    resetMapDirections: function resetMapDirections() {
+      this.directionsDisplay.setMap(null);
+      this.directionsDisplay.setPanel(null);
+    },
+    getDirection: function getDirection(order_request) {
+      this.mapRef = 'mapRef' + order_request.id;
+      this.directionsService = this.google && new google.maps.DirectionsService();
+      this.directionsDisplay = this.google && new google.maps.DirectionsRenderer();
+      this.directionsDisplay.setMap(this.$refs[this.mapRef][0].$mapObject);
+      this.directionsDisplay.setPanel(document.getElementById('directionPanel')); //google maps API's direction service
 
       function calculateAndDisplayRoute(directionsService, directionsDisplay, start, destination) {
         directionsService.route({
@@ -3414,7 +3426,7 @@ __webpack_require__.r(__webpack_exports__);
         });
       }
 
-      calculateAndDisplayRoute(directionsService, directionsDisplay, this.coords, this.destination);
+      calculateAndDisplayRoute(this.directionsService, this.directionsDisplay, this.logisticCoordinates, this.customerCoordinates);
     }
   }
 });
@@ -44191,74 +44203,60 @@ var render = function() {
                                                   { attrs: { cols: "6" } },
                                                   [
                                                     _c(
+                                                      "v-btn",
+                                                      {
+                                                        staticClass: "mx-1",
+                                                        attrs: {
+                                                          fab: "",
+                                                          "x-small": "",
+                                                          color: "primary"
+                                                        },
+                                                        on: {
+                                                          click: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.openMapDialog(
+                                                              order_request
+                                                            )
+                                                          }
+                                                        }
+                                                      },
+                                                      [
+                                                        _c(
+                                                          "v-icon",
+                                                          {
+                                                            attrs: {
+                                                              "x-small": ""
+                                                            }
+                                                          },
+                                                          [
+                                                            _vm._v(
+                                                              "fa-map-marker-alt"
+                                                            )
+                                                          ]
+                                                        )
+                                                      ],
+                                                      1
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _c(
                                                       "v-dialog",
                                                       {
                                                         attrs: {
                                                           "max-width": "750"
                                                         },
-                                                        scopedSlots: _vm._u(
-                                                          [
-                                                            {
-                                                              key: "activator",
-                                                              fn: function(
-                                                                ref
-                                                              ) {
-                                                                var on = ref.on
-                                                                return [
-                                                                  _c(
-                                                                    "v-btn",
-                                                                    _vm._g(
-                                                                      {
-                                                                        staticClass:
-                                                                          "mx-1",
-                                                                        attrs: {
-                                                                          fab:
-                                                                            "",
-                                                                          "x-small":
-                                                                            "",
-                                                                          color:
-                                                                            "primary"
-                                                                        }
-                                                                      },
-                                                                      on
-                                                                    ),
-                                                                    [
-                                                                      _c(
-                                                                        "v-icon",
-                                                                        {
-                                                                          attrs: {
-                                                                            "x-small":
-                                                                              ""
-                                                                          }
-                                                                        },
-                                                                        [
-                                                                          _vm._v(
-                                                                            "fa-map-marker-alt"
-                                                                          )
-                                                                        ]
-                                                                      )
-                                                                    ],
-                                                                    1
-                                                                  )
-                                                                ]
-                                                              }
-                                                            }
-                                                          ],
-                                                          null,
-                                                          true
-                                                        ),
                                                         model: {
-                                                          value: _vm.dialog,
+                                                          value: _vm.mapDialog,
                                                           callback: function(
                                                             $$v
                                                           ) {
-                                                            _vm.dialog = $$v
+                                                            _vm.mapDialog = $$v
                                                           },
-                                                          expression: "dialog"
+                                                          expression:
+                                                            "mapDialog"
                                                         }
                                                       },
                                                       [
-                                                        _vm._v(" "),
                                                         _c(
                                                           "v-card",
                                                           [
@@ -44269,7 +44267,8 @@ var render = function() {
                                                                   "GmapMap",
                                                                   {
                                                                     ref:
-                                                                      "mapRef",
+                                                                      "mapRef" +
+                                                                      order_request.id,
                                                                     refInFor: true,
                                                                     staticStyle: {
                                                                       width:
@@ -44315,7 +44314,9 @@ var render = function() {
                                                                       click: function(
                                                                         $event
                                                                       ) {
-                                                                        return _vm.getDirection()
+                                                                        return _vm.getDirection(
+                                                                          order_request
+                                                                        )
                                                                       }
                                                                     }
                                                                   },

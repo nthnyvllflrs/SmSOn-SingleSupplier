@@ -19,6 +19,8 @@ class CreateCustomersTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('address')->default('Zamboanga City');
+            $table->string('latitude')->default(6.9214);
+            $table->string('longitude')->default(122.0790);
             $table->string('contact_number');
             $table->timestamps();
 
