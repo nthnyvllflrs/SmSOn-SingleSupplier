@@ -18,7 +18,7 @@
                                             <v-list-item-title>{{ order_request.code }}</v-list-item-title>
                                             <v-list-item-subtitle>{{ order_request.customer }}, {{ order_request.address }}</v-list-item-subtitle>
                                         </v-list-item-content>
-                                        <v-list-item-action>
+                                        <v-list-item-action v-if="item.delivery_date == new Date().toISOString().substr(0, 10)">
                                             <v-row no-gutters>
                                                 <v-col cols=6>
                                                     <v-btn fab x-small color="primary" class="mx-1" @click="openMapDialog(order_request)">
@@ -43,7 +43,7 @@
                                                     </v-dialog>
                                                 </v-col>
                                                 <v-col cols=6>
-                                                    <v-btn fab x-small color="success" class="mx-1">
+                                                    <v-btn fab x-small color="success" class="mx-1" @click="updatedRequestStatus(order_request)" :disabled="order_request.status == 'Delivered'">
                                                         <v-icon x-small>fa-check</v-icon>
                                                     </v-btn>
                                                 </v-col>
@@ -83,8 +83,6 @@
                     streetViewControl: false, rotateControl: false, fullscreenControl: false, disableDefaultUi: true
                 },
 
-                // coords: { lat: -7.824374, lng: 110.262371},
-                // destination: { lat: -7.925665, lng: 110.298115}
                 mapRef: null, directionsService: null, directionsDisplay: null,
             }
         },
@@ -114,19 +112,33 @@
                 })
             },
 
+            updatedRequestStatus(order_request) {
+                axios.put('/api/order-request/' + order_request.id + '/status', {
+                    status: 'Delivered'
+                })
+                .then( response => {
+                    order_request.status = 'Delivered'
+                })
+                .catch(() => {})
+                .finally(() => {
+                    console.log(order_request.status)
+                })
+            },
+
             openMapDialog(order_request) {
                 this.mapDialog = true
                 this.customerCoordinates = { lat: Number(order_request.latitude), lng: Number(order_request.longitude)}
             },
 
             resetMapDirections() {
+                this.logisticCoordinates = { lat: 6.9214, lng: 122.079}
                 this.directionsDisplay.setMap(null);
                 this.directionsDisplay.setPanel(null);
             },
 
             getDirection(order_request) {
                 this.mapRef = 'mapRef' + order_request.id
-                
+
                 this.directionsService = this.google && new google.maps.DirectionsService;
                 this.directionsDisplay = this.google && new google.maps.DirectionsRenderer;
                 this.directionsDisplay.setMap(this.$refs[this.mapRef][0].$mapObject);
@@ -139,7 +151,7 @@
                     }, 
                     function(response, status) {
                         if (status === 'OK') {
-                            directionsDisplay.setDirections(response);
+                            directionsDisplay.setDirections(response)
                         } else {
                             window.alert('Directions request failed due to ' + status);
                         }

@@ -3366,8 +3366,6 @@ __webpack_require__.r(__webpack_exports__);
         fullscreenControl: false,
         disableDefaultUi: true
       },
-      // coords: { lat: -7.824374, lng: 110.262371},
-      // destination: { lat: -7.925665, lng: 110.298115}
       mapRef: null,
       directionsService: null,
       directionsDisplay: null
@@ -3394,6 +3392,15 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error.response.data);
       });
     },
+    updatedRequestStatus: function updatedRequestStatus(order_request) {
+      axios.put('/api/order-request/' + order_request.id + '/status', {
+        status: 'Delivered'
+      }).then(function (response) {
+        order_request.status = 'Delivered';
+      })["catch"](function () {})["finally"](function () {
+        console.log(order_request.status);
+      });
+    },
     openMapDialog: function openMapDialog(order_request) {
       this.mapDialog = true;
       this.customerCoordinates = {
@@ -3402,6 +3409,10 @@ __webpack_require__.r(__webpack_exports__);
       };
     },
     resetMapDirections: function resetMapDirections() {
+      this.logisticCoordinates = {
+        lat: 6.9214,
+        lng: 122.079
+      };
       this.directionsDisplay.setMap(null);
       this.directionsDisplay.setPanel(null);
     },
@@ -44191,152 +44202,161 @@ var render = function() {
                                           1
                                         ),
                                         _vm._v(" "),
-                                        _c(
-                                          "v-list-item-action",
-                                          [
-                                            _c(
-                                              "v-row",
-                                              { attrs: { "no-gutters": "" } },
+                                        item.delivery_date ==
+                                        new Date().toISOString().substr(0, 10)
+                                          ? _c(
+                                              "v-list-item-action",
                                               [
                                                 _c(
-                                                  "v-col",
-                                                  { attrs: { cols: "6" } },
+                                                  "v-row",
+                                                  {
+                                                    attrs: { "no-gutters": "" }
+                                                  },
                                                   [
                                                     _c(
-                                                      "v-btn",
-                                                      {
-                                                        staticClass: "mx-1",
-                                                        attrs: {
-                                                          fab: "",
-                                                          "x-small": "",
-                                                          color: "primary"
-                                                        },
-                                                        on: {
-                                                          click: function(
-                                                            $event
-                                                          ) {
-                                                            return _vm.openMapDialog(
-                                                              order_request
-                                                            )
-                                                          }
-                                                        }
-                                                      },
+                                                      "v-col",
+                                                      { attrs: { cols: "6" } },
                                                       [
                                                         _c(
-                                                          "v-icon",
+                                                          "v-btn",
                                                           {
+                                                            staticClass: "mx-1",
                                                             attrs: {
-                                                              "x-small": ""
+                                                              fab: "",
+                                                              "x-small": "",
+                                                              color: "primary"
+                                                            },
+                                                            on: {
+                                                              click: function(
+                                                                $event
+                                                              ) {
+                                                                return _vm.openMapDialog(
+                                                                  order_request
+                                                                )
+                                                              }
                                                             }
                                                           },
                                                           [
-                                                            _vm._v(
-                                                              "fa-map-marker-alt"
+                                                            _c(
+                                                              "v-icon",
+                                                              {
+                                                                attrs: {
+                                                                  "x-small": ""
+                                                                }
+                                                              },
+                                                              [
+                                                                _vm._v(
+                                                                  "fa-map-marker-alt"
+                                                                )
+                                                              ]
                                                             )
-                                                          ]
-                                                        )
-                                                      ],
-                                                      1
-                                                    ),
-                                                    _vm._v(" "),
-                                                    _c(
-                                                      "v-dialog",
-                                                      {
-                                                        attrs: {
-                                                          "max-width": "750"
-                                                        },
-                                                        model: {
-                                                          value: _vm.mapDialog,
-                                                          callback: function(
-                                                            $$v
-                                                          ) {
-                                                            _vm.mapDialog = $$v
-                                                          },
-                                                          expression:
-                                                            "mapDialog"
-                                                        }
-                                                      },
-                                                      [
+                                                          ],
+                                                          1
+                                                        ),
+                                                        _vm._v(" "),
                                                         _c(
-                                                          "v-card",
+                                                          "v-dialog",
+                                                          {
+                                                            attrs: {
+                                                              "max-width": "750"
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.mapDialog,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.mapDialog = $$v
+                                                              },
+                                                              expression:
+                                                                "mapDialog"
+                                                            }
+                                                          },
                                                           [
                                                             _c(
-                                                              "v-container",
+                                                              "v-card",
                                                               [
                                                                 _c(
-                                                                  "GmapMap",
-                                                                  {
-                                                                    ref:
-                                                                      "mapRef" +
-                                                                      order_request.id,
-                                                                    refInFor: true,
-                                                                    staticStyle: {
-                                                                      width:
-                                                                        "100%",
-                                                                      height:
-                                                                        "50vh"
-                                                                    },
-                                                                    attrs: {
-                                                                      options:
-                                                                        _vm.mapOptions,
-                                                                      center:
-                                                                        _vm.logisticCoordinates,
-                                                                      zoom: 15,
-                                                                      "map-type-id":
-                                                                        "terrain"
-                                                                    }
-                                                                  },
+                                                                  "v-container",
                                                                   [
                                                                     _c(
-                                                                      "GmapMarker",
+                                                                      "GmapMap",
                                                                       {
+                                                                        ref:
+                                                                          "mapRef" +
+                                                                          order_request.id,
+                                                                        refInFor: true,
+                                                                        staticStyle: {
+                                                                          width:
+                                                                            "100%",
+                                                                          height:
+                                                                            "50vh"
+                                                                        },
                                                                         attrs: {
-                                                                          position:
-                                                                            _vm.logisticCoordinates
+                                                                          options:
+                                                                            _vm.mapOptions,
+                                                                          center:
+                                                                            _vm.logisticCoordinates,
+                                                                          zoom: 15,
+                                                                          "map-type-id":
+                                                                            "terrain"
                                                                         }
+                                                                      },
+                                                                      [
+                                                                        _c(
+                                                                          "GmapMarker",
+                                                                          {
+                                                                            attrs: {
+                                                                              position:
+                                                                                _vm.logisticCoordinates
+                                                                            }
+                                                                          }
+                                                                        )
+                                                                      ],
+                                                                      1
+                                                                    ),
+                                                                    _vm._v(" "),
+                                                                    _c(
+                                                                      "v-btn",
+                                                                      {
+                                                                        staticClass:
+                                                                          "mt-3",
+                                                                        attrs: {
+                                                                          block:
+                                                                            "",
+                                                                          color:
+                                                                            "success"
+                                                                        },
+                                                                        on: {
+                                                                          click: function(
+                                                                            $event
+                                                                          ) {
+                                                                            return _vm.getDirection(
+                                                                              order_request
+                                                                            )
+                                                                          }
+                                                                        }
+                                                                      },
+                                                                      [
+                                                                        _vm._v(
+                                                                          "Show Directions"
+                                                                        )
+                                                                      ]
+                                                                    ),
+                                                                    _vm._v(" "),
+                                                                    _c("div", {
+                                                                      staticClass:
+                                                                        "mt-3 text-center",
+                                                                      attrs: {
+                                                                        id:
+                                                                          "directionPanel",
+                                                                        width:
+                                                                          "100%"
                                                                       }
-                                                                    )
+                                                                    })
                                                                   ],
                                                                   1
-                                                                ),
-                                                                _vm._v(" "),
-                                                                _c(
-                                                                  "v-btn",
-                                                                  {
-                                                                    staticClass:
-                                                                      "mt-3",
-                                                                    attrs: {
-                                                                      block: "",
-                                                                      color:
-                                                                        "success"
-                                                                    },
-                                                                    on: {
-                                                                      click: function(
-                                                                        $event
-                                                                      ) {
-                                                                        return _vm.getDirection(
-                                                                          order_request
-                                                                        )
-                                                                      }
-                                                                    }
-                                                                  },
-                                                                  [
-                                                                    _vm._v(
-                                                                      "Show Directions"
-                                                                    )
-                                                                  ]
-                                                                ),
-                                                                _vm._v(" "),
-                                                                _c("div", {
-                                                                  staticClass:
-                                                                    "mt-3 text-center",
-                                                                  attrs: {
-                                                                    id:
-                                                                      "directionPanel",
-                                                                    width:
-                                                                      "100%"
-                                                                  }
-                                                                })
+                                                                )
                                                               ],
                                                               1
                                                             )
@@ -44345,34 +44365,50 @@ var render = function() {
                                                         )
                                                       ],
                                                       1
-                                                    )
-                                                  ],
-                                                  1
-                                                ),
-                                                _vm._v(" "),
-                                                _c(
-                                                  "v-col",
-                                                  { attrs: { cols: "6" } },
-                                                  [
+                                                    ),
+                                                    _vm._v(" "),
                                                     _c(
-                                                      "v-btn",
-                                                      {
-                                                        staticClass: "mx-1",
-                                                        attrs: {
-                                                          fab: "",
-                                                          "x-small": "",
-                                                          color: "success"
-                                                        }
-                                                      },
+                                                      "v-col",
+                                                      { attrs: { cols: "6" } },
                                                       [
                                                         _c(
-                                                          "v-icon",
+                                                          "v-btn",
                                                           {
+                                                            staticClass: "mx-1",
                                                             attrs: {
-                                                              "x-small": ""
+                                                              fab: "",
+                                                              "x-small": "",
+                                                              color: "success",
+                                                              disabled:
+                                                                order_request.status ==
+                                                                "Delivered"
+                                                            },
+                                                            on: {
+                                                              click: function(
+                                                                $event
+                                                              ) {
+                                                                return _vm.updatedRequestStatus(
+                                                                  order_request
+                                                                )
+                                                              }
                                                             }
                                                           },
-                                                          [_vm._v("fa-check")]
+                                                          [
+                                                            _c(
+                                                              "v-icon",
+                                                              {
+                                                                attrs: {
+                                                                  "x-small": ""
+                                                                }
+                                                              },
+                                                              [
+                                                                _vm._v(
+                                                                  "fa-check"
+                                                                )
+                                                              ]
+                                                            )
+                                                          ],
+                                                          1
                                                         )
                                                       ],
                                                       1
@@ -44383,9 +44419,7 @@ var render = function() {
                                               ],
                                               1
                                             )
-                                          ],
-                                          1
-                                        )
+                                          : _vm._e()
                                       ],
                                       1
                                     )
