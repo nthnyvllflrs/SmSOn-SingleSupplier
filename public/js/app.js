@@ -3772,7 +3772,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var _this = this;
 
       axios.get('/api/' + this.userRole.toLowerCase() + '/' + this.userId).then(function (response) {
-        _this.userProfile = response.data.success.profile;
+        _this.userProfile = response.data.success.supplier.profile;
       })["catch"](function (error) {
         console.log(error.response.data);
       });

@@ -269,7 +269,7 @@ import {mapGetters, mapActions} from 'vuex'
             retrieveUserProfile() {
                 axios.get('/api/' + this.userRole.toLowerCase() + '/' +  this.userId)
                 .then( response => {
-                    this.userProfile = response.data.success.profile
+                    this.userProfile = response.data.success.supplier.profile
                 })
                 .catch( error => {
                     console.log(error.response.data)

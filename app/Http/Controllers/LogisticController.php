@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 
 use App\User;
@@ -49,6 +50,8 @@ class LogisticController extends Controller
         $user = User::create(array_merge($request->toArray(), ['role' => 'Logistic']));
         $logistic = logistic::create(array_merge($request->toArray(), ['user_id' => $user->id]));
 
+        Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
+
         return response(['success' => ['user' => $user, 'logistic' => $logistic]], 200);
     }
 
@@ -85,6 +88,7 @@ class LogisticController extends Controller
     }
 
     public function destroy(Request $request, User $logistic) {
+        Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($logistic));
         $logistic->delete();
         return response(['success' => ['message' => 'Logistic Deleted']], 201);
     }

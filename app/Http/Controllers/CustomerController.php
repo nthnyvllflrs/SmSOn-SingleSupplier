@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 
 use App\User;
@@ -43,6 +44,8 @@ class CustomerController extends Controller {
         $user = User::create(array_merge($request->toArray(), ['role' => 'Customer']));
         $customer = Customer::create(array_merge($request->toArray(), ['user_id' => $user->id]));
 
+        Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
+
         return response(['success' => ['user' => $user, 'customer' => $customer]], 200);
     }
 
@@ -80,6 +83,7 @@ class CustomerController extends Controller {
     }
 
     public function destroy(Request $request, User $customer) {
+        Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($customer));
         $customer->delete();
         return response(['success' => ['message' => 'Customer Deleted']], 201);
     }

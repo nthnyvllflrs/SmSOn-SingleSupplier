@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 
 use App\User;
@@ -47,15 +48,17 @@ class SupplierController extends Controller
         $user = User::create(array_merge($request->toArray(), ['role' => 'Supplier']));
         $supplier = supplier::create(array_merge($request->toArray(), ['user_id' => $user->id]));
 
+        Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
+
         return response(['success' => ['user' => $user, 'supplier' => $supplier]], 200);
     }
 
     public function show(Request $request, User $supplier) {
         $supplier = [
             'profile' => [
-                'code' => $logistic->code, 'username' => $logistic->username,
-                'name' => $logistic->information->name, 'contact_number' => $logistic->information->contact_number,
-                'address' => $logistic->information->address,
+                'code' => $supplier->code, 'username' => $supplier->username,
+                'name' => $supplier->information->name, 'contact_number' => $supplier->information->contact_number,
+                'address' => $supplier->information->address, 'description' => $supplier->information->description,
             ],
 
             'name' => $supplier->information->name, 'description' => $supplier->information->description,
@@ -90,6 +93,7 @@ class SupplierController extends Controller
     }
 
     public function destroy(Request $request, User $supplier) {
+        Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($supplier));
         $supplier->delete();
         return response(['success' => ['message' => 'Supplier Deleted']], 201);
     }
