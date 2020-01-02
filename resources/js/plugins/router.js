@@ -15,7 +15,7 @@ const PERMISSIONS = {
     Supplier: {
         ...MODULES,
         customers: false, suppliers: false,
-        default: 'order-requests'
+        default: 'order_requests'
     },
     Logistic: {
         ...MODULES,
@@ -68,7 +68,7 @@ const routes = [
         children: [
             { path: '/customers', name: 'customers', components: { content: Customer } },
             { path: '/suppliers', name: 'suppliers', components: { content: Supplier } },
-            { path: '/order-requests', name: 'order-requests', components: {content: OrderRequests} },
+            { path: '/order-requests', name: 'order_requests', components: {content: OrderRequests} },
             { path: '/products', name: 'products', components: {content: Products} },
             { path: '/logistics', name: 'logistics', components: { content: Logistics } },
             { path: '/manifests', name: 'manifests', components: { content: Manifests } },
@@ -86,10 +86,10 @@ export const router = new VueRouter(opts)
 router.beforeEach((to, from, next) => {
     if (sessionStorage.getItem('user-token')) {
         var userRole = sessionStorage.getItem('user-role')
-        if (PERMISSIONS[userRole][to.name]) {
-            next()
-        } else {
+        if (!PERMISSIONS[userRole][to.name]) {
             next({name: PERMISSIONS[userRole]['default']})
+        } else {
+            next()
         }
     } else {
         next()

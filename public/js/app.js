@@ -3772,7 +3772,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var _this = this;
 
       axios.get('/api/' + this.userRole.toLowerCase() + '/' + this.userId).then(function (response) {
-        _this.userProfile = response.data.success.profile;
+        _this.userProfile = response.data.success.supplier.profile;
       })["catch"](function (error) {
         console.log(error.response.data);
       });
@@ -104906,7 +104906,7 @@ var PERMISSIONS = {
   Supplier: _objectSpread({}, MODULES, {
     customers: false,
     suppliers: false,
-    "default": 'order-requests'
+    "default": 'order_requests'
   }),
   Logistic: _objectSpread({}, MODULES, {
     customers: false,
@@ -104968,7 +104968,7 @@ var routes = [{
     }
   }, {
     path: '/order-requests',
-    name: 'order-requests',
+    name: 'order_requests',
     components: {
       content: _components_main_OrderRequestComponent_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
     }
@@ -105001,12 +105001,12 @@ router.beforeEach(function (to, from, next) {
   if (sessionStorage.getItem('user-token')) {
     var userRole = sessionStorage.getItem('user-role');
 
-    if (PERMISSIONS[userRole][to.name]) {
-      next();
-    } else {
+    if (!PERMISSIONS[userRole][to.name]) {
       next({
         name: PERMISSIONS[userRole]['default']
       });
+    } else {
+      next();
     }
   } else {
     next();

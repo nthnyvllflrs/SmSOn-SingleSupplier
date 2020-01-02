@@ -68,12 +68,15 @@ class OrderRequestController extends Controller
 
         $order_requests_code = [];
         foreach($filtered_order_requests as $supplier => $order_requests) {
-            $new_order_request = \App\OrderRequest::create(['customer_id' => $request->user()->information->id, 'supplier_id' => $supplier]);
+            $new_order_request = OrderRequest::create(['customer_id' => $request->user()->information->id, 'supplier_id' => $supplier]);
 
             foreach($order_requests as $order_request) {
-                \App\OrderRequestDetail::create(array_merge((array) $order_request, ['order_request_id' => $new_order_request->id]));
+                OrderRequestDetail::create(array_merge((array) $order_request, ['order_request_id' => $new_order_request->id]));
             }
             $order_requests_code[] = $new_order_request->code;
+
+            $supplier = \App\Supplier::find($supplier);
+            $supplier->user->notify(new \App\Notifications\OrderRequestCreationNotification($new_order_request));
         }
 
         return response(['success' => ['order_request_codes' => $order_requests_code]], 200);
@@ -111,6 +114,7 @@ class OrderRequestController extends Controller
 
     public function update_status(Request $request, OrderRequest $order_request) {
         $order_request->update($request->toArray());
+        $order_request->customer->user->notify(new \App\Notifications\OrderRequestStatusNotification($order_request));
         return response(['success' => ['message' => $order_request->code." Status Updated"]], 200);
     }
 
