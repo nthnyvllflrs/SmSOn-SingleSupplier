@@ -269,7 +269,7 @@ import {mapGetters, mapActions} from 'vuex'
             retrieveUserProfile() {
                 axios.get('/api/' + this.userRole.toLowerCase() + '/' +  this.userId)
                 .then( response => {
-                    this.userProfile = response.data.success.supplier.profile
+                    this.userProfile = response.data.success.profile
                 })
                 .catch( error => {
                     console.log(error.response.data)
@@ -320,7 +320,7 @@ import {mapGetters, mapActions} from 'vuex'
                         this.orderRequestCodeDialog = true
                     })
                     .catch( error => {
-                        console.error(error.response.data)
+                        console.log(error.response.data)
                     })
                     .finally(() => {
                         this.loading = false
