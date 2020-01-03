@@ -9,6 +9,10 @@ import {router} from './plugins/router.js'
 
 import './plugins/google-maps.js'
 
+Vue.filter('substr', function (value, start, end) {
+    return value.substring(start, end)
+})
+
 const app = new Vue({
     vuetify, router, store,
     render: h => h(App),

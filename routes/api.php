@@ -12,6 +12,9 @@ Route::group(['middleware' => ['json.response']], function () {
         Route::get('/logout', 'AuthController@logout');
         
         Route::get('/user', function (Request $request) { return $request->user();}); // Return current logged in user
+        Route::get('/notifications', function (Request $request) {
+            return $request->user()->notifications;
+        });
 
         Route::group(['prefix' => '/administrator'], function($request) {
             Route::get('/{administrator}', 'AuthController@show');

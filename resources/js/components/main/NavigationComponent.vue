@@ -104,7 +104,7 @@
             <v-btn icon @click="profileDialog = !profileDialog">
                 <v-icon>fa-user-circle</v-icon>
             </v-btn>
-            <v-btn icon>
+            <v-btn icon @click="openNotificationDialog()">
                 <v-icon>fa-bell</v-icon>
             </v-btn>
             <v-btn icon @click.stop="cartDrawer = !cartDrawer" v-if="userRole == 'Customer'">
@@ -221,6 +221,60 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog v-model="notificationDialog" max-width="600">
+            <v-card>
+                <v-overlay :value="loading">
+                    <v-progress-circular :size="100" :width="5" color="light-green accent-4" indeterminate></v-progress-circular>
+                </v-overlay>
+                <v-card-title class="headline">Notifications</v-card-title>
+                <v-card-text>
+                    <v-list-item two-line v-for="notification in userNotifications" :key="notification.id">
+                        <v-list-item-content>
+                            <v-list-item-title>
+                                <template v-if="userRole == 'Administrator'">
+                                    {{ notification.data.code }}
+                                </template>
+                                <template v-if="userRole != 'Administrator'">
+                                    {{ notification.data.status }}
+                                </template>
+                            </v-list-item-title>
+                            <v-list-item-subtitle>
+                                <template v-if="userRole == 'Administrator'">
+                                    U: {{ notification.data.username }} - N: {{ notification.data.name }} - R: {{ notification.data.role }}
+                                </template>
+                                <template v-if="userRole != 'Administrator'">
+                                    Code: {{ notification.data.code }}
+                                </template>
+                            </v-list-item-subtitle>
+                            <v-list-item-subtitle>@ {{ notification.created_at }}</v-list-item-subtitle>
+                        </v-list-item-content>
+                        <v-list-item-action>
+
+                            <!-- Administrator Notifications -->
+                            <v-chip small v-if="notification.type == 'App\\Notifications\\UserCreationNotification'" color="success">
+                                {{ notification.type|substr(18) }}
+                            </v-chip>
+
+                            <v-chip small v-if="notification.type == 'App\\Notifications\\UserDeletionNotification'" color="error">
+                                {{ notification.type|substr(18) }}
+                            </v-chip>
+
+                            <!-- Customer Notifications -->
+                            <v-chip small v-if="notification.type == 'App\\Notifications\\OrderRequestStatusNotification'" color="info">
+                                {{ notification.type|substr(18) }}
+                            </v-chip>
+                            
+                            <!-- Supplier Notifications -->
+                            <v-chip small v-if="notification.type == 'App\\Notifications\\OrderRequestCreationNotification'" color="success">
+                                {{ notification.type|substr(18) }}
+                            </v-chip>
+
+                        </v-list-item-action>
+                    </v-list-item>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
         <v-content>
             <v-container>
                 <router-view name="content" />
@@ -238,8 +292,8 @@ import {mapGetters, mapActions} from 'vuex'
                 userId: sessionStorage.getItem('user-id'),
                 userInformationId: sessionStorage.getItem('user-information-id'),
                 sideNavigationBar: true, cartDrawer: false, profileDialog: false,
-                confirmationDialog: false, orderRequestCodeDialog: false, loading: false,
-                orderRequestCodes: [],
+                confirmationDialog: false, orderRequestCodeDialog: false, notificationDialog: false, loading: false,
+                orderRequestCodes: [], userNotifications: [],
 
                 userProfile: {
                     code: null, username: null, password: null, password_confirmation: null,
@@ -265,6 +319,20 @@ import {mapGetters, mapActions} from 'vuex'
 
         methods: {
             ...mapActions(['removeCartProduct', 'resetCart']),
+
+            retreiveUserNotification() {
+                this.loading = true
+                axios.get('/api/notifications')
+                .then( response => {
+                    this.userNotifications = response.data
+                })
+                .catch( error => {
+                    toastr.error("An Error Occurred")
+                })
+                .finally(() => {
+                    this.loading = false
+                })
+            },
 
             retrieveUserProfile() {
                 axios.get('/api/' + this.userRole.toLowerCase() + '/' +  this.userId)
@@ -298,6 +366,11 @@ import {mapGetters, mapActions} from 'vuex'
                     }
                 })
                 .finally(() => { this.loading = false})
+            },
+
+            openNotificationDialog() {
+                this.notificationDialog = true
+                this.retreiveUserNotification()
             },
 
             closeDialog() {

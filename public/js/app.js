@@ -3727,6 +3727,60 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -3739,8 +3793,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       profileDialog: false,
       confirmationDialog: false,
       orderRequestCodeDialog: false,
+      notificationDialog: false,
       loading: false,
       orderRequestCodes: [],
+      userNotifications: [],
       userProfile: {
         code: null,
         username: null,
@@ -3768,38 +3824,54 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.retrieveUserProfile();
   },
   methods: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapActions"])(['removeCartProduct', 'resetCart']), {
-    retrieveUserProfile: function retrieveUserProfile() {
+    retreiveUserNotification: function retreiveUserNotification() {
       var _this = this;
 
+      this.loading = true;
+      axios.get('/api/notifications').then(function (response) {
+        _this.userNotifications = response.data;
+      })["catch"](function (error) {
+        toastr.error("An Error Occurred");
+      })["finally"](function () {
+        _this.loading = false;
+      });
+    },
+    retrieveUserProfile: function retrieveUserProfile() {
+      var _this2 = this;
+
       axios.get('/api/' + this.userRole.toLowerCase() + '/' + this.userId).then(function (response) {
-        _this.userProfile = response.data.success.supplier.profile;
+        _this2.userProfile = response.data.success.supplier.profile;
       })["catch"](function (error) {
         console.log(error.response.data);
       });
     },
     updateUserProfile: function updateUserProfile() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.loading = true;
       axios.put('/api/' + this.userRole.toLowerCase() + '/' + this.userId, _objectSpread({}, this.userProfile)).then(function (response) {
-        _this2.profileDialog = false;
+        _this3.profileDialog = false;
 
-        _this2.retrieveUserProfile();
+        _this3.retrieveUserProfile();
 
         toastr.success("Profile Updated");
       })["catch"](function (error) {
         if (error.response.status == 422) {
           if (_typeof(error.response.data) == 'object') {
-            _this2.formErrors = error.response.data.errors;
+            _this3.formErrors = error.response.data.errors;
           } else {
-            _this2.errorMessage = error.response.data;
+            _this3.errorMessage = error.response.data;
           }
         } else {
           toastr.error("An Error Occurred");
         }
       })["finally"](function () {
-        _this2.loading = false;
+        _this3.loading = false;
       });
+    },
+    openNotificationDialog: function openNotificationDialog() {
+      this.notificationDialog = true;
+      this.retreiveUserNotification();
     },
     closeDialog: function closeDialog() {
       this.orderRequestCodeDialog = false;
@@ -3808,26 +3880,26 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.retrieveUserProfile();
     },
     submitOrderRequest: function submitOrderRequest() {
-      var _this3 = this;
+      var _this4 = this;
 
       if (this.cartProducts.length > 0) {
         this.loading = true;
         axios.post('/api/order-request', _objectSpread({}, this.cartProducts)).then(function (response) {
-          _this3.orderRequestCodes = response.data.success.order_request_codes;
+          _this4.orderRequestCodes = response.data.success.order_request_codes;
 
-          _this3.resetCart();
+          _this4.resetCart();
 
-          _this3.cartDrawer = false;
-          _this3.orderRequestCodeDialog = true;
+          _this4.cartDrawer = false;
+          _this4.orderRequestCodeDialog = true;
         })["catch"](function (error) {
           console.log(error.response.data);
         })["finally"](function () {
-          _this3.loading = false;
+          _this4.loading = false;
         });
       }
     },
     logout: function logout() {
-      var _this4 = this;
+      var _this5 = this;
 
       axios.get('api/logout').then(function () {})["catch"](function () {})["finally"](function () {
         sessionStorage.removeItem('user-token');
@@ -3835,7 +3907,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         sessionStorage.removeItem('user-information-id');
         sessionStorage.clear();
 
-        _this4.$router.push('/login');
+        _this5.$router.push('/login');
 
         toastr.success("Logout Successfull");
       });
@@ -45062,7 +45134,14 @@ var render = function() {
           _vm._v(" "),
           _c(
             "v-btn",
-            { attrs: { icon: "" } },
+            {
+              attrs: { icon: "" },
+              on: {
+                click: function($event) {
+                  return _vm.openNotificationDialog()
+                }
+              }
+            },
             [_c("v-icon", [_vm._v("fa-bell")])],
             1
           ),
@@ -45593,6 +45672,201 @@ var render = function() {
                     [_vm._v("Save")]
                   )
                 ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { "max-width": "600" },
+          model: {
+            value: _vm.notificationDialog,
+            callback: function($$v) {
+              _vm.notificationDialog = $$v
+            },
+            expression: "notificationDialog"
+          }
+        },
+        [
+          _c(
+            "v-card",
+            [
+              _c(
+                "v-overlay",
+                { attrs: { value: _vm.loading } },
+                [
+                  _c("v-progress-circular", {
+                    attrs: {
+                      size: 100,
+                      width: 5,
+                      color: "light-green accent-4",
+                      indeterminate: ""
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("v-card-title", { staticClass: "headline" }, [
+                _vm._v("Notifications")
+              ]),
+              _vm._v(" "),
+              _c(
+                "v-card-text",
+                _vm._l(_vm.userNotifications, function(notification) {
+                  return _c(
+                    "v-list-item",
+                    { key: notification.id, attrs: { "two-line": "" } },
+                    [
+                      _c(
+                        "v-list-item-content",
+                        [
+                          _c(
+                            "v-list-item-title",
+                            [
+                              _vm.userRole == "Administrator"
+                                ? [
+                                    _vm._v(
+                                      "\n                                " +
+                                        _vm._s(notification.data.code) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _vm.userRole != "Administrator"
+                                ? [
+                                    _vm._v(
+                                      "\n                                " +
+                                        _vm._s(notification.data.status) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                : _vm._e()
+                            ],
+                            2
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "v-list-item-subtitle",
+                            [
+                              _vm.userRole == "Administrator"
+                                ? [
+                                    _vm._v(
+                                      "\n                                U: " +
+                                        _vm._s(notification.data.username) +
+                                        " - N: " +
+                                        _vm._s(notification.data.name) +
+                                        " - R: " +
+                                        _vm._s(notification.data.role) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _vm.userRole != "Administrator"
+                                ? [
+                                    _vm._v(
+                                      "\n                                Code: " +
+                                        _vm._s(notification.data.code) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                : _vm._e()
+                            ],
+                            2
+                          ),
+                          _vm._v(" "),
+                          _c("v-list-item-subtitle", [
+                            _vm._v("@ " + _vm._s(notification.created_at))
+                          ])
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-list-item-action",
+                        [
+                          notification.type ==
+                          "App\\Notifications\\UserCreationNotification"
+                            ? _c(
+                                "v-chip",
+                                { attrs: { small: "", color: "success" } },
+                                [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(
+                                        _vm._f("substr")(notification.type, 18)
+                                      ) +
+                                      "\n                        "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          notification.type ==
+                          "App\\Notifications\\UserDeletionNotification"
+                            ? _c(
+                                "v-chip",
+                                { attrs: { small: "", color: "error" } },
+                                [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(
+                                        _vm._f("substr")(notification.type, 18)
+                                      ) +
+                                      "\n                        "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          notification.type ==
+                          "App\\Notifications\\OrderRequestStatusNotification"
+                            ? _c(
+                                "v-chip",
+                                { attrs: { small: "", color: "info" } },
+                                [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(
+                                        _vm._f("substr")(notification.type, 18)
+                                      ) +
+                                      "\n                        "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          notification.type ==
+                          "App\\Notifications\\OrderRequestCreationNotification"
+                            ? _c(
+                                "v-chip",
+                                { attrs: { small: "", color: "success" } },
+                                [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(
+                                        _vm._f("substr")(notification.type, 18)
+                                      ) +
+                                      "\n                        "
+                                  )
+                                ]
+                              )
+                            : _vm._e()
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                }),
                 1
               )
             ],
@@ -103621,6 +103895,9 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 
 
 
+Vue.filter('substr', function (value, start, end) {
+  return value.substring(start, end);
+});
 var app = new Vue({
   vuetify: _plugins_vuetify_js__WEBPACK_IMPORTED_MODULE_2__["default"],
   router: _plugins_router_js__WEBPACK_IMPORTED_MODULE_3__["router"],

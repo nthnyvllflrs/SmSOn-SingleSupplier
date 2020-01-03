@@ -53,6 +53,8 @@ class AuthController extends Controller
         return response($response, 200);
     }
 
+    // Administrator Special Functions
+
     public function show(Request $request, User $administrator) {
         return response(['success' => [
             'profile' => [
