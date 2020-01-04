@@ -337,7 +337,11 @@ import {mapGetters, mapActions} from 'vuex'
             retrieveUserProfile() {
                 axios.get('/api/' + this.userRole.toLowerCase() + '/' +  this.userId)
                 .then( response => {
-                    this.userProfile = response.data.success.supplier.profile
+                    if(this.userRole == 'Supplier') {
+                        this.userProfile = response.data.success.supplier.profile
+                    } else {
+                        this.userProfile = response.data.success.profile
+                    }
                 })
                 .catch( error => {
                     console.log(error.response.data)
