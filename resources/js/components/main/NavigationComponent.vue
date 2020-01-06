@@ -426,6 +426,7 @@ import {mapGetters, mapActions} from 'vuex'
                 .then(() => {})
                 .catch(() => {})
                 .finally(() => {
+                    clearInterval()
                     sessionStorage.removeItem('user-token')
                     sessionStorage.removeItem('user-role')
                     sessionStorage.removeItem('user-information-id')

@@ -98,7 +98,8 @@
         },
 
         mounted() {
-            this.retrieveManifests()    
+            this.retrieveManifests()   
+            this.ifLogistic() 
         },
         
         methods: {
@@ -123,6 +124,31 @@
                 .finally(() => {
                     console.log(order_request.status)
                 })
+            },
+
+            ifLogistic() {
+                if(sessionStorage.getItem('user-role') == 'Logistic') {
+                    setInterval(() => this.getLogisticGeolocation(), 10000)
+                }
+            },
+
+            getLogisticGeolocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(this.setLogisticGeolocation);
+                } else {
+                    clearInterval()
+                    alert("Geolocation is not supported by this browser.");
+                }
+            },
+
+            setLogisticGeolocation(position) {
+                var logisticGeolocationLatitude = position.coords.latitude
+                var logisticGeolocationLongitude = position.coords.longitude
+                console.log(logisticGeolocationLatitude, logisticGeolocationLongitude)
+                axios.put('api/logistic/' + sessionStorage.getItem('user-id') + '/update-location', {
+                    latitude: logisticGeolocationLatitude, longitude: logisticGeolocationLongitude,
+                })
+                .then( response => { console.log(response.data)}).catch( error => { toastr.error("An Error Occurred")})
             },
 
             openMapDialog(order_request) {

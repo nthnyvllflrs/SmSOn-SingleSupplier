@@ -49,6 +49,7 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::get('/', 'LogisticController@index');
             Route::post('/', 'LogisticController@store');
             Route::get('/{logistic}', 'LogisticController@show');
+            Route::put('/{logistic}/update-location', 'LogisticController@update_location');
             Route::put('/{logistic}', 'LogisticController@update');
             Route::delete('/{logistic}', 'LogisticController@destroy');
         });

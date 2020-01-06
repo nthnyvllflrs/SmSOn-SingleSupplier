@@ -50,6 +50,22 @@
                     </v-toolbar>
                 </template>
                 <template v-slot:item.action="{ item }">
+                    <v-icon class="mx-1" @click="openMapDialog(item)">fa-map-marker-alt</v-icon>
+                    <v-dialog v-model="mapDialog" max-width="750">
+                        <v-card>
+                            <v-container>
+                                <GmapMap
+                                    :ref="'mapRef' + item.id"
+                                    :options="mapOptions"
+                                    :center="logisticCoordinates"
+                                    :zoom="15"
+                                    map-type-id="terrain"
+                                    style="width: 100%; height: 50vh;">
+                                    <GmapMarker :position="logisticCoordinates" />
+                                </GmapMap>
+                            </v-container>
+                        </v-card>
+                    </v-dialog>
                     <v-icon class="mx-1" @click="editLogistic(item)">fa-pen</v-icon>
                     <v-icon class="mx-1" @click="deleteLogistic(item)">fa-trash-alt</v-icon>
                 </template>
@@ -62,6 +78,11 @@
     export default {
         data() {
             return {
+                mapOptions: {
+                    zoomControl: false, mapTypeControl: false, scaleControl: false,
+                    streetViewControl: false, rotateControl: false, fullscreenControl: false, disableDefaultUi: true
+                },
+
                 dialog: false, informationDialog: false,
                 loading: false, search: '', editedIndex: -1,
                 logisticTableHeaders: [
@@ -76,10 +97,21 @@
                 defaultLogisticInformation: { username: null, name: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
                 editedLogisticInformation: { username: null, name: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
                 formErrors: { username: null, name: null, contact_number: null, password: null, password_confirmation: null},
+
+                mapDialog: false, currentLogisticBeingViewed: {},
+                logisticCoordinates: { lat: 6.9214, lng: 122.079},
             }
         },
         mounted() {
             this.retrieveLogistics()
+
+            Echo.channel('logistic')
+                .listen('UpdateLogisticLocation', (data) => {
+                    if(data.logistic.code == this.currentLogisticBeingViewed.code) {
+                        this.logisticCoordinates.lat = Number(data.logistic.latitude)
+                        this.logisticCoordinates.lng = Number(data.logistic.longitude)
+                    }
+                })
         },
         computed: {
             formTitle () {
@@ -87,6 +119,13 @@
             },
         },
         methods: {
+            openMapDialog(item) {
+                this.mapDialog = true
+                this.currentLogisticBeingViewed = item
+                this.logisticCoordinates.lat = Number(item.latitude)
+                this.logisticCoordinates.lng = Number(item.longitude)
+            },
+
             retrieveLogistics() {
                 axios.get('/api/logistic')
                 .then( response => {

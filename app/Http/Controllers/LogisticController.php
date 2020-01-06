@@ -27,6 +27,8 @@ class LogisticController extends Controller
                'name' => $logistic->name,
                'address' => $logistic->address,
                'contact_number' => $logistic->contact_number,
+               'latitude' => $logistic->latitude,
+               'longitude' => $logistic->longitude,
            ];
         }
 
@@ -91,5 +93,11 @@ class LogisticController extends Controller
         Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($logistic));
         $logistic->delete();
         return response(['success' => ['message' => 'Logistic Deleted']], 201);
+    }
+
+    public function update_location(Request $request, User $logistic) {
+        $logistic->information->update($request->toArray());
+        event(new \App\Events\UpdateLogisticLocation($logistic->information));
+        return response(['success' => ['msg' => 'Logistic Location Updated']], 200);
     }
 }
