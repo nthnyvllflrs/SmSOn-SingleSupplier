@@ -315,6 +315,22 @@ import {mapGetters, mapActions} from 'vuex'
 
         mounted() {
             this.retrieveUserProfile()
+
+            Echo.channel('order-request')
+                .listen('OrderRequest', (data) => {
+                    if(data.order_request.user_id == sessionStorage.getItem('user-id')) {
+                        if(data.order_request.type == 'Created') {
+                            toastr.info("New Order Request", data.order_request.code)
+                        } else if(data.order_request.type == 'Deleted') {
+                            toastr.info("Deleted Order Request". data.order_request.code)
+                        }
+                    }
+                })
+                .listen('OrderRequestStatus', (data) => {
+                    if(data.order_request.user_id == sessionStorage.getItem('user-id')) {
+                        toastr.info(data.order_request.status, data.order_request.code)
+                    }
+                })
         },
 
         methods: {

@@ -77,6 +77,9 @@ class OrderRequestController extends Controller
 
             $supplier = \App\Supplier::find($supplier);
             $supplier->user->notify(new \App\Notifications\OrderRequestCreationNotification($new_order_request));
+            event(new \App\Events\OrderRequest([
+                'user_id' => $supplier->user->id, 'code' => $new_order_request->code, 'type' => 'Created'
+            ]));
         }
 
         return response(['success' => ['order_request_codes' => $order_requests_code]], 200);
@@ -109,12 +112,18 @@ class OrderRequestController extends Controller
 
     public function destroy(Request $request, OrderRequest $order_request) {
         $order_request->delete();
+        event(new \App\Events\OrderRequest([
+            'user_id' => $supplier->user()->id, 'code' => $new_order_request->code, 'type' => 'Deleted'
+        ]));
         return response(['success' => ['message' => 'Order Request Deleted']], 201);
     }
 
     public function update_status(Request $request, OrderRequest $order_request) {
         $order_request->update($request->toArray());
         $order_request->customer->user->notify(new \App\Notifications\OrderRequestStatusNotification($order_request));
+        event(new \App\Events\OrderRequestStatus([
+            'user_id' => $order_request->customer->user->id, 'code' => $order_request->code, 'status' => $order_request->status
+        ]));
         return response(['success' => ['message' => $order_request->code." Status Updated"]], 200);
     }
 
