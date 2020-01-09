@@ -23,6 +23,9 @@
                                 <v-card-text>
                                     <v-row no-gutters>
                                         <v-col cols=12>
+                                            <v-file-input :error-messages="formErrors.image" v-model="photoData" prepend-icon="fa-camera" label="Supplier Logo" accept="image/png, image/jpeg, image/bmp" @change="fileConvert()" messages="Uploading a new image will overwrite the existing image."/>
+                                        </v-col>
+                                        <v-col cols=12>
                                             <v-text-field :error-messages="formErrors.username" v-model="editedSupplierInformation.username" label="Username" />
                                         </v-col>
                                         <v-col cols=12>
@@ -66,7 +69,8 @@
                                 <v-progress-circular :size="100" :width="5" color="primary" indeterminate></v-progress-circular>
                             </v-overlay>
                             <v-card-title class="headline">
-                                {{ supplierInformation.name }}
+                                <img :src="supplierInformation.image_url" width="50px" height="50px" alt="Logo" v-if="supplierInformation.image_url"/>
+                                <span class="ml-3">{{ supplierInformation.name }}</span>
                                 <v-spacer />
                                 <v-btn x-small fab color="primary" @click="cancel()">
                                     <v-icon small>fa-times</v-icon>
@@ -136,9 +140,11 @@
 
                 defaultSupplierInformation: { username: null, name: null, description: null, address: null, contact_number: null, password: null, password_confirmation: null},
                 editedSupplierInformation: { username: null, name: null, description: null, address: null, contact_number: null, password: null, password_confirmation: null},
-                formErrors: { username: null, name: null, description: null, address: null, contact_number: null, password: null, password_confirmation: null},
+                formErrors: { username: null, name: null, description: null, address: null, contact_number: null, password: null, password_confirmation: null, image: null},
 
-                supplierInformation: { name: null, description: null, address: null, product_count: 0, logistic_count: 0, products: []},
+                supplierInformation: { name: null, description: null, address: null, image_url: null, product_count: 0, logistic_count: 0, products: []},
+
+                photoData: null, photoByteData: null,
             }
         },
         mounted() {
@@ -214,9 +220,9 @@
 
             createSupplier() {
                 this.loading = true
-                
                 axios.post('/api/supplier', {
-                    ...(_.omit(this.editedSupplierInformation, 'code'))
+                    ...(_.omit(this.editedSupplierInformation, 'code')),
+                    image: this.photoByteData
                 })
                 .then( response => {
                     this.editedSupplierInformation.code = response.data.success.supplier.code
@@ -241,9 +247,9 @@
 
             updateSupplier() {
                 this.loading = true
-                _.omit(this.editedSupplierInformation, 'code')
                 axios.put('/api/supplier/' + this.editedSupplierInformation.id, {
-                    ...(_.omit(this.editedSupplierInformation, 'code'))
+                    ...(_.omit(this.editedSupplierInformation, 'code')),
+                    image: this.photoByteData
                 })
                 .then( response => {
                     Object.assign(this.suppliers[this.editedIndex], this.editedSupplierInformation)
@@ -262,6 +268,19 @@
                     }
                 })
                 .finally( x => { this.loading = false})
+            },
+
+            fileConvert() {
+                try {
+                    var reader = new FileReader()
+                    reader.onload = () => {
+                        this.photoByteData = reader.result
+                        console.log(typeof(this.photoByteData))
+                    }
+                    reader.readAsDataURL(this.photoData)
+                } catch(e) {
+                    console.log(e)
+                }
             }
         }
     }

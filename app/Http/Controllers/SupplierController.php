@@ -41,16 +41,22 @@ class SupplierController extends Controller
             'description' => 'required|max:500',
             'address' => 'required|min:8|max:255',
             'contact_number' => 'required|max:11|unique:suppliers,contact_number',
+
+            'image' => 'required',
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
 
+        // Image Upload
+        \Cloudder::upload($request->image, null);
+        $response = \Cloudder::getResult();
+
         $user = User::create(array_merge($request->toArray(), ['role' => 'Supplier']));
-        $supplier = supplier::create(array_merge($request->toArray(), ['user_id' => $user->id]));
+        $supplier = supplier::create(array_merge($request->toArray(), ['user_id' => $user->id, 'image_url' => $response['secure_url']]));
 
         Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
 
-        return response(['success' => ['user' => $user, 'supplier' => $supplier]], 200);
+        return response(['success' => ['image' => \Cloudder::getPublicId(), 'user' => $user, 'supplier' => $supplier]], 200);
     }
 
     public function show(Request $request, User $supplier) {
@@ -59,9 +65,10 @@ class SupplierController extends Controller
                 'code' => $supplier->code, 'username' => $supplier->username,
                 'name' => $supplier->information->name, 'contact_number' => $supplier->information->contact_number,
                 'address' => $supplier->information->address, 'description' => $supplier->information->description,
+                'image_url' => $supplier->information->image_url,
             ],
 
-            'name' => $supplier->information->name, 'description' => $supplier->information->description,
+            'name' => $supplier->information->name, 'description' => $supplier->information->description, 'image_url' => $supplier->information->image_url,
             'address' => $supplier->information->address, 'product_count' => count($supplier->information->products),
             'logistic_count' => count($supplier->information->logistics), 'products' => $supplier->information->products,
         ];
@@ -85,6 +92,13 @@ class SupplierController extends Controller
 
         if(empty($request->password) || ($request->password == null)) { $updated_data = $request->except('password');
         } else { $updated_data = $request->all();}
+
+        if(!empty($request->image) || ($request->image != null)) { 
+            // Image Upload
+            \Cloudder::upload($request->image, null);
+            $response = \Cloudder::getResult();
+            $updated_data = array_merge($updated_data, ['image_url' => $response['secure_url']]);
+        }
 
         $supplier->update($updated_data);
         $supplier->information->update($updated_data);

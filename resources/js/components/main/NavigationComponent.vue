@@ -101,7 +101,10 @@
                 <span class="title font-weight-bold title-letter-spacing">SMS ON</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn icon @click="profileDialog = !profileDialog">
+            <v-btn icon @click="profileDialog = !profileDialog" v-if="userRole == 'Supplier' && userProfile.image_url">
+                <img :src="userProfile.image_url" width="25px" height="25px" style="border-radius: 50%;"/>
+            </v-btn>
+            <v-btn icon @click="profileDialog = !profileDialog" v-if="userRole != 'Supplier' || !userProfile.image_url">
                 <v-icon>fa-user-circle</v-icon>
             </v-btn>
             <v-btn icon @click="openNotificationDialog()">
@@ -185,6 +188,9 @@
                 <v-card-title class="headline">Profile Information</v-card-title>
                 <v-card-text>
                     <v-row>
+                        <v-col cols=12>
+                            <v-file-input :error-messages="formErrors.image" v-model="photoData" prepend-icon="fa-camera" label="Supplier Logo" accept="image/png, image/jpeg, image/bmp" @change="fileConvert()" messages="Uploading a new image will overwrite the existing image." v-if="userRole == 'Supplier'"/>
+                        </v-col>
                         <v-col cols=12 md=6>
                             <v-text-field :error-messages="formErrors.code" v-model="userProfile.code" label="User Code" readonly />
                         </v-col>
@@ -298,14 +304,16 @@ import {mapGetters, mapActions} from 'vuex'
                 userProfile: {
                     code: null, username: null, password: null, password_confirmation: null,
                     name: null, address: null, contact_number: null,
-                    description: null,
+                    description: null, image: null, image_url: null
                 },
 
                 formErrors: {
                     code: null, username: null, password: null, password_confirmation: null,
                     name: null, address: null, contact_number: null,
-                    description: null,
+                    description: null, image: null, image_url: null
                 },
+
+                photoData: null, photoByteData: null,
             }
         },
 
@@ -367,7 +375,8 @@ import {mapGetters, mapActions} from 'vuex'
             updateUserProfile() {
                 this.loading = true
                 axios.put('/api/' + this.userRole.toLowerCase() + '/' +  this.userId, {
-                    ...this.userProfile
+                    ...this.userProfile,
+                    image: this.photoByteData
                 })
                 .then( response => {
                     this.profileDialog = false
@@ -462,6 +471,19 @@ import {mapGetters, mapActions} from 'vuex'
                     }
                 }
                 return permissions[this.userRole][module]
+            },
+
+            fileConvert() {
+                try {
+                    var reader = new FileReader()
+                    reader.onload = () => {
+                        this.photoByteData = reader.result
+                        console.log(typeof(this.photoByteData))
+                    }
+                    reader.readAsDataURL(this.photoData)
+                } catch(e) {
+                    console.log(e)
+                }
             }
         }
     }

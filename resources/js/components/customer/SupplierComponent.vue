@@ -16,7 +16,8 @@
                                 <v-progress-circular :size="100" :width="5" color="primary" indeterminate></v-progress-circular>
                             </v-overlay>
                             <v-card-title class="headline">
-                                {{ supplierInformation.name }}
+                                <img :src="supplierInformation.image_url" width="50px" height="50px" alt="Logo" v-if="supplierInformation.image_url" />
+                                <span class="ml-3">{{ supplierInformation.name }}</span>
                                 <v-spacer />
                                 <v-btn x-small fab color="primary" @click="cancel()">
                                     <v-icon small>fa-times</v-icon>
@@ -84,7 +85,7 @@
                 ],
                 suppliers: [],
                 
-                supplierInformation: { name: null, description: null, address: null, product_count: 0, logistic_count: 0, products: []},
+                supplierInformation: { name: null, description: null, address: null, image_url: null, product_count: 0, logistic_count: 0, products: []},
             }
         },
         mounted() {

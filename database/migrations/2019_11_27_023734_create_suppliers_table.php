@@ -21,6 +21,7 @@ class CreateSuppliersTable extends Migration
             $table->string('description');
             $table->string('address')->default('Zamboanga City');
             $table->string('contact_number');
+            $table->string('image_url');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
