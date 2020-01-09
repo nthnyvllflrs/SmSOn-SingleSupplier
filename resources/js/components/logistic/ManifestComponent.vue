@@ -30,11 +30,12 @@
                                                                 <GmapMap
                                                                     :ref="'mapRef' + order_request.id"
                                                                     :options="mapOptions"
-                                                                    :center="logisticCoordinates"
+                                                                    :center="customerCoordinates"
                                                                     :zoom="15"
                                                                     map-type-id="terrain"
                                                                     style="width: 100%; height: 50vh;">
-                                                                    <GmapMarker :position="logisticCoordinates" />
+                                                                    <!-- <GmapMarker :position="logisticCoordinates" /> -->
+                                                                    <GmapMarker :position="customerCoordinates" />
                                                                 </GmapMap>
                                                                 <v-btn block color="success" class="mt-3" @click="getDirection(order_request)">Show Directions</v-btn>
                                                                 <div class="mt-3 text-center" id="directionPanel" width="100%"></div>
