@@ -16,7 +16,7 @@ Route::group(['middleware' => ['json.response']], function () {
             return $request->user()->notifications;
         });
 
-        Route::get('/send-sms', 'SMSController@send_sms');
+        Route::post('/send-sms', 'SMSController@send_sms');
         Route::get('/system-log', 'SystemLogController@index');
 
         Route::group(['prefix' => '/administrator'], function($request) {

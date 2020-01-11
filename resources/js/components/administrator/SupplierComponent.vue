@@ -70,12 +70,12 @@
                     </v-toolbar>
                 </template>
                 <template v-slot:item.action="{ item }">
-                    <v-icon small @click="sendCustomerMessage(item)">fa-sms</v-icon>
+                    <v-icon class="mx-1" @click="sendCustomerMessage(item)">fa-sms</v-icon>
 
                     <v-dialog v-model="messageDialog" max-width="500px" persistent>
                         <v-card>
                             <v-overlay :value="loading">
-                                <v-progress-circular :size="100" :width="5" color="light-green accent-4" indeterminate></v-progress-circular>
+                                <v-progress-circular :size="100" :width="5" color="primary" indeterminate></v-progress-circular>
                             </v-overlay>
                             <v-card-title>
                                 <span class="headline">Send Message</span>
@@ -84,14 +84,14 @@
                             <v-card-text>
                                 <v-container>
                                     <v-text-field v-model="message.phone_number" label="Phone Number" disabled=""></v-text-field>
-                                    <v-textarea v-model="message.body" label="Body"></v-textarea>
+                                    <v-textarea v-model="message.message" label="Body"></v-textarea>
                                 </v-container>
                             </v-card-text>
 
                             <v-card-actions>
                                 <div class="flex-grow-1"></div>
-                                <v-btn text color="success" @click="sendMessage(item)">Send</v-btn>
-                                <v-btn text color="error" @click="messageDialog = !messageDialog">Cancel</v-btn>
+                                <v-btn @click="messageDialog = !messageDialog">Cancel</v-btn>
+                                <v-btn color="primary" @click="sendMessage(item)">Send</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -195,7 +195,7 @@
         methods: {
             sendCustomerMessage(item) {
                 this.messageDialog = !this.messageDialog
-                this.message.phone_number = item.phone_number
+                this.message.phone_number = item.contact_number
             },
 
             sendMessage() {
