@@ -75,7 +75,7 @@ import {mapActions} from 'vuex'
                     this.products = response.data.success.products
                 })
                 .catch( error => {
-                    console.log(error.response.data)
+                    toastr.error("Retrieve Products Error")
                 })
             },
 

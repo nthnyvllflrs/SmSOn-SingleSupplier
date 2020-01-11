@@ -1,3 +1,5 @@
+window.googleApiKey = process.env.MIX_GOOGLE_API_KEY
+
 window._ = require('lodash');
 
 try {

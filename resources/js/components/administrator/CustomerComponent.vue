@@ -127,6 +127,7 @@
         },
         mounted() {
             this.retrieveCustomers()
+            // this.reverseGeoCode()
         },
         computed: {
             google: gmapApi,
@@ -148,6 +149,20 @@
             changeMarkerPosition(event) {
                 this.editedCustomerInformation.latitude = event.latLng.lat()
                 this.editedCustomerInformation.longitude = event.latLng.lng()
+
+                axios.get('/api/customer/reverse-geocode', {
+                    params: {
+                        latitude: event.latLng.lat(),
+                        longitude: event.latLng.lng(),
+                    }
+                })
+                .then( response => {
+                    this.editedCustomerInformation.address = response.data.success.address
+                })
+                .catch( error => {
+                    toastr.error("Reverse Geocoding Error")
+                })
+                .finally(() => {})
             },
 
             retrieveCustomers() {
@@ -157,7 +172,7 @@
                     this.customers = response.data.success.customers
                 })
                 .catch( error => {
-                    toastr.error("An Error Occurred")
+                    toastr.error("Retrieve Customers Error")
                 })
                 .finally(() => { this.loading = false})
             },
@@ -171,7 +186,9 @@
                         this.customers.splice(index, 1)
                         toastr.success("Customer Deleted")
                     })
-                    .catch( error => { alert(error)})
+                    .catch( error => { 
+                        toastr.error("Delete Customer Error")
+                    })
                 }
             },
 
@@ -223,7 +240,7 @@
                             this.errorMessage = error.response.data
                         }
                     } else {
-                        toastr.error("An Error Occurred")
+                        toastr.error("Create Customer Error")
                     }
                 })
                 .finally( x => { this.loading = false})
@@ -252,7 +269,7 @@
                             this.errorMessage = error.response.data
                         }
                     } else {
-                        toastr.error("An Error Occurred")
+                        toastr.error("Update Customer Error")
                     }
                 })
                 .finally( x => { this.loading = false})

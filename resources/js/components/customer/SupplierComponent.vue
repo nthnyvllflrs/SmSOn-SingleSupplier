@@ -104,7 +104,7 @@
                     this.suppliers = response.data.success.suppliers
                 })
                 .catch( error => {
-                    toastr.error("An Error Occurred")
+                    toastr.error("Retrieve Suppliers Error")
                 })
                 .finally(() => { this.loading = false})
             },
@@ -117,7 +117,7 @@
                     this.supplierInformation = response.data.success.supplier
                 })
                 .catch( error => {
-                    toastr.error("An Error Occurred")
+                    toastr.error("Retrieve Supplier Information Error")
                 })
                 .finally( x => { this.loading = false})
             },

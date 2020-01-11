@@ -93,4 +93,16 @@ class CustomerController extends Controller {
         $customer->delete();
         return response(['success' => ['message' => 'Customer Deleted']], 201);
     }
+
+    public function reverse_geocode_location(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
+        
+        $address = reverseGeocode($request->latitude, $request->longitude);
+        return response(['success' => ['address' => $address]], 200);
+    }
 }

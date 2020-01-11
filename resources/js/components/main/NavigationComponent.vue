@@ -478,11 +478,10 @@ import {mapGetters, mapActions} from 'vuex'
                     var reader = new FileReader()
                     reader.onload = () => {
                         this.photoByteData = reader.result
-                        console.log(typeof(this.photoByteData))
                     }
                     reader.readAsDataURL(this.photoData)
                 } catch(e) {
-                    console.log(e)
+                    toastr.error("File Converter Error")
                 }
             }
         }

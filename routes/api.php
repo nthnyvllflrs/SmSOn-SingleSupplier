@@ -31,6 +31,7 @@ Route::group(['middleware' => ['json.response']], function () {
     
         Route::group(['prefix' => '/customer'], function($request) {
             Route::get('/', 'CustomerController@index');
+            Route::get('/reverse-geocode', 'CustomerController@reverse_geocode_location');
             Route::post('/', 'CustomerController@store');
             Route::get('/{customer}', 'CustomerController@show');
             Route::put('/{customer}', 'CustomerController@update');

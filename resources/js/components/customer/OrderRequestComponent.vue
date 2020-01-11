@@ -141,7 +141,9 @@
                 .then( response => {
                     this.order_requests = response.data.success.order_requests
                 })
-                .catch(() => {})
+                .catch( error => {
+                    toastr.error("Retrieve Order Requests Error")
+                })
                 .finally(() => { this.loading = false})
             },
 
@@ -151,7 +153,7 @@
                     this.order_requests = response.data.success.order_requests
                 })
                 .catch( error => {
-                    console.log(error.response.data)
+                    toastr.error("Retrieve Receivables Error")
                 })
             },
 
@@ -161,7 +163,9 @@
                     this.order_request_information = response.data.success.order_request_information
                     this.order_request_information_dialog = true
                 })
-                .catch(() => {})
+                .catch( error => {
+                    toastr.error("Retrieve Order Request Information Error")
+                })
             },
 
             cancelOrderRequest(order_request) {
@@ -172,7 +176,9 @@
                         const index = this.order_requests.indexOf(order_request)
                         this.order_requests.splice(index, 1)
                     })
-                    .catch(() => {})
+                    .catch( error => {
+                        toastr.error("Cancel Order Request Error")
+                    })
                 }
             }
         }

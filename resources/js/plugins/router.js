@@ -88,10 +88,6 @@ router.beforeEach((to, from, next) => {
         var userRole = sessionStorage.getItem('user-role')
         if (!PERMISSIONS[userRole][to.name]) {
             next({name: PERMISSIONS[userRole]['default']})
-        } else {
-            next()
-        }
-    } else {
-        next()
-    }
+        } else { next()}
+    } else { next()}
 })

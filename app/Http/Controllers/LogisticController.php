@@ -96,7 +96,15 @@ class LogisticController extends Controller
     }
 
     public function update_location(Request $request, User $logistic) {
-        $logistic->information->update($request->toArray());
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
+        
+        $address = reverseGeocode($request->latitude, $request->longitude);
+        $logistic->information->update(array_merge($request->toArray(), ['address' => $address]));
         event(new \App\Events\UpdateLogisticLocation($logistic->information));
         return response(['success' => ['msg' => 'Logistic Location Updated']], 200);
     }

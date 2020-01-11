@@ -163,7 +163,7 @@
                     this.suppliers = response.data.success.suppliers
                 })
                 .catch( error => {
-                    toastr.error("An Error Occurred")
+                    toastr.error("Retrieve Suppliers Error")
                 })
                 .finally(() => { this.loading = false})
             },
@@ -176,7 +176,7 @@
                     this.supplierInformation = response.data.success.supplier
                 })
                 .catch( error => {
-                    toastr.error("An Error Occurred")
+                    toastr.error("Supplier Information Error")
                 })
                 .finally( x => { this.loading = false})
             },
@@ -190,7 +190,9 @@
                         this.suppliers.splice(index, 1)
                         toastr.success("Supplier Deleted")
                     })
-                    .catch( error => { alert(error)})
+                    .catch( error => { 
+                        toastr.error("Delete Supplier Error")
+                    })
                 }
             },
 
@@ -239,7 +241,7 @@
                             this.errorMessage = error.response.data
                         }
                     } else {
-                        toastr.error("An Error Occurred")
+                        toastr.error("Create Supplier Error")
                     }
                 })
                 .finally( x => { this.loading = false})
@@ -264,7 +266,7 @@
                             this.errorMessage = error.response.data
                         }
                     } else {
-                        toastr.error("An Error Occurred")
+                        toastr.error("Update Supplier Error")
                     }
                 })
                 .finally( x => { this.loading = false})
@@ -279,7 +281,7 @@
                     }
                     reader.readAsDataURL(this.photoData)
                 } catch(e) {
-                    console.log(e)
+                    toastr.error("File Converter Error")
                 }
             }
         }

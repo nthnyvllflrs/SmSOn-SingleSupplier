@@ -110,7 +110,7 @@
                     this.manifests = response.data.success.manifests
                 })
                 .catch( error => {
-                    console.log(error.response.data)
+                    toastr.error("Retrieve Manifests Error")
                 })
             },
 
@@ -121,10 +121,10 @@
                 .then( response => {
                     order_request.status = 'Delivered'
                 })
-                .catch(() => {})
-                .finally(() => {
-                    console.log(order_request.status)
+                .catch( error => {
+                    toastr.error("Update Requests Status Error")
                 })
+                .finally(() => {})
             },
 
             ifLogistic() {
@@ -149,7 +149,10 @@
                 axios.put('api/logistic/' + sessionStorage.getItem('user-id') + '/update-location', {
                     latitude: logisticGeolocationLatitude, longitude: logisticGeolocationLongitude,
                 })
-                .then( response => { /** console.log(response.data) **/}).catch( error => { toastr.error("An Error Occurred")})
+                .then(() => {})
+                .catch( error => { 
+                    toastr.error("Logistic Geolocation Error")
+                })
             },
 
             openMapDialog(order_request) {

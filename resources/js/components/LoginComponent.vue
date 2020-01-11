@@ -60,7 +60,7 @@ export default {
                         this.errorMessage = error.response.data
                     }
                 } else {
-                    toastr.error("An Error Occurred")
+                    toastr.error("Login Error")
                 }
             })
             .finally( x => {this.loading = false})
