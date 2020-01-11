@@ -1,5 +1,16 @@
 <template>
     <v-container>
+        <v-card-title>
+            Suppliers
+            <v-spacer />
+            <v-text-field
+                v-model="search"
+                append-icon="fa-search"
+                label="Search supplier"
+                single-line
+                hide-details
+            ></v-text-field>
+        </v-card-title>
         <v-card>
             <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="supplierTableHeaders" :items="suppliers" :search="search">
                 <template v-slot:top>

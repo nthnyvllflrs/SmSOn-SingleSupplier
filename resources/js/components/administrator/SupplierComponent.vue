@@ -1,6 +1,17 @@
 <template>
     <v-container>
         <v-card>
+            <v-card-title>
+                Suppliers
+                <v-spacer />
+                <v-text-field
+                    v-model="search"
+                    append-icon="fa-search"
+                    label="Search supplier"
+                    single-line
+                    hide-details
+                ></v-text-field>
+            </v-card-title>
             <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="supplierTableHeaders" :items="suppliers" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
@@ -59,6 +70,31 @@
                     </v-toolbar>
                 </template>
                 <template v-slot:item.action="{ item }">
+                    <v-icon small @click="sendCustomerMessage(item)">fa-sms</v-icon>
+
+                    <v-dialog v-model="messageDialog" max-width="500px" persistent>
+                        <v-card>
+                            <v-overlay :value="loading">
+                                <v-progress-circular :size="100" :width="5" color="light-green accent-4" indeterminate></v-progress-circular>
+                            </v-overlay>
+                            <v-card-title>
+                                <span class="headline">Send Message</span>
+                            </v-card-title>
+
+                            <v-card-text>
+                                <v-container>
+                                    <v-text-field v-model="message.phone_number" label="Phone Number" disabled=""></v-text-field>
+                                    <v-textarea v-model="message.body" label="Body"></v-textarea>
+                                </v-container>
+                            </v-card-text>
+
+                            <v-card-actions>
+                                <div class="flex-grow-1"></div>
+                                <v-btn text color="success" @click="sendMessage(item)">Send</v-btn>
+                                <v-btn text color="error" @click="messageDialog = !messageDialog">Cancel</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
                     <v-icon class="mx-1" @click="retrieveSupplierInformation(item)">fa-info-circle</v-icon>
                     <v-icon class="mx-1" @click="editSupplier(item)">fa-pen</v-icon>
                     <v-icon class="mx-1" @click="deleteSupplier(item)">fa-trash-alt</v-icon>
@@ -126,7 +162,8 @@
     export default {
         data() {
             return {
-                dialog: false, informationDialog: false,
+                dialog: false, informationDialog: false,messageDialog: false,
+                message: { phone_number: null, message: null},
                 loading: false, search: '', editedIndex: -1,
                 supplierTableHeaders: [
                     { text: 'Code', value: 'code' },
@@ -156,6 +193,26 @@
             },
         },
         methods: {
+            sendCustomerMessage(item) {
+                this.messageDialog = !this.messageDialog
+                this.message.phone_number = item.phone_number
+            },
+
+            sendMessage() {
+                this.loading = true
+                axios.post('api/send-sms', { 
+                    ...this.message
+                })
+                .then( response => {
+                    this.messageDialog = !this.messageDialog
+                    toastr.success("SMS Sent")
+                })
+                .catch( error => {
+                    toastr.error("Send SMS Error")
+                })
+                .finally( x => { this.loading = false})
+            },
+            
             retrieveSuppliers() {
                 this.loading = true
                 axios.get('/api/supplier')

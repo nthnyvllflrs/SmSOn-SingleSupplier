@@ -54,6 +54,11 @@ class LogisticController extends Controller
 
         Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
 
+        \App\SystemLog::create([
+            'type' => 'Logistic',
+            'remarks' => $user->code." Created."
+        ]);
+
         return response(['success' => ['user' => $user, 'logistic' => $logistic]], 200);
     }
 
@@ -86,10 +91,20 @@ class LogisticController extends Controller
         $logistic->update($updated_data);
         $logistic->information->update($updated_data);
 
+        \App\SystemLog::create([
+            'type' => 'Logistic',
+            'remarks' => $logistic->code." Updated."
+        ]);
+
         return response(['success' => ['user' => $logistic, 'logistic' => $logistic->information]], 200);
     }
 
     public function destroy(Request $request, User $logistic) {
+        \App\SystemLog::create([
+            'type' => 'Logistic',
+            'remarks' => $logistic->code." Deleted."
+        ]);
+
         Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($logistic));
         $logistic->delete();
         return response(['success' => ['message' => 'Logistic Deleted']], 201);
@@ -106,6 +121,12 @@ class LogisticController extends Controller
         $address = reverseGeocode($request->latitude, $request->longitude);
         $logistic->information->update(array_merge($request->toArray(), ['address' => $address]));
         event(new \App\Events\UpdateLogisticLocation($logistic->information));
+
+        \App\SystemLog::create([
+            'type' => 'Logistic',
+            'remarks' => $logistic->code." Updated Location."
+        ]);
+
         return response(['success' => ['msg' => 'Logistic Location Updated']], 200);
     }
 }

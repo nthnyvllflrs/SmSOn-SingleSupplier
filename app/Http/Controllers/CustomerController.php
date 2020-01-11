@@ -50,6 +50,11 @@ class CustomerController extends Controller {
 
         Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
 
+        \App\SystemLog::create([
+            'type' => 'Customer',
+            'remarks' => $user->code." Created."
+        ]);
+
         return response(['success' => ['user' => $user, 'customer' => $customer]], 200);
     }
 
@@ -85,10 +90,20 @@ class CustomerController extends Controller {
         $customer->update($updated_data);
         $customer->information->update($updated_data);
 
+        \App\SystemLog::create([
+            'type' => 'Customer',
+            'remarks' => $customer->code." Updated."
+        ]);
+
         return response(['success' => ['user' => $customer, 'customer' => $customer]], 200);
     }
 
     public function destroy(Request $request, User $customer) {
+        \App\SystemLog::create([
+            'type' => 'Customer',
+            'remarks' => $customer->code." Deleted."
+        ]);
+
         Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($customer));
         $customer->delete();
         return response(['success' => ['message' => 'Customer Deleted']], 201);

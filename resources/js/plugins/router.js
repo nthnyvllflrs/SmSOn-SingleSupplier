@@ -1,5 +1,5 @@
 const MODULES = {
-    customers: true, suppliers: true, order_requests: true, products: true, logistics: true, manifests: true, default: null
+    customers: true, suppliers: true, order_requests: true, products: true, logistics: true, manifests: true, logs: true, default: null
 }
 const PERMISSIONS = {
     Administrator: {
@@ -9,17 +9,17 @@ const PERMISSIONS = {
     },
     Customer: {
         ...MODULES,
-        customers: false, logistics: false, manifests: false,
+        customers: false, logistics: false, manifests: false, logs: false,
         default: 'products'
     },
     Supplier: {
         ...MODULES,
-        customers: false, suppliers: false,
+        customers: false, suppliers: false, logs: false,
         default: 'order_requests'
     },
     Logistic: {
         ...MODULES,
-        customers: false, suppliers: false, order_requests: false, products: false, logistics: false,
+        customers: false, suppliers: false, order_requests: false, products: false, logistics: false, logs: false,
         default: 'manifests'
     }
 }
@@ -37,6 +37,7 @@ import OrderRequests from '../components/main/OrderRequestComponent.vue'
 import Products from '../components/main/ProductComponent.vue'
 import Logistics from '../components/supplier/LogisticComponent.vue'
 import Manifests from '../components/main/ManifestComponent.vue'
+import Logs from '../components/main/SystemLogComponent.vue'
 
 
 Vue.use(VueRouter)
@@ -72,6 +73,7 @@ const routes = [
             { path: '/products', name: 'products', components: {content: Products} },
             { path: '/logistics', name: 'logistics', components: { content: Logistics } },
             { path: '/manifests', name: 'manifests', components: { content: Manifests } },
+            { path: '/logs', name: 'logs', components: { content: Logs } },
         ],
     }
 ]

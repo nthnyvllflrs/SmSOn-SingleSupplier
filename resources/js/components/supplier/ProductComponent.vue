@@ -1,7 +1,18 @@
 <template>
     <v-container>
         <v-card>
-            <v-data-table :headers="productTableHeaders" :items="products" :search="search">
+            <v-card-title>
+                Products
+                <v-spacer />
+                <v-text-field
+                    v-model="search"
+                    append-icon="fa-search"
+                    label="Search product"
+                    single-line
+                    hide-details
+                ></v-text-field>
+            </v-card-title>
+            <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="productTableHeaders" :items="products" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
                         <v-toolbar-title class="headline">Products</v-toolbar-title>
@@ -91,12 +102,16 @@
         },
         methods: {
             retrieveProducts() {
+                this.loading = true
                 axios.get('/api/product')
                 .then( response => {
                     this.products = response.data.success.products
                 })
                 .catch( error => {
                     toastr.error("An Error Occurred")
+                })
+                .finally(() => {
+                    this.loading = false
                 })
             },
 

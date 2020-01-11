@@ -168,6 +168,14 @@
             </v-list>
             <template v-slot:append>
                 <v-list>
+                    <v-list-item to="/logs" v-if="userPermission('logs')">
+                        <v-list-item-avatar>
+                            <v-icon>fa-cog</v-icon>
+                        </v-list-item-avatar>
+                        <v-list-item-content>
+                            <v-list-item-title class="subtitle-2 font-weight-bold">Logs</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
                     <v-list-item @click="logout()">
                         <v-list-item-avatar>
                             <v-icon>fa-sign-out-alt</v-icon>
@@ -450,7 +458,7 @@ import {mapGetters, mapActions} from 'vuex'
             
             userPermission(module) {
                 var modules = {
-                    customers: true, suppliers: true, order_requests: true, products: true, logistics: true, manifests: true
+                    customers: true, suppliers: true, order_requests: true, products: true, logistics: true, manifests: true, logs: true
                 }
                 var permissions = {
                     Administrator: {
@@ -459,15 +467,15 @@ import {mapGetters, mapActions} from 'vuex'
                     },
                     Customer: {
                         ...modules,
-                        customers: false, logistics: false, manifests: false,
+                        customers: false, logistics: false, manifests: false, logs: false
                     },
                     Supplier: {
                         ...modules,
-                        customers: false, suppliers: false,
+                        customers: false, suppliers: false, logs: false
                     },
                     Logistic: {
                         ...modules,
-                        customers: false, suppliers: false, order_requests: false, products: false, logistics: false,
+                        customers: false, suppliers: false, order_requests: false, products: false, logistics: false, logs: false
                     }
                 }
                 return permissions[this.userRole][module]

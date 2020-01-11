@@ -80,6 +80,11 @@ class OrderRequestController extends Controller
             event(new \App\Events\OrderRequest([
                 'user_id' => $supplier->user->id, 'code' => $new_order_request->code, 'type' => 'Created'
             ]));
+
+            \App\SystemLog::create([
+                'type' => 'Order Request',
+                'remarks' => $new_order_request->code." Created."
+            ]);
         }
 
         return response(['success' => ['order_request_codes' => $order_requests_code]], 200);
@@ -111,6 +116,11 @@ class OrderRequestController extends Controller
     }
 
     public function destroy(Request $request, OrderRequest $order_request) {
+        \App\SystemLog::create([
+            'type' => 'Order Request',
+            'remarks' => $order_request->code." Deleted."
+        ]);
+
         $order_request->delete();
         event(new \App\Events\OrderRequest([
             'user_id' => $supplier->user()->id, 'code' => $new_order_request->code, 'type' => 'Deleted'
@@ -124,7 +134,23 @@ class OrderRequestController extends Controller
         event(new \App\Events\OrderRequestStatus([
             'user_id' => $order_request->customer->user->id, 'code' => $order_request->code, 'status' => $order_request->status
         ]));
+
+        \App\SystemLog::create([
+            'type' => 'Order Request',
+            'remarks' => $order_request->code." Updated Status."
+        ]);
+
         return response(['success' => ['message' => $order_request->code." Status Updated"]], 200);
+    }
+
+    public function search_order_request(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'filter' => 'required|string',
+        ]);
+
+        if($validator->fails()) { return response(['errors' => $validator->errors()], 422);}
+
+        return response(['success' => ['result' => []]], 200);
     }
 
     private function filter_order_requests($order_requests) {

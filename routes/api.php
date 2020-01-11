@@ -16,6 +16,9 @@ Route::group(['middleware' => ['json.response']], function () {
             return $request->user()->notifications;
         });
 
+        Route::get('/send-sms', 'SMSController@send_sms');
+        Route::get('/system-log', 'SystemLogController@index');
+
         Route::group(['prefix' => '/administrator'], function($request) {
             Route::get('/{administrator}', 'AuthController@show');
             Route::put('/{administrator}', 'AuthController@update');
@@ -75,34 +78,4 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::delete('/{manifest}', 'ManifestController@destroy');
         });
     });
-
-    
-
-    // Route::resource('customer', 'CustomerController',
-    //                 array(
-    //                     'only' => array(
-    //                         'index', 'store', 'show', 'update', 'destroy'
-    //                     )
-    //                 ));
-
-    // Route::resource('supplier', 'SupplierController',
-    //                 array(
-    //                     'only' => array(
-    //                         'index', 'store', 'show', 'update', 'destroy'
-    //                     )
-    //                 ));
-
-    // Route::resource('logistic', 'LogisticController',
-    //                 array(
-    //                     'only' => array(
-    //                         'index', 'store', 'show', 'update', 'destroy'
-    //                     )
-    //                 ));
-
-    // Route::resource('product', 'ProductController',
-    //                 array(
-    //                     'only' => array(
-    //                         'index', 'store', 'show', 'update', 'destroy'
-    //                     )
-    //                 ));
 });

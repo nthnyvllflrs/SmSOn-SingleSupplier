@@ -1,6 +1,17 @@
 <template>
     <v-container>
         <v-card>
+            <v-card-title>
+                Logistics
+                <v-spacer />
+                <v-text-field
+                    v-model="search"
+                    append-icon="fa-search"
+                    label="Search logistic"
+                    single-line
+                    hide-details
+                ></v-text-field>
+            </v-card-title>
             <v-data-table :headers="logisticTableHeaders" :items="logistics" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">

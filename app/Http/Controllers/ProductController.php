@@ -49,6 +49,12 @@ class ProductController extends Controller
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
         $product = Product::create($request->toArray());
+
+        \App\SystemLog::create([
+            'type' => 'Product',
+            'remarks' => $product->code." Created."
+        ]);
+
         return response(['success' => ['product' => $product]], 200);
     }
 
@@ -68,10 +74,21 @@ class ProductController extends Controller
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
         $product->update($request->toArray());
+
+        \App\SystemLog::create([
+            'type' => 'Product',
+            'remarks' => $product->code." Updated."
+        ]);
+
         return response(['success' => ['product' => $product]], 200);
     }
 
     public function destroy(Request $request, Product $product) {
+        \App\SystemLog::create([
+            'type' => 'Product',
+            'remarks' => $product->code." Deleted."
+        ]);
+
         $product->delete();
         return response(['success' => ['message' => 'product Deleted']], 201);
     }

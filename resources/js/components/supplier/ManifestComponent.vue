@@ -1,7 +1,18 @@
 <template>
     <v-container>
         <v-card>
-            <v-data-table :headers="dataTableHeaders" :items="manifests" show-expand single-expand expanded.sync>
+            <v-card-title>
+                Manifests
+                <v-spacer />
+                <v-text-field
+                    v-model="search"
+                    append-icon="fa-search"
+                    label="Search manifest"
+                    single-line
+                    hide-details
+                ></v-text-field>
+            </v-card-title>
+            <v-data-table :headers="dataTableHeaders" :items="manifests" show-expand single-expand expanded.sync :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
                         <v-toolbar-title class="headline">Manifests</v-toolbar-title>
@@ -100,7 +111,7 @@
         data () {
             return {
                 dialog: false, loading: false, editedIndex: -1, menu: false,
-                expanded: [],
+                expanded: [], search: '',
                 singleExpand: false,
                 dataTableHeaders: [
                     { text: 'Code', value: 'code', align: 'center'},

@@ -63,6 +63,12 @@ class ManifestController extends Controller
             ManifestDetail::create(['manifest_id' => $manifest->id, 'order_request_id' => $order_request['id']]);
         }
         $manifest->logistic;
+
+        \App\SystemLog::create([
+            'type' => 'Manifest',
+            'remarks' => $manifest->code." Created."
+        ]);
+
         return response(['success' => ['manifest' => $manifest]], 200);
     }
 
@@ -81,6 +87,7 @@ class ManifestController extends Controller
             'logistic' => $manifest->logistic->name, 'logistic_id' => $manifest->logistic->id,
             'delivery_date' => $manifest->delivery_date, 'order_requests' => $order_requests
         ];
+
         return response(['success' => ['manifest' => $manifest]], 200);
     }
 
@@ -102,10 +109,21 @@ class ManifestController extends Controller
             ManifestDetail::create(['manifest_id' => $manifest->id, 'order_request_id' => $order_request['id']]);
         }
         $manifest->logistic;
+
+        \App\SystemLog::create([
+            'type' => 'Manifest',
+            'remarks' => $manifest->code." Updated."
+        ]);
+
         return response(['success' => ['manifest' => $manifest]], 200);
     }
 
     public function delete(Request $request, Manifest $manifest) {
+        \App\SystemLog::create([
+            'type' => 'Manifest',
+            'remarks' => $manifest->code." Deleted."
+        ]);
+
         $manifest->delete();
         return response(['success' => ['message' => 'Manifest Deleted']], 201);
     }

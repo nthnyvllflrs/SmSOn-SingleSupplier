@@ -1,6 +1,17 @@
 <template>
     <v-container>
         <v-card>
+            <v-card-title>
+                Order Requests
+                <v-spacer />
+                <v-text-field
+                    v-model="search"
+                    append-icon="fa-search"
+                    label="Search order request"
+                    single-line
+                    hide-details
+                ></v-text-field>
+            </v-card-title>
             <v-tabs grow v-model="tabModel">
                 <v-tab :href="`#disapproved-tab`"  @click="retrieveOrderRequests('Disapproved')">Disapproved</v-tab>
                 <v-tab :href="`#pending-tab`" @click="retrieveOrderRequests('Pending')">Pending</v-tab>
@@ -13,7 +24,7 @@
                 <!-- Approved Orders -->
                 <v-tab-item :value="`disapproved-tab`">
                     <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests" :search="search">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                             </template>
@@ -24,7 +35,7 @@
                 <!-- Pending Orders -->
                 <v-tab-item :value="`pending-tab`">
                     <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests" :search="search">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                                 <v-icon color="error" class="mx-1" @click="cancelOrderRequest(item)">fa-ban</v-icon>
@@ -36,7 +47,7 @@
                 <!-- Approved Orders -->
                 <v-tab-item :value="`approved-tab`">
                     <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests" :search="search">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                             </template>
@@ -47,7 +58,7 @@
                 <!-- Reveivable Orders -->
                 <v-tab-item :value="`receivable-tab`">
                     <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="reveivable_table_headers" :items="order_requests">
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="reveivable_table_headers" :items="order_requests" :search="search">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                             </template>
@@ -58,7 +69,7 @@
                 <!-- Delivered Orders -->
                 <v-tab-item :value="`delivered-tab`">
                     <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests" :search="search">
                             <template v-slot:item.action="{ item }">
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                             </template>
@@ -107,7 +118,7 @@
     export default {
         data() {
             return {
-                tabModel: 'pending-tab',
+                tabModel: 'pending-tab', search: '',
                 order_request_information_dialog: false, loading: false,
                 table_headers: [
                     {text: 'Code', value: 'code', align: 'center'},

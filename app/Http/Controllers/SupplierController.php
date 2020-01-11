@@ -56,6 +56,11 @@ class SupplierController extends Controller
 
         Notification::send([User::find(1)], new \App\Notifications\UserCreationNotification($user));
 
+        \App\SystemLog::create([
+            'type' => 'Supplier',
+            'remarks' => $user->code." Created."
+        ]);
+
         return response(['success' => ['image' => \Cloudder::getPublicId(), 'user' => $user, 'supplier' => $supplier]], 200);
     }
 
@@ -103,10 +108,20 @@ class SupplierController extends Controller
         $supplier->update($updated_data);
         $supplier->information->update($updated_data);
 
+        \App\SystemLog::create([
+            'type' => 'Supplier',
+            'remarks' => $supplier->code." Updated."
+        ]);
+
         return response(['success' => ['user' => $supplier, 'supplier' => $supplier->information]], 200);
     }
 
     public function destroy(Request $request, User $supplier) {
+        \App\SystemLog::create([
+            'type' => 'Supplier',
+            'remarks' => $supplier->code." Deleted."
+        ]);
+
         Notification::send([User::find(1)], new \App\Notifications\UserDeletionNotification($supplier));
         $supplier->delete();
         return response(['success' => ['message' => 'Supplier Deleted']], 201);

@@ -32,6 +32,10 @@ class AuthController extends Controller
                     'information_id' => $user->role != 'Administrator' ? $user->information->id : null,
                     ]
                 ];
+                \App\SystemLog::create([
+                    'type' => 'Authentication',
+                    'remarks' => $user->code." Logged In."
+                ]);
                 return response($response, 200);
             } else {
                 $response = "Password missmatch";
@@ -45,6 +49,10 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request) {
+        \App\SystemLog::create([
+            'type' => 'Authentication',
+            'remarks' => $request->user()->username." Logged Out."
+        ]);
 
         $token = $request->user()->token();
         $token->revoke();
@@ -77,6 +85,11 @@ class AuthController extends Controller
         } else { $updated_data = $request->all();}
 
         $administrator->update($updated_data);
+
+        \App\SystemLog::create([
+            'type' => 'User Profile',
+            'remarks' => $administrator->username." Updated."
+        ]);
 
         return response(['success' => ['user' => $administrator]], 200);
     }
