@@ -50,7 +50,8 @@ class OrderRequestController extends Controller
                             ->join('logistics', 'logistics.id', 'manifests.logistic_id')
                             ->where('order_requests.customer_id', $request->user()->information->id)
                             ->select('order_requests.id', 'order_requests.code', 'manifests.delivery_date', 
-                                    'suppliers.name as supplier', 'logistics.name as logistic')->get();
+                                    'suppliers.name as supplier', 'logistics.name as logistic', 
+                                    'logistics.code as logistic_code', 'logistics.latitude', 'logistics.longitude')->get();
         return response(['success' => ['order_requests' => $receivable_list]], 200);
     }
 

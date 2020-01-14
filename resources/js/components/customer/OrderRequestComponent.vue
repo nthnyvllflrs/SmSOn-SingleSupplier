@@ -60,6 +60,23 @@
                     <v-container>
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="reveivable_table_headers" :items="order_requests" :search="search">
                             <template v-slot:item.action="{ item }">
+                                <v-icon class="mx-1" @click="showCurrentLocation(item)" v-if="item.delivery_date == new Date().toISOString().substr(0, 10)">fa-map-marker-alt</v-icon>
+                                <v-dialog v-model="mapDialog" max-width="750px" min-heigth="500px">
+                                    <v-card>
+                                        <v-card-text>
+                                            <v-container>
+                                                <GmapMap
+                                                    :options="mapOptions"
+                                                    :center="logisticCoordinates"
+                                                    :zoom="15"
+                                                    map-type-id="terrain"
+                                                    style="width: 100%; height: 50vh;">
+                                                    <GmapMarker :position="logisticCoordinates" />
+                                                </GmapMap>
+                                            </v-container>
+                                        </v-card-text>
+                                    </v-card>
+                                </v-dialog>
                                 <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
                             </template>
                         </v-data-table>
@@ -118,6 +135,13 @@
     export default {
         data() {
             return {
+                mapDialog: false,
+                logisticCoordinates: { lat: 6.9214, lng: 122.0790}, locationLastUpdatedAt: null, logisticBeingViewed: null,
+                mapOptions: {
+                    zoomControl: false, mapTypeControl: false, scaleControl: false,
+                    streetViewControl: false, rotateControl: false, fullscreenControl: false, disableDefaultUi: true
+                },
+
                 tabModel: 'pending-tab', search: '',
                 order_request_information_dialog: false, loading: false,
                 table_headers: [
@@ -142,9 +166,24 @@
 
         mounted() {
             this.retrieveOrderRequests('Pending')
+
+            Echo.channel('logistic')
+                .listen('UpdateLogisticLocation', (data) => {
+                    if(data.logistic.code == this.currentLogisticBeingViewed.logistic_code) {
+                        this.logisticCoordinates.lat = Number(data.logistic.latitude)
+                        this.logisticCoordinates.lng = Number(data.logistic.longitude)
+                    }
+                })
         },
 
         methods: {
+            showCurrentLocation(item) {
+                this.currentLogisticBeingViewed = item
+                this.logisticCoordinates.lat = Number(item.latitude)
+                this.logisticCoordinates.lng = Number(item.longitude)
+                this.mapDialog = true
+            },
+
             retrieveOrderRequests(status) {
                 this.loading = true
                 this.order_requests = []
