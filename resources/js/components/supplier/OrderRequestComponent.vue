@@ -5,7 +5,6 @@
                 <v-tab :href="`#disapproved-tab`" @click="retrieveOrderRequests('Disapproved')">Disapproved</v-tab>
                 <v-tab :href="`#pending-tab`" @click="retrieveOrderRequests('Pending')" active-class>Pending</v-tab>
                 <v-tab :href="`#aprroved-tab`" @click="retrieveOrderRequests('Approved')">Approved</v-tab>
-                <!-- <v-tab :href="`#deliverable-tab`" @click="retrieveOrderRequests('Receivable')">Deliverables</v-tab> -->
                 <v-tab :href="`#delivered-tab`" @click="retrieveOrderRequests('Delivered')">Delivered</v-tab>
             </v-tabs>
 
@@ -47,19 +46,6 @@
                         </v-data-table>
                     </v-container>
                 </v-tab-item>
-
-                <!-- Deliverables Orders -->
-                <!-- <v-tab-item :value="`deliverable-tab`">
-                    <v-container>
-                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
-                            <template v-slot:item.action="{ item }">
-                                <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
-                                <v-icon color="success" class="mx-1" @click="updatedRequestStatus(item, 'Delivered')">fa-check-square</v-icon>
-                                <v-icon color="error" class="mx-1" @click="updatedRequestStatus(item, 'Approved')">fa-times-circle</v-icon>
-                            </template>
-                        </v-data-table>
-                    </v-container>
-                </v-tab-item> -->
 
                 <!-- Delivered Orders -->
                 <v-tab-item :value="`delivered-tab`">

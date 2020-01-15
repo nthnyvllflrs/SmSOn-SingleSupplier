@@ -76,7 +76,7 @@
 
                 formErrors: { supplier_id: null, logistic_id: null, delivery_date: null},
                 
-                logisticCoordinates: { lat: 6.9214, lng: 122.079},
+                logisticCoordinates: { lat: 6.9214, lng: 122.0866},
                 customerCoordinates: { lat: 6.9161, lng: 122.0866},
                 mapOptions: {
                     zoomControl: false, mapTypeControl: false, scaleControl: false,
@@ -128,7 +128,7 @@
 
             ifLogistic() {
                 if(sessionStorage.getItem('user-role') == 'Logistic') {
-                    setInterval(() => this.getLogisticGeolocation(), 10000)
+                    window.locationInterval = setInterval(() => this.getLogisticGeolocation(), 10000)
                 }
             },
 
@@ -136,7 +136,7 @@
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(this.setLogisticGeolocation);
                 } else {
-                    clearInterval()
+                    window.clearInterval(window.locationInterval);
                     alert("Geolocation is not supported by this browser.");
                 }
             },
@@ -144,11 +144,11 @@
             setLogisticGeolocation(position) {
                 var logisticGeolocationLatitude = position.coords.latitude
                 var logisticGeolocationLongitude = position.coords.longitude
-                console.log(logisticGeolocationLatitude, logisticGeolocationLongitude)
+                // console.log(logisticGeolocationLatitude, logisticGeolocationLongitude)
                 axios.put('api/logistic/' + sessionStorage.getItem('user-id') + '/update-location', {
                     latitude: logisticGeolocationLatitude, longitude: logisticGeolocationLongitude,
                 })
-                .then( response => { console.log(response.data)}).catch( error => { toastr.error("An Error Occurred")})
+                .then( response => { /** console.log(response.data) **/}).catch( error => { toastr.error("An Error Occurred")})
             },
 
             openMapDialog(order_request) {

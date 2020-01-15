@@ -21,6 +21,8 @@ class CustomerController extends Controller {
                'username' => $customer->user->username,
                'name' => $customer->name,
                'address' => $customer->address,
+               'latitude' => $customer->latitude,
+               'longitude' => $customer->longitude,
                'contact_number' => $customer->contact_number,
            ];
         }
@@ -36,6 +38,8 @@ class CustomerController extends Controller {
             // Customer Model Data
             'name' => 'required|min:8|max:255',
             'address' => 'required|min:8|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'contact_number' => 'required|max:11|unique:customers,contact_number',
         ]);
 
@@ -68,6 +72,8 @@ class CustomerController extends Controller {
             // Customer Model Data
             'name' => 'required|min:8|max:255',
             'address' => 'required|min:8|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'contact_number' => 'required|max:11|unique:customers,contact_number,'.$customer->information->id,
         ]);
 

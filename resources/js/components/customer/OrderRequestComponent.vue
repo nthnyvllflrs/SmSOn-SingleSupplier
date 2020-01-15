@@ -1,14 +1,28 @@
 <template>
     <v-container>
         <v-card>
-            <v-tabs grow>
-                <v-tab @click="retrieveOrderRequests('Pending')">Pending</v-tab>
-                <v-tab @click="retrieveOrderRequests('Approved')">Approved</v-tab>
-                <v-tab @click="retrieveReceivables()">Receivables</v-tab>
-                <v-tab @click="retrieveOrderRequests('Delivered')">Delivered</v-tab>
+            <v-tabs grow v-model="tabModel">
+                <v-tab :href="`#disapproved-tab`"  @click="retrieveOrderRequests('Disapproved')">Disapproved</v-tab>
+                <v-tab :href="`#pending-tab`" @click="retrieveOrderRequests('Pending')">Pending</v-tab>
+                <v-tab :href="`#approved-tab`" @click="retrieveOrderRequests('Approved')">Approved</v-tab>
+                <v-tab :href="`#receivable-tab`" @click="retrieveReceivables()">Receivables</v-tab>
+                <v-tab :href="`#delivered-tab`" @click="retrieveOrderRequests('Delivered')">Delivered</v-tab>
+            </v-tabs>
+
+            <v-tabs-items v-model="tabModel">
+                <!-- Approved Orders -->
+                <v-tab-item :value="`disapproved-tab`">
+                    <v-container>
+                        <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
+                            <template v-slot:item.action="{ item }">
+                                <v-icon class="mx-1" @click="retrieveOrderRequestInformation(item)">fa-info-circle</v-icon>
+                            </template>
+                        </v-data-table>
+                    </v-container>
+                </v-tab-item>
 
                 <!-- Pending Orders -->
-                <v-tab-item>
+                <v-tab-item :value="`pending-tab`">
                     <v-container>
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
@@ -20,7 +34,7 @@
                 </v-tab-item>
 
                 <!-- Approved Orders -->
-                <v-tab-item>
+                <v-tab-item :value="`approved-tab`">
                     <v-container>
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
@@ -31,7 +45,7 @@
                 </v-tab-item>
 
                 <!-- Reveivable Orders -->
-                <v-tab-item>
+                <v-tab-item :value="`receivable-tab`">
                     <v-container>
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="reveivable_table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
@@ -42,7 +56,7 @@
                 </v-tab-item>
 
                 <!-- Delivered Orders -->
-                <v-tab-item>
+                <v-tab-item :value="`delivered-tab`">
                     <v-container>
                         <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="table_headers" :items="order_requests">
                             <template v-slot:item.action="{ item }">
@@ -51,39 +65,40 @@
                         </v-data-table>
                     </v-container>
                 </v-tab-item>
-
-                <v-dialog max-width="750" v-model="order_request_information_dialog">
-                    <v-card>
-                        <v-card-title>Order Request Details</v-card-title>
-                        <v-card-text>
-                            <v-row>
-                                <v-col cols=12 md=6>
-                                    <span class="ml-3 font-weight-bold">Supplier: {{ order_request_information.supplier }}</span>
-                                </v-col>
-                                <v-col cols=12 md=6>
-                                    <span class="ml-3 font-weight-bold">Total: Php {{ Number(order_request_information.total).toLocaleString() }}</span>
-                                </v-col>
-                                <v-col cols=12>
-                                    <v-row>
-                                        <v-col cols=12 md=6 v-for="(order, index) in order_request_information.details" :key="index">
-                                            <v-card>
-                                                <v-card-title class="subtitle-2">
-                                                    <span>{{ order.name }}</span><span class="caption ml-2">({{ order.code }})</span>
-                                                    <v-spacer></v-spacer>
-                                                    <span>Php {{ Number(order.total).toLocaleString() }}</span>
-                                                    </v-card-title>
-                                                <v-card-text class="body-2">
-                                                    {{ order.quantity}} {{ order.unit }}(s)
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-col>
-                                    </v-row>
-                                </v-col>
-                            </v-row>
-                        </v-card-text>
-                    </v-card>
-                </v-dialog>
-            </v-tabs>
+            </v-tabs-items>
+                
+            <v-dialog max-width="750" v-model="order_request_information_dialog">
+                <v-card>
+                    <v-card-title>Order Request Details</v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col cols=12 md=6>
+                                <span class="ml-3 font-weight-bold">Supplier: {{ order_request_information.supplier }}</span>
+                            </v-col>
+                            <v-col cols=12 md=6>
+                                <span class="ml-3 font-weight-bold">Total: Php {{ Number(order_request_information.total).toLocaleString() }}</span>
+                            </v-col>
+                            <v-col cols=12>
+                                <v-row>
+                                    <v-col cols=12 md=6 v-for="(order, index) in order_request_information.details" :key="index">
+                                        <v-card>
+                                            <v-card-title class="subtitle-2">
+                                                <span>{{ order.name }}</span><span class="caption ml-2">({{ order.code }})</span>
+                                                <v-spacer></v-spacer>
+                                                <span>Php {{ Number(order.total).toLocaleString() }}</span>
+                                                </v-card-title>
+                                            <v-card-text class="body-2">
+                                                {{ order.quantity}} {{ order.unit }}(s)
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-dialog>
+            
         </v-card>
     </v-container>
 </template>
@@ -92,6 +107,7 @@
     export default {
         data() {
             return {
+                tabModel: 'pending-tab',
                 order_request_information_dialog: false, loading: false,
                 table_headers: [
                     {text: 'Code', value: 'code', align: 'center'},

@@ -26,16 +26,52 @@
                                             <v-text-field :error-messages="formErrors.username" v-model="editedCustomerInformation.username" label="Username" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.password" v-model="editedCustomerInformation.password" label="Password" />
+                                            <v-text-field type="password" :error-messages="formErrors.password" v-model="editedCustomerInformation.password" label="Password" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-text-field :error-messages="formErrors.password_confirmation" v-model="editedCustomerInformation.password_confirmation" label="Password Confirmation" />
+                                            <v-text-field type="password" :error-messages="formErrors.password_confirmation" v-model="editedCustomerInformation.password_confirmation" label="Password Confirmation" />
                                         </v-col>
                                         <v-col cols=12>
                                             <v-text-field :error-messages="formErrors.name" v-model="editedCustomerInformation.name" label="Name" />
                                         </v-col>
                                         <v-col cols=12>
-                                            <v-textarea :error-messages="formErrors.address" v-model="editedCustomerInformation.address" label="Address" />
+                                            <v-textarea :error-messages="formErrors.address" v-model="editedCustomerInformation.address" label="Address">
+                                                <template slot="append-outer">
+                                                    <v-btn icon fab small color="primary" @click="openMapDialog">
+                                                        <v-icon>fa-map-marker-alt</v-icon>
+                                                    </v-btn>
+                                                    <v-dialog v-model="mapDialog" max-width="750px">
+                                                        <v-card>
+                                                            <v-card-title>Customer Address</v-card-title>
+                                                            <v-card-text>
+                                                                <v-container>
+                                                                    <GmapMap
+                                                                        ref="mapRef"
+                                                                        :options="mapOptions"
+                                                                        :center="{
+                                                                            lat: Number(editedCustomerInformation.latitude), 
+                                                                            lng: Number(editedCustomerInformation.longitude)
+                                                                        }"
+                                                                        :zoom="15"
+                                                                        map-type-id="terrain"
+                                                                        style="width: 100%; height: 50vh;">
+                                                                        <GmapMarker ref="mapMarker" :position="{
+                                                                            lat: Number(editedCustomerInformation.latitude), 
+                                                                            lng: Number(editedCustomerInformation.longitude)
+                                                                        }" />
+                                                                    </GmapMap>
+                                                                </v-container>
+                                                            </v-card-text>
+                                                        </v-card>
+                                                    </v-dialog>
+                                                </template>
+                                            </v-textarea>
+                                        </v-col>
+                                        <v-col cols=6>
+                                            <v-text-field v-model="editedCustomerInformation.latitude" label="Latitude" class="mr-2" readonly/>
+                                        </v-col>
+                                        <v-col cols=6>
+                                            <v-text-field v-model="editedCustomerInformation.longitude" label="Longitude" class="ml-2" readonly/>
                                         </v-col>
                                         <v-col cols=12>
                                             <v-text-field :error-messages="formErrors.contact_number" v-model="editedCustomerInformation.contact_number" label="Contact Number" />
@@ -62,10 +98,11 @@
 </template>
 
 <script>
+    import {gmapApi} from 'vue2-google-maps'
     export default {
         data() {
             return {
-                dialog: false, informationDialog: false,
+                dialog: false, informationDialog: false, mapDialog: false,
                 loading: false, search: '', editedIndex: -1,
                 customerTableHeaders: [
                     { text: 'Code', value: 'code' },
@@ -77,20 +114,42 @@
                 ],
                 customers: [],
 
-                defaultCustomerInformation: { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
-                editedCustomerInformation: { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null, supplier_id: sessionStorage.getItem('user-information-id')},
+                defaultCustomerInformation: { username: null, name: null, address: null, latitude: 6.9161, longitude: 122.0866, contact_number: null, password: null, password_confirmation: null, customer_id: sessionStorage.getItem('user-information-id')},
+                editedCustomerInformation: { username: null, name: null, address: null, latitude: 6.9161, longitude: 122.0866, contact_number: null, password: null, password_confirmation: null, customer_id: sessionStorage.getItem('user-information-id')},
                 formErrors: { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null},
+
+                customerCoordinates: { lat: 6.9161, lng: 122.0866},
+                mapOptions: {
+                    zoomControl: false, mapTypeControl: false, scaleControl: false,
+                    streetViewControl: false, rotateControl: false, fullscreenControl: false, disableDefaultUi: true
+                },
             }
         },
         mounted() {
             this.retrieveCustomers()
         },
         computed: {
+            google: gmapApi,
             formTitle () {
                 return this.editedIndex === -1 ? 'New Customer' : 'Edit Customer'
             },
         },
         methods: {
+            openMapDialog() {
+                this.mapDialog = true
+
+                this.$nextTick(() => {
+                    this.$refs.mapRef.$mapPromise.then((map) => {
+                        this.$refs.mapRef.$mapObject.addListener('click', this.changeMarkerPosition)
+                    })
+                })
+            },
+
+            changeMarkerPosition(event) {
+                this.editedCustomerInformation.latitude = event.latLng.lat()
+                this.editedCustomerInformation.longitude = event.latLng.lng()
+            },
+
             retrieveCustomers() {
                 this.loading = true
                 axios.get('/api/customer')
@@ -118,6 +177,8 @@
 
             editCustomer(customer) {
                 this.editedIndex = this.customers.indexOf(customer)
+                // this.customerCoordinates.lat = customer.latitude
+                // this.customerCoordinates.lng = customer.longitude
                 this.editedCustomerInformation = Object.assign({}, customer)
                 this.dialog = true
             },
@@ -143,7 +204,9 @@
                 this.loading = true
                 
                 axios.post('/api/customer', {
-                    ...(_.omit(this.editedCustomerInformation, 'code'))
+                    ...(_.omit(this.editedCustomerInformation, 'code')),
+                    // latitude: this.customerCoordinates.lat,
+                    // longitude: this.customerCoordinates.lng,
                 })
                 .then( response => {
                     this.editedCustomerInformation.code = response.data.success.customer.code
@@ -151,7 +214,6 @@
                     this.customers.push(this.editedCustomerInformation)
                     this.cancel()
                     toastr.success("Customers Created")
-                    console.log(this.editedCustomerInformation.id)
                 })
                 .catch( error => {
                     if(error.response.status == 422) {
@@ -171,10 +233,14 @@
                 this.loading = true
                 _.omit(this.editedCustomerInformation, 'code')
                 axios.put('/api/customer/' + this.editedCustomerInformation.id, {
-                    ...(_.omit(this.editedCustomerInformation, 'code'))
+                    ...(_.omit(this.editedCustomerInformation, 'code')),
+                    // latitude: this.customerCoordinates.lat,
+                    // longitude: this.customerCoordinates.lng,
                 })
                 .then( response => {
-                    Object.assign(this.customers[this.editedIndex], this.editedCustomerInformation)
+                    var customer = Object.assign(this.customers[this.editedIndex], this.editedCustomerInformation)
+                    // costumer.latitude = this.customerCoordinates.lat
+                    // costumer.longitude = this.customerCoordinates.lat
                     this.cancel()
                     toastr.success("Customers Updated")
                 })
