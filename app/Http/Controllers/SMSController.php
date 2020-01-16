@@ -15,7 +15,7 @@ class SMSController extends Controller
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
 
-        $result = $this->itexmo($request->phone_number, $request->message, "TR-AL-FA668030_IKY9F");
+        $result = iTextMo($request->phone_number, $request->message);
         if ($result == ""){
             return response(['msg' => 'iTexMo: No response from server!!!
             Please check the METHOD used (CURL or CURL-LESS). If you are using CURL then try CURL-LESS and vice versa.
@@ -27,22 +27,8 @@ class SMSController extends Controller
                 'type' => 'SMS',
                 'remarks' => $request->phone_number." Sent."
             ]);
-        } else{
+        } else {
             return response(['msg' => "Error Num ". $result . " was encountered!"], 400);
         }
-    }
-
-    function itexmo($number, $message, $apicode){
-        $url = 'https://www.itexmo.com/php_api/api.php';
-        $itexmo = array('1' => $number, '2' => $message, '3' => $apicode);
-        $param = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($itexmo),
-            ),
-        );
-        $context  = stream_context_create($param);
-        return file_get_contents($url, false, $context);
     }
 }
