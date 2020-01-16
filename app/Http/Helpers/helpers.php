@@ -8,7 +8,7 @@ function reverseGeocode($latitude, $longitude) {
     return $address ? $address : "Zamboanga City";
 }
 
-function iTextMo($number, $message, $apicode){
+function iTextMo($number, $message){
     $url = 'https://www.itexmo.com/php_api/api.php';
     $itexmo = array('1' => $number, '2' => $message, '3' => env('ITEXTMO_API_KEY', null));
     $param = array(
