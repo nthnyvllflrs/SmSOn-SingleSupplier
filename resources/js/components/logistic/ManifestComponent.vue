@@ -13,11 +13,11 @@
                 ></v-text-field>
             </v-card-title>
             <v-data-table :headers="dataTableHeaders" :items="manifests" show-expand single-expand expanded.sync :search="search">
-                <template v-slot:top>
+                <!-- <template v-slot:top>
                     <v-toolbar flat color="white">
                         <v-toolbar-title class="headline">Manifests</v-toolbar-title>
                     </v-toolbar>
-                </template>
+                </template> -->
 
                 <template v-slot:expanded-item="{ item, headers }">
                     <td :colspan="headers.length">

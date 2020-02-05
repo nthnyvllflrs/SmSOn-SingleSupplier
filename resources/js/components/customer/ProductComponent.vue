@@ -15,7 +15,7 @@
             <v-data-table calculate-widths :loading=loading loading-text="Loading... Please wait" :headers="productTableHeaders" :items="products" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
-                        <v-toolbar-title class="headline">Products</v-toolbar-title>
+                        <!-- <v-toolbar-title class="headline">Products</v-toolbar-title> -->
                     </v-toolbar>
                 </template>
                 <template v-slot:item.price="{ item }">

@@ -13,11 +13,11 @@
         </v-card-title>
         <v-card>
             <v-data-table :loading=loading loading-text="Loading... Please wait" :headers="supplierTableHeaders" :items="suppliers" :search="search">
-                <template v-slot:top>
+                <!-- <template v-slot:top>
                     <v-toolbar flat color="white">
                         <v-toolbar-title class="headline">Suppliers</v-toolbar-title>
                     </v-toolbar>
-                </template>
+                </template> -->
                 <template v-slot:item.action="{ item }">
                     <v-icon class="mx-1" @click="retrieveSupplierInformation(item)">fa-info-circle</v-icon>
                     

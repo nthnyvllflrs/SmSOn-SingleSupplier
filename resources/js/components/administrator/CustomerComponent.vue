@@ -15,7 +15,7 @@
             <v-data-table :loading="loading" loading-text="Loading... Please wait" :headers="customerTableHeaders" :items="customers" :search="search">
                 <template v-slot:top>
                     <v-toolbar flat color="white">
-                        <v-toolbar-title class="headline">Customers</v-toolbar-title>
+                        <!-- <v-toolbar-title class="headline">Customers</v-toolbar-title> -->
                         <div class="flex-grow-1"></div>
                         <v-dialog v-model="dialog" max-width="500px" persistent>
                             <template v-slot:activator="{ on }">
