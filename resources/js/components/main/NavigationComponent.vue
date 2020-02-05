@@ -463,7 +463,7 @@ import {mapGetters, mapActions} from 'vuex'
                 var permissions = {
                     Administrator: {
                         ...modules,
-                        order_requests: false, products: false, logistics: false, manifests: false
+                        // order_requests: false, products: false, logistics: false, manifests: false
                     },
                     Customer: {
                         ...modules,

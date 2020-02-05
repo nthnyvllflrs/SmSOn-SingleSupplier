@@ -16,12 +16,12 @@ class CreateManifestsTable extends Migration
         Schema::create('manifests', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('code')->unique();
-            $table->unsignedBigInteger('supplier_id');
+            // $table->unsignedBigInteger('supplier_id');
             $table->unsignedBigInteger('logistic_id');
             $table->date('delivery_date');
             $table->timestamps();
 
-            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
+            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
             $table->foreign('logistic_id')->references('id')->on('logistics')->onDelete('cascade');
         });
     }

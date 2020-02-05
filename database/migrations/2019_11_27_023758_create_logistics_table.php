@@ -17,7 +17,7 @@ class CreateLogisticsTable extends Migration
             $table->bigIncrements('id');
             $table->string('code')->unique();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('supplier_id');
+            // $table->unsignedBigInteger('supplier_id');
             $table->string('name');
             $table->string('address')->default('Zamboanga City');
             $table->string('latitude')->default(6.9214);
@@ -26,7 +26,7 @@ class CreateLogisticsTable extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
+            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
         });
     }
 

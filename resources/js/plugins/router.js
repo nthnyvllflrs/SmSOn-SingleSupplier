@@ -4,7 +4,7 @@ const MODULES = {
 const PERMISSIONS = {
     Administrator: {
         ...MODULES,
-        order_requests: false, products: false, logistics: false, manifests: false, 
+        // order_requests: false, products: false, logistics: false, manifests: false, 
         default: 'customers'
     },
     Customer: {

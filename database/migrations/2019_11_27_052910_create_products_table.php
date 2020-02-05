@@ -15,7 +15,7 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('supplier_id');
+            // $table->unsignedBigInteger('supplier_id');
             $table->string('code')->unique();
             $table->string('name');
             $table->string('description');
@@ -23,7 +23,7 @@ class CreateProductsTable extends Migration
             $table->decimal('price',9, 2);
             $table->timestamps();
 
-            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
+            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
         });
     }
 

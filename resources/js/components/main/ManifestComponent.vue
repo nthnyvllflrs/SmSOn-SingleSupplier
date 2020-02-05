@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <supplier-manifest v-if="userRole == 'Supplier'" />
+        <supplier-manifest v-if="userRole == 'Administrator'" />
         <logistic-manifest v-if="userRole == 'Logistic'" />
     </v-container>
 </template>

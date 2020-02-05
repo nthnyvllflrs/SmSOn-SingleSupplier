@@ -1,6 +1,6 @@
 <template>
     <div>
-        <supplier-product v-if="userRole == 'Supplier'" />
+        <supplier-product v-if="userRole == 'Administrator'" />
         <customer-product v-if="userRole == 'Customer'" />
     </div>
 </template>

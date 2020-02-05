@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <supplier-order-request v-if="userRole == 'Supplier'" />
+        <supplier-order-request v-if="userRole == 'Administrator'" />
         <customer-order-request v-if="userRole == 'Customer'" />
     </v-container>
 </template>
