@@ -61,11 +61,30 @@
                     </v-toolbar>
                 </template>
                 <template v-slot:item.action="{ item }">
+                    <v-icon class="mx-1" @click="openStockDialog(item)">fa-boxes</v-icon>
                     <v-icon class="mx-1" @click="editProduct(item)">fa-pen</v-icon>
                     <v-icon class="mx-1" @click="deleteProduct(item)">fa-trash-alt</v-icon>
                 </template>
             </v-data-table>
         </v-card>
+
+        <v-dialog v-model="stockDialog" max-width="300px">
+            <v-card>
+                <v-card-title>Available Stock</v-card-title>
+                <v-card-text>
+                    <v-row>
+                        <v-col cols=9 align="center" justify="center">
+                            <v-text-field type="number" label="Available Stock(s)" v-model="productStock"/>
+                        </v-col>
+                        <v-col cols=3 align="center" justify="center">
+                            <v-btn color="primary" dark small fab @click="updateStock()" :loading="loading">
+                                <v-icon dark small>fa-check</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
@@ -75,7 +94,7 @@
             return {
                 supplierID: sessionStorage.getItem('user-information-id'),
 
-                dialog: false, informationDialog: false,
+                dialog: false, informationDialog: false, stockDialog: false,
                 loading: false, search: '', editedIndex: -1,
                 productTableHeaders: [
                     { text: 'Code', value: 'code' },
@@ -90,6 +109,8 @@
                 defaultProductInformation: { code: null, name: null, description: null, unit: null, price: null, supplier_id: sessionStorage.getItem('user-information-id')},
                 editedProductInformation: { code: null, name: null, description: null, unit: null, price: null, supplier_id: sessionStorage.getItem('user-information-id')},
                 formErrors: { code: null, name: null, description: null, unit: null, price: null,},
+
+                productStock: 0,
             }
         },
         mounted() {
@@ -101,6 +122,13 @@
             },
         },
         methods: {
+            openStockDialog(product) {
+                this.stockDialog = true
+                this.productStock = product.stock.available
+                this.editedIndex = this.products.indexOf(product)
+                this.editedProductInformation = Object.assign({}, product)
+            },
+
             retrieveProducts() {
                 this.loading = true
                 axios.get('/api/product')
@@ -135,7 +163,7 @@
             },
             
             cancel() {
-                this.dialog = false; this.informationDialog = false
+                this.dialog = false; this.informationDialog = false; this.stockDialog = false;
                 setTimeout(() => {
                     this.formErrors = { username: null, name: null, address: null, contact_number: null, password: null, password_confirmation: null}
                     this.editedProductInformation = Object.assign({}, this.defaultProductInformation)
@@ -158,11 +186,12 @@
                     ...this.editedProductInformation
                 })
                 .then( response => {
-                    this.editedProductInformation.id = response.data.success.product.id
+                    this.editedProductInformation.product_id = response.data.success.product.id
+                    this.editedProductInformation.stock = response.data.success.product.stock
                     this.products.push(this.editedProductInformation)
                     this.cancel()
                     toastr.success("Product Created")
-                    console.log(this.editedProductInformation.id)
+                    console.log(this.editedProductInformation.product_id)
                 })
                 .catch( error => {
                     if(error.response.status == 422) {
@@ -181,7 +210,7 @@
             updateProduct() {
                 this.loading = true
                 _.omit(this.editedProductInformation, 'code')
-                axios.put('/api/product/' + this.editedProductInformation.id, {
+                axios.put('/api/product/' + this.editedProductInformation.product_id, {
                     ...this.editedProductInformation
                 })
                 .then( response => {
@@ -201,6 +230,22 @@
                     }
                 })
                 .finally( x => { this.loading = false})
+            },
+
+            updateStock() {
+                this.loading = true
+                axios.put('/api/product/' + this.editedProductInformation.product_id + '/stock', {
+                    available: this.productStock
+                })
+                .then( response => {
+                    this.editedProductInformation.stock.available = this.productStock
+                    this.cancel()
+                    toastr.success("Product Stock Updated")
+                })
+                .catch( error => {
+                    toastr.error("An Error While Updating Stocks")
+                })
+                .finally(() => this.loading = false)
             }
         }
     }

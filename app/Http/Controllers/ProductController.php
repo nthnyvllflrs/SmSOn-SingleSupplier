@@ -11,13 +11,13 @@ use App\Product;
 class ProductController extends Controller
 {
     public function index(Request $request) {
-        if($request->user()->role == 'Administrator') {
-            return response(['success' => ['products' => Product::all()]], 200);
-        // } elseif($request->user()->role == 'Supplier') {
-        //     return response(['success' => [
-        //         'products' => Product::where('supplier_id', $request->user()->information->id)->get()]
-        //     ], 200);
-        } elseif($request->user()->role == 'Customer') {
+        // if($request->user()->role == 'Administrator') {
+        //     return response(['success' => ['products' => Product::all()]], 200);
+        // // } elseif($request->user()->role == 'Supplier') {
+        // //     return response(['success' => [
+        // //         'products' => Product::where('supplier_id', $request->user()->information->id)->get()]
+        // //     ], 200);
+        // } elseif($request->user()->role == 'Customer') {
             $_products = Product::all();
             $products = [];
             foreach($_products as $product) {
@@ -30,10 +30,11 @@ class ProductController extends Controller
                     'description' => $product->description,
                     'unit' => $product->unit,
                     'price' => $product->price,
+                    'stock' => $product->stock,
                 ];
             }
             return response(['success' => ['products' => $products]], 200);
-        }
+        // }
     }
 
     public function store(Request $request) {
@@ -54,7 +55,7 @@ class ProductController extends Controller
             'type' => 'Product',
             'remarks' => $product->code." Created."
         ]);
-
+        $product->stock;
         return response(['success' => ['product' => $product]], 200);
     }
 
@@ -90,6 +91,16 @@ class ProductController extends Controller
         ]);
 
         $product->delete();
-        return response(['success' => ['message' => 'product Deleted']], 201);
+        return response(['success' => ['message' => 'Product Deleted']], 201);
+    }
+
+    public function stock(Request $request, Product $product) {
+        $validator = Validator::make($request->all(), [
+            'available' => 'required|numeric|min:1',
+        ]);
+
+        if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
+        $product->stock->update($request->toArray());
+        return response(['success' => ['message' => 'Product Stock Updated']], 201);
     }
 }

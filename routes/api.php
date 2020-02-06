@@ -46,6 +46,7 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::post('/', 'ProductController@store');
             Route::get('/{product}', 'ProductController@show');
             Route::put('/{product}', 'ProductController@update');
+            Route::put('/{product}/stock', 'ProductController@stock');
             Route::delete('/{product}', 'ProductController@destroy');
         });
 
