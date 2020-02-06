@@ -28,7 +28,7 @@ class ManifestController extends Controller
             $order_requests = [];
             foreach($manifest->details as $manifest_detail) {
                 $order_requests[] = [
-                    'id' => $manifest_detail->id, 
+                    'id' => $manifest_detail->orderRequest->id, 
                     'code' => $manifest_detail->orderRequest->code, 
                     'customer' => $manifest_detail->orderRequest->customer->name, 
                     'address' => $manifest_detail->orderRequest->customer->address, 

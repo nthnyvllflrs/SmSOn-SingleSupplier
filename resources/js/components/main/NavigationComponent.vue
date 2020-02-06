@@ -125,14 +125,14 @@
                             <v-list-item-title class="subtitle-2 font-weight-bold">Customers</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
-                    <v-list-item to="/suppliers" v-if="userPermission('suppliers')">
+                    <!-- <v-list-item to="/suppliers" v-if="userPermission('suppliers')">
                         <v-list-item-avatar>
                             <v-icon>fa-boxes</v-icon>
                         </v-list-item-avatar>
                         <v-list-item-content>
                             <v-list-item-title class="subtitle-2 font-weight-bold">Suppliers</v-list-item-title>
                         </v-list-item-content>
-                    </v-list-item>
+                    </v-list-item> -->
                     <v-list-item to="/order-requests" v-if="userPermission('order_requests')">
                         <v-list-item-avatar>
                             <v-icon>fa-list</v-icon>

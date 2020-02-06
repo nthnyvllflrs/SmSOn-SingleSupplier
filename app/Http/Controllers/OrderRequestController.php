@@ -53,6 +53,7 @@ class OrderRequestController extends Controller
                             ->join('manifests', 'manifests.id', 'manifest_details.manifest_id')
                             ->join('logistics', 'logistics.id', 'manifests.logistic_id')
                             ->where('order_requests.customer_id', $request->user()->information->id)
+                            ->where('order_requests.status', 'Approved')
                             ->select('order_requests.id', 'order_requests.code', 'manifests.delivery_date', 
                                     // 'suppliers.name as supplier', 
                                     'logistics.name as logistic', 
@@ -149,26 +150,26 @@ class OrderRequestController extends Controller
             'remarks' => $order_request->code." Updated Status."
         ]);
 
-        if($request->status == 'Delivered') {
-            $customer_phone_number = $order_request->customer->contact_number;
-            $message = "Your Order Request with ORID ".$order_request->code." has been delivered.";
-            $result = iTextMo($customer_phone_number, $message);
+        // if($request->status == 'Delivered') {
+        //     $customer_phone_number = $order_request->customer->contact_number;
+        //     $message = "Your Order Request with ORID ".$order_request->code." has been delivered.";
+        //     $result = iTextMo($customer_phone_number, $message);
 
-            if ($result == ""){
-                return response(['msg' => 'iTexMo: No response from server!!!
-                Please check the METHOD used (CURL or CURL-LESS). If you are using CURL then try CURL-LESS and vice versa.
-                Please CONTACT US for help.'], 200);
-            } else if ($result == 0){
-                return response(['msg' => 'Message Sent!'], 200);
+        //     if ($result == ""){
+        //         return response(['msg' => 'iTexMo: No response from server!!!
+        //         Please check the METHOD used (CURL or CURL-LESS). If you are using CURL then try CURL-LESS and vice versa.
+        //         Please CONTACT US for help.'], 200);
+        //     } else if ($result == 0){
+        //         return response(['msg' => 'Message Sent!'], 200);
     
-                \App\SystemLog::create([
-                    'type' => 'SMS',
-                    'remarks' => $request->phone_number." Sent."
-                ]);
-            } else {
-                return response(['msg' => "Error Num ". $result . " was encountered!"], 400);
-            }
-        }
+        //         \App\SystemLog::create([
+        //             'type' => 'SMS',
+        //             'remarks' => $request->phone_number." Sent."
+        //         ]);
+        //     } else {
+        //         return response(['msg' => "Error Num ". $result . " was encountered!"], 400);
+        //     }
+        // }
 
         return response(['success' => ['message' => $order_request->code." Status Updated"]], 200);
     }
