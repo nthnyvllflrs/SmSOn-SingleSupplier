@@ -54,7 +54,7 @@ import {mapActions} from 'vuex'
         data() {
             return {
                 search: null, quantityModal: false, productQuantity: 0,
-                selectedProduct: {}, loading: false,
+                selectedProduct: { stock: { available: 0}}, loading: false,
 
                 productTableHeaders: [
                     { text: 'Code', value: 'code' },
@@ -63,6 +63,7 @@ import {mapActions} from 'vuex'
                     // { text: 'Supplier', value: 'supplier' },
                     { text: 'Unit', value: 'unit' },
                     { text: 'Price', value: 'price' },
+                    { text: 'Available', value: 'stock.available' },
                     { text: 'Actions', value: 'action', align: 'center', sortable: false, width: 200 },
                 ],
 
@@ -100,7 +101,7 @@ import {mapActions} from 'vuex'
             },
 
             addCartItem() {
-                if(this.selectedProduct.quantity > 0) {
+                if(this.selectedProduct.quantity > 0 && this.selectedProduct.quantity <= this.selectedProduct.stock.available) {
                     var product = Object.assign({}, this.selectedProduct)
                     this.addCartProduct(product)
                     toastr.success("Product Added")

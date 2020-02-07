@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Validator;
 
 class SMSController extends Controller
 {
+    public function webhook(Request $request) {
+        return response('Webhook Successful!', 200);
+    }
+
     public function send_sms(Request $request) {
         $validator = Validator::make($request->all(), [
             'phone_number' => 'required|string',
@@ -30,5 +34,126 @@ class SMSController extends Controller
         } else {
             return response(['msg' => "Error Num ". $result . " was encountered!"], 400);
         }
+    }
+
+    public function sms_request(Request $request) {
+        try {
+            // $user_check = \App\UserInformation::join('users', 'users.id', 'user_information.user_id')
+            //                                     ->join('user_types', 'user_types.id', 'users.user_type')
+            //                                     ->where([['user_information.phone_number', $request->phone_number], ['user_types.name', 'Customer']])->exists();
+            $customer = \App\Customer::where('contact_number', $request->phone_number)->exists();
+            if(!$customer) { return response('Phone number not tied to any registered customer. Please use a registered phone number. Thank you.');}
+
+            $sms_request = explode(' ', $request->body);
+            if(strtoupper($sms_request[0]) == 'PRODUCTLIST') {
+                return $this->product_list();
+            } else if (strtoupper($sms_request[0]) == 'ORDER'){
+                return $this->order_request($sms_request, $request->phone_number);
+            } else if (strtoupper($sms_request[0]) == 'CANCEL'){
+                return $this->cancel_request($sms_request, $request->phone_number);
+            } else {
+                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+            }
+        } catch (\Exception $e) {
+            return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+        }
+    }
+
+    private function order_request($sms_request, $phone_number) {
+        if(count(array_slice($sms_request, 1)) != 0) {
+            try {
+                $orders = [];
+                foreach(array_slice($sms_request, 1) as $order) {
+                    $order_ = explode('_', $order);
+                    $product = \App\Product::where('code', $order_[0])->first();
+                    $quantity = is_numeric($order_[1]);
+
+                    if(!$product) { return response('A non-existing product code was detected. Please double check order code and then try again. Thank you.');}
+
+                    if(!$quantity) { return response('Incorrect quantity format. Please double check order quantity and then try again. Thank you.');}
+
+                    $orders[] = [ 'product_id' => $product->id, 'quantity' => (integer) $order_[1],];
+                }
+
+                $customer = \App\Customer::where('phone_number', $phone_number)->first();
+
+                $new_order_request = \App\Request::create(['user_id' => $customer->id]);
+                foreach ($orders as $order) {
+                    if($order['quantity'] > 0) {
+                        \App\OrderRequestDetail::create(['order_request_id' => $new_order_request->id, 'product_id' => $order['product_id'], 'quantity' => $order['quantity']]);
+                    }
+                }
+
+                // $broadcast = [ 'username' => $new_order_request->user->username, 'request_code' => $new_order_request->code, 'date_time' => date('d-m-Y H:m:s', strtotime($new_order_request->updated_at))];
+                // event(new \App\Events\NewRequest($broadcast));
+
+                // Notification::send([\App\User::find(1)], new \App\Notifications\RequestNotification($new_order_request));
+                // \App\Log::create(['type' => 'Creation', 'code' => $new_order_request->code]);
+
+                Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestCreationNotification($new_order_request));
+                event(new \App\Events\OrderRequest([
+                    'user_id' => \App\User::find(1)->id, 'code' => $new_order_request->code, 'type' => 'Created'
+                ]));
+                
+                \App\SystemLog::create([
+                    'type' => 'Order Request',
+                    'remarks' => $new_order_request->code." Created."
+                ]);
+
+                return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
+            } catch (\Exception $e) {
+                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+            }
+        } else {
+            return response('Order Request empty. Please add your order request. E.g. ORDER ITEM01_100 ITEM02_200. Thank you.');
+        }
+    }
+
+    private function cancel_request($sms_request, $phone_number) {
+        if(count(array_slice($sms_request, 1)) != 0) {
+            try {
+                $customer = \App\Customer::where('contact_number', $phone_number)->first();
+                $order_request = \App\OrderRequest::where([['code', $sms_request[1]], ['customer_id', $customer->id]])->exists();
+                if(!$order_request) { return response('Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');}
+
+                $order_request = \App\OrderRequest::where('code', $sms_request[1])->first();
+                if($order_request->status == 'Pending') {
+                    $order_request->delete();
+
+                    // $broadcast = [ 'username' => $order_request->user->username,  'request_code' => $order_request->code,  'status' => $order_request->status, 'date_time' => date('d-m-Y H:m:s', strtotime($order_request->updated_at))];
+                    // event(new \App\Events\UpdateRequest($broadcast));
+
+                    // Notification::send([\App\User::find(1)], new \App\Notifications\RequestNotification($order_request));
+                    // \App\Log::create(['type' => 'Cancelation', 'code' => $order_request->code]);
+
+                    Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestDeletionNotification($new_order_request));
+                    event(new \App\Events\OrderRequest([
+                        'user_id' => \App\User::find(1)->id, 'code' => $order_request->code, 'type' => 'Deleted'
+                    ]));
+                    
+                    \App\SystemLog::create([
+                        'type' => 'Order Request',
+                        'remarks' => $order_request->code." Deleted."
+                    ]);
+                    return response('('.$order_request->code.') Request successfuly canceled. Thank you.');
+                } else {
+                    return response('Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.');
+                }
+            } catch (\Exception $e) {
+                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+            }
+        } else {
+            return response('Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
+        }
+    }
+
+    private function product_list() {
+        $product_list = \App\Product::all();
+        $response = 'Product Code List\n';
+        foreach ($product_list as $product) {
+            $response = $response.$product->code.'\n';
+        }
+        $response = $response.'To order send ORDER PRODUCTCODE_QUANTITY. E.g. ORDER PROD01_100 PROD02_200';
+        return response($response);
     }
 }
