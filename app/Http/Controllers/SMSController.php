@@ -37,7 +37,7 @@ class SMSController extends Controller
     }
 
     public function sms_webhook(Request $request) {
-        // try {
+        try {
             // $user_check = \App\UserInformation::join('users', 'users.id', 'user_information.user_id')
             //                                     ->join('user_types', 'user_types.id', 'users.user_type')
             //                                     ->where([['user_information.phone_number', $request->phone_number], ['user_types.name', 'Customer']])->exists();
@@ -54,14 +54,14 @@ class SMSController extends Controller
             } else {
                 return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
             }
-        // } catch (\Exception $e) {
-        //     return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
-        // }
+        } catch (\Exception $e) {
+            return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+        }
     }
 
     private function order_request($sms_request, $phone_number) {
         if(count(array_slice($sms_request, 1)) != 0) {
-            // try {
+            try {
                 $orders = [];
                 foreach(array_slice($sms_request, 1) as $order) {
                     $order_ = explode('_', $order);
@@ -111,9 +111,9 @@ class SMSController extends Controller
                 ]);
 
                 return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
-            // } catch (\Exception $e) {
-            //     return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
-            // }
+            } catch (\Exception $e) {
+                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
+            }
         } else {
             return response('Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.');
         }
@@ -121,7 +121,7 @@ class SMSController extends Controller
 
     private function cancel_request($sms_request, $phone_number) {
         if(count(array_slice($sms_request, 1)) != 0) {
-            // try {
+            try {
                 $customer = \App\Customer::where('contact_number', $phone_number)->first();
                 $order_request = \App\OrderRequest::where([['code', $sms_request[1]], ['customer_id', $customer->id]])->exists();
                 if(!$order_request) { return response('Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');}
@@ -156,9 +156,9 @@ class SMSController extends Controller
                 } else {
                     return response('Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.');
                 }
-            // } catch (\Exception $e) {
-            //     return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
-            // }
+            } catch (\Exception $e) {
+                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+            }
         } else {
             return response('Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
         }
