@@ -137,8 +137,6 @@ class OrderRequestController extends Controller
     }
 
     public function destroy(Request $request, OrderRequest $order_request) {
-        
-
         Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestDeletionNotification($order_request));
         event(new \App\Events\OrderRequest([
             'user_id' => \App\User::find(1)->id, 'code' => $order_request->code, 'type' => 'Deleted'
@@ -148,6 +146,12 @@ class OrderRequestController extends Controller
             'type' => 'Order Request',
             'remarks' => $order_request->code." Deleted."
         ]);
+
+        foreach($order_request->details as $order_request_detail) {
+            $stock = $order_request_detail->product->stock;
+            $stock->pending = $stock->pending - $order_request_detail->quantity;
+            $stock->save();    
+        }
 
         $order_request->delete();
         // event(new \App\Events\OrderRequest([
@@ -170,6 +174,13 @@ class OrderRequestController extends Controller
         ]);
 
         if($request->status == 'Delivered') {
+            foreach($order_request->details as $order_request_detail) {
+                $stock = $order_request_detail->product->stock;
+                $stock->delivered = $stock->delivered + $order_request_detail->quantity;
+                $stock->approved = $stock->approved - $order_request_detail->quantity;
+                $stock->save();    
+            }
+
             // $customer_phone_number = $order_request->customer->contact_number;
             // $message = "Your Order Request with ORID ".$order_request->code." has been delivered.";
             // $result = iTextMo($customer_phone_number, $message);
@@ -179,8 +190,6 @@ class OrderRequestController extends Controller
             //     Please check the METHOD used (CURL or CURL-LESS). If you are using CURL then try CURL-LESS and vice versa.
             //     Please CONTACT US for help.'], 200);
             // } else if ($result == 0){
-            //     return response(['msg' => 'Message Sent!'], 200);
-    
             //     \App\SystemLog::create([
             //         'type' => 'SMS',
             //         'remarks' => $request->phone_number." Sent."
@@ -188,12 +197,7 @@ class OrderRequestController extends Controller
             // } else {
             //     return response(['msg' => "Error Num ". $result . " was encountered!"], 400);
             // }
-            foreach($order_request->details as $order_request_detail) {
-                $stock = $order_request_detail->product->stock;
-                $stock->delivered = $stock->delivered + $order_request_detail->quantity;
-                $stock->approved = $stock->approved - $order_request_detail->quantity;
-                $stock->save();    
-            }
+            
         } else if($request->status == 'Approved') {
             foreach($order_request->details as $order_request_detail) {
                 $stock = $order_request_detail->product->stock;

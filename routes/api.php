@@ -6,6 +6,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
     // public routes
     Route::post('/login', 'AuthController@login');
+    Route::get('/sms-webhook', 'SMSController@sms_webhook');
 
     // private routes
     Route::middleware('auth:api')->group(function () {

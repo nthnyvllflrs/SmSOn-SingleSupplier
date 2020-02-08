@@ -36,8 +36,8 @@ class SMSController extends Controller
         }
     }
 
-    public function sms_request(Request $request) {
-        try {
+    public function sms_webhook(Request $request) {
+        // try {
             // $user_check = \App\UserInformation::join('users', 'users.id', 'user_information.user_id')
             //                                     ->join('user_types', 'user_types.id', 'users.user_type')
             //                                     ->where([['user_information.phone_number', $request->phone_number], ['user_types.name', 'Customer']])->exists();
@@ -54,14 +54,14 @@ class SMSController extends Controller
             } else {
                 return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
             }
-        } catch (\Exception $e) {
-            return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
-        }
+        // } catch (\Exception $e) {
+        //     return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+        // }
     }
 
     private function order_request($sms_request, $phone_number) {
         if(count(array_slice($sms_request, 1)) != 0) {
-            try {
+            // try {
                 $orders = [];
                 foreach(array_slice($sms_request, 1) as $order) {
                     $order_ = explode('_', $order);
@@ -75,12 +75,22 @@ class SMSController extends Controller
                     $orders[] = [ 'product_id' => $product->id, 'quantity' => (integer) $order_[1],];
                 }
 
-                $customer = \App\Customer::where('phone_number', $phone_number)->first();
+                $customer = \App\Customer::where('contact_number', $phone_number)->first();
 
-                $new_order_request = \App\Request::create(['user_id' => $customer->id]);
+                $new_order_request = \App\OrderRequest::create(['customer_id' => $customer->id]);
                 foreach ($orders as $order) {
                     if($order['quantity'] > 0) {
-                        \App\OrderRequestDetail::create(['order_request_id' => $new_order_request->id, 'product_id' => $order['product_id'], 'quantity' => $order['quantity']]);
+                        $product_ = \App\Product::find($order['product_id']);
+
+                        \App\OrderRequestDetail::create([
+                            'order_request_id' => $new_order_request->id, 
+                            'product_id' => $order['product_id'], 
+                            'quantity' => $order['quantity'],
+                            'total' => $order['quantity'] * $product_->price,
+                        ]);
+
+                        $product_->stock->pending = (integer) $product_->stock->pending + (integer) $order['quantity'];
+                        $product_->stock->save();
                     }
                 }
 
@@ -90,7 +100,7 @@ class SMSController extends Controller
                 // Notification::send([\App\User::find(1)], new \App\Notifications\RequestNotification($new_order_request));
                 // \App\Log::create(['type' => 'Creation', 'code' => $new_order_request->code]);
 
-                Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestCreationNotification($new_order_request));
+                \Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestCreationNotification($new_order_request));
                 event(new \App\Events\OrderRequest([
                     'user_id' => \App\User::find(1)->id, 'code' => $new_order_request->code, 'type' => 'Created'
                 ]));
@@ -101,23 +111,30 @@ class SMSController extends Controller
                 ]);
 
                 return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
-            } catch (\Exception $e) {
-                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
-            }
+            // } catch (\Exception $e) {
+            //     return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
+            // }
         } else {
-            return response('Order Request empty. Please add your order request. E.g. ORDER ITEM01_100 ITEM02_200. Thank you.');
+            return response('Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.');
         }
     }
 
     private function cancel_request($sms_request, $phone_number) {
         if(count(array_slice($sms_request, 1)) != 0) {
-            try {
+            // try {
                 $customer = \App\Customer::where('contact_number', $phone_number)->first();
                 $order_request = \App\OrderRequest::where([['code', $sms_request[1]], ['customer_id', $customer->id]])->exists();
                 if(!$order_request) { return response('Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');}
 
                 $order_request = \App\OrderRequest::where('code', $sms_request[1])->first();
                 if($order_request->status == 'Pending') {
+
+                    foreach($order_request->details as $order_request_detail) {
+                        $stock = $order_request_detail->product->stock;
+                        $stock->pending = $stock->pending - $order_request_detail->quantity;
+                        $stock->save();    
+                    }
+
                     $order_request->delete();
 
                     // $broadcast = [ 'username' => $order_request->user->username,  'request_code' => $order_request->code,  'status' => $order_request->status, 'date_time' => date('d-m-Y H:m:s', strtotime($order_request->updated_at))];
@@ -126,7 +143,7 @@ class SMSController extends Controller
                     // Notification::send([\App\User::find(1)], new \App\Notifications\RequestNotification($order_request));
                     // \App\Log::create(['type' => 'Cancelation', 'code' => $order_request->code]);
 
-                    Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestDeletionNotification($new_order_request));
+                    \Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestDeletionNotification($order_request));
                     event(new \App\Events\OrderRequest([
                         'user_id' => \App\User::find(1)->id, 'code' => $order_request->code, 'type' => 'Deleted'
                     ]));
@@ -139,9 +156,9 @@ class SMSController extends Controller
                 } else {
                     return response('Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.');
                 }
-            } catch (\Exception $e) {
-                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
-            }
+            // } catch (\Exception $e) {
+            //     return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+            // }
         } else {
             return response('Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
         }
