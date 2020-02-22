@@ -196,7 +196,7 @@
                 setTimeout(() => {
                     this.editedManifest = Object.assign({}, this.defaultManifest)
                     this.editedIndex = -1
-                }, 500)
+                }, 300)
             },
 
             saveManifest() {

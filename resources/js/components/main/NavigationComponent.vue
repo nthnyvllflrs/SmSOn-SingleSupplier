@@ -79,8 +79,8 @@
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols=12>Order Request(s) Reference Code(s)</v-col>
-                                        <v-col cols=12 md=6 v-for="(code, index) in orderRequestCodes" :key="index">
-                                            <v-chip class="font-weight-medium" color="primary">{{ code }}</v-chip>
+                                        <v-col cols=12 md=6>
+                                            <v-chip class="font-weight-medium" color="primary">{{ orderRequestCode }}</v-chip>
                                         </v-col>
                                     </v-row>
                                 </v-card-text>
@@ -307,7 +307,7 @@ import {mapGetters, mapActions} from 'vuex'
                 userInformationId: sessionStorage.getItem('user-information-id'),
                 sideNavigationBar: true, cartDrawer: false, profileDialog: false,
                 confirmationDialog: false, orderRequestCodeDialog: false, notificationDialog: false, loading: false,
-                orderRequestCodes: [], userNotifications: [],
+                orderRequestCode: null, userNotifications: [],
 
                 userProfile: {
                     code: null, username: null, password: null, password_confirmation: null,
@@ -424,7 +424,7 @@ import {mapGetters, mapActions} from 'vuex'
                         ...this.cartProducts
                     })
                     .then( response => {
-                        this.orderRequestCodes = response.data.success.order_request_codes
+                        this.orderRequestCode = response.data.success.order_request_code
                         this.resetCart()
                         this.cartDrawer = false
                         this.orderRequestCodeDialog = true

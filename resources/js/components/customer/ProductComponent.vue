@@ -60,7 +60,7 @@ import {mapActions} from 'vuex'
                     { text: 'Code', value: 'code' },
                     { text: 'Name', value: 'name' },
                     { text: 'Description', value: 'description' },
-                    { text: 'Supplier', value: 'supplier' },
+                    // { text: 'Supplier', value: 'supplier' },
                     { text: 'Unit', value: 'unit' },
                     { text: 'Price', value: 'price' },
                     { text: 'Actions', value: 'action', align: 'center', sortable: false, width: 200 },

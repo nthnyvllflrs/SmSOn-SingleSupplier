@@ -15,8 +15,8 @@ class ManifestController extends Controller
     public function index(Request $request) {
         if($request->user()->role == 'Administrator') {
             $_manifests = Manifest::all();
-        } elseif($request->user()->role == 'Supplier') {
-            $_manifests = Manifest::where('supplier_id', $request->user()->information->id)->get();
+        // } elseif($request->user()->role == 'Supplier') {
+        //     $_manifests = Manifest::where('supplier_id', $request->user()->information->id)->get();
         } elseif($request->user()->role == 'Logistic') {
             $_manifests = Manifest::where('logistic_id', $request->user()->information->id)->get();
         } else {
@@ -48,7 +48,7 @@ class ManifestController extends Controller
 
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
-            'supplier_id' => 'required|exists:suppliers,id',
+            // 'supplier_id' => 'required|exists:suppliers,id',
             'logistic_id' => 'required|exists:logistics,id',
             'delivery_date' => 'required|date',
             'order_requests' => 'required|array|min:1',
@@ -83,7 +83,9 @@ class ManifestController extends Controller
             ];
         }
         $manifest = [
-            'id' => $manifest->id, 'supplier_id' => $request->user()->information->id, 'code' => $manifest->code, 
+            'id' => $manifest->id, 
+            // 'supplier_id' => $request->user()->information->id, 
+            'code' => $manifest->code, 
             'logistic' => $manifest->logistic->name, 'logistic_id' => $manifest->logistic->id,
             'delivery_date' => $manifest->delivery_date, 'order_requests' => $order_requests
         ];
@@ -93,7 +95,7 @@ class ManifestController extends Controller
 
     public function update(Request $request, Manifest $manifest) {
         $validator = Validator::make($request->all(), [
-            'supplier_id' => 'required|exists:suppliers,id',
+            // 'supplier_id' => 'required|exists:suppliers,id',
             'logistic_id' => 'required|exists:logistics,id',
             'delivery_date' => 'required|date',
             'order_requests' => 'required|array|min:1',
@@ -129,7 +131,8 @@ class ManifestController extends Controller
     }
 
     public function supplier_logistics(Request $request) {
-        $_supplier_logistics = Logistic::where('supplier_id', $request->user()->information->id)->get();
+        // $_supplier_logistics = Logistic::where('supplier_id', $request->user()->information->id)->get();
+        $_supplier_logistics = Logistic::all();
         $supplier_logistics = [];
         foreach($_supplier_logistics as $logistic) {
             $supplier_logistics[] = [

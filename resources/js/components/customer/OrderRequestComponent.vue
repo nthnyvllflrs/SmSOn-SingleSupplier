@@ -146,7 +146,7 @@
                 order_request_information_dialog: false, loading: false,
                 table_headers: [
                     {text: 'Code', value: 'code', align: 'center'},
-                    {text: 'Supplier', value: 'supplier', align: 'center'},
+                    // {text: 'Supplier', value: 'supplier', align: 'center'},
                     {text: 'Date and Time', value: 'datetime', align: 'center'},
                     {text: 'Actions', value: 'action', align: 'center', sortable: false},
                 ],
@@ -154,7 +154,7 @@
                 reveivable_table_headers: [
                     {text: 'Code', value: 'code', align: 'center'},
                     {text: 'Delivery Date', value: 'delivery_date', align: 'center'},
-                    {text: 'Supplier', value: 'supplier', align: 'center'},
+                    // {text: 'Supplier', value: 'supplier', align: 'center'},
                     {text: 'Logistic', value: 'logistic', align: 'center'},
                     {text: 'Actions', value: 'action', align: 'center', sortable: false},
                 ],

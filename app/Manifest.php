@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Manifest extends Model
 {
     protected $fillable = [
-        'code', 'supplier_id', 'logistic_id', 'delivery_date'
+        'code', 
+        // 'supplier_id', 
+        'logistic_id', 'delivery_date'
     ];
 
-    public function supplier() {
-        return $this->belongsTo('App\Supplier', 'supplier_id');
-    }
+    // public function supplier() {
+    //     return $this->belongsTo('App\Supplier', 'supplier_id');
+    // }
 
     public function logistic() {
         return $this->belongsTo('App\Logistic', 'logistic_id');

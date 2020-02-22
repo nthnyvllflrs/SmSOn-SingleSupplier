@@ -21,9 +21,13 @@ class OrderRequestController extends Controller
                 ['customer_id', $request->user()->information->id], 
                 ['status', $request->status]
             ])->orderBy('created_at', 'desc')->get();
-        } elseif ($request->user()->role == 'Supplier') {
+        // } elseif ($request->user()->role == 'Supplier') {
+        //     $order_requests = OrderRequest::where([
+        //         ['supplier_id', $request->user()->information->id], 
+        //         ['status', $request->status]
+        //     ])->orderBy('created_at', 'desc')->get();
+        } elseif ($request->user()->role == 'Administrator') {
             $order_requests = OrderRequest::where([
-                ['supplier_id', $request->user()->information->id], 
                 ['status', $request->status]
             ])->orderBy('created_at', 'desc')->get();
         }
@@ -34,7 +38,7 @@ class OrderRequestController extends Controller
                 'id' => $order_request->id,
                 'code' => $order_request->code,
                 'customer' => $order_request->customer->name,
-                'supplier' => $order_request->supplier->name,
+                // 'supplier' => $order_request->supplier->name,
                 'datetime' => date('d-m-Y H:m:s', strtotime($order_request->created_at)),
             ];
         }
@@ -44,20 +48,21 @@ class OrderRequestController extends Controller
 
     public function receivables(Request $request) {
         $receivable_list = \DB::table('order_requests')
-                            ->join('suppliers', 'suppliers.id', 'order_requests.supplier_id')
+                            // ->join('suppliers', 'suppliers.id', 'order_requests.supplier_id')
                             ->join('manifest_details', 'manifest_details.order_request_id', 'order_requests.id')
                             ->join('manifests', 'manifests.id', 'manifest_details.manifest_id')
                             ->join('logistics', 'logistics.id', 'manifests.logistic_id')
                             ->where('order_requests.customer_id', $request->user()->information->id)
                             ->select('order_requests.id', 'order_requests.code', 'manifests.delivery_date', 
-                                    'suppliers.name as supplier', 'logistics.name as logistic', 
+                                    // 'suppliers.name as supplier', 
+                                    'logistics.name as logistic', 
                                     'logistics.code as logistic_code', 'logistics.latitude', 'logistics.longitude')->get();
         return response(['success' => ['order_requests' => $receivable_list]], 200);
     }
 
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
-            '*.supplier_id' => 'required|exists:suppliers,id',
+            // '*.supplier_id' => 'required|exists:suppliers,id',
             '*.product_id' => 'required|exists:products,id',
             '*.quantity' => 'required|numeric|min:1',
             '*.total' => 'required|numeric|min:1',
@@ -65,30 +70,33 @@ class OrderRequestController extends Controller
 
         if($validator->fails()) { return response(['errors' => $validator->errors()], 422);}
 
-        $filtered_order_requests = $this->filter_order_requests($request->toArray());
-
-        $order_requests_code = [];
-        foreach($filtered_order_requests as $supplier => $order_requests) {
-            $new_order_request = OrderRequest::create(['customer_id' => $request->user()->information->id, 'supplier_id' => $supplier]);
-
-            foreach($order_requests as $order_request) {
-                OrderRequestDetail::create(array_merge((array) $order_request, ['order_request_id' => $new_order_request->id]));
-            }
-            $order_requests_code[] = $new_order_request->code;
-
-            $supplier = \App\Supplier::find($supplier);
-            $supplier->user->notify(new \App\Notifications\OrderRequestCreationNotification($new_order_request));
-            event(new \App\Events\OrderRequest([
-                'user_id' => $supplier->user->id, 'code' => $new_order_request->code, 'type' => 'Created'
-            ]));
-
-            \App\SystemLog::create([
-                'type' => 'Order Request',
-                'remarks' => $new_order_request->code." Created."
-            ]);
+        $new_order_request = OrderRequest::create(['customer_id' => $request->user()->information->id]);
+        foreach($request->toArray() as $product) {
+            OrderRequestDetail::create(array_merge((array) $product, ['order_request_id' => $new_order_request->id]));
         }
+        // $filtered_order_requests = $this->filter_order_requests($request->toArray());
 
-        return response(['success' => ['order_request_codes' => $order_requests_code]], 200);
+        // $order_requests_code = [];
+        // foreach($filtered_order_requests as $supplier => $order_requests) {
+        //     $new_order_request = OrderRequest::create(['customer_id' => $request->user()->information->id, 'supplier_id' => $supplier]);
+
+        //     foreach($order_requests as $order_request) {
+        //         OrderRequestDetail::create(array_merge((array) $order_request, ['order_request_id' => $new_order_request->id]));
+        //     }
+        //     $order_requests_code[] = $new_order_request->code;
+
+        //     $supplier = \App\Supplier::find($supplier);
+        //     $supplier->user->notify(new \App\Notifications\OrderRequestCreationNotification($new_order_request));
+        //     event(new \App\Events\OrderRequest([
+        //         'user_id' => $supplier->user->id, 'code' => $new_order_request->code, 'type' => 'Created'
+        //     ]));
+        // }
+        \App\SystemLog::create([
+            'type' => 'Order Request',
+            'remarks' => $new_order_request->code." Created."
+        ]);
+
+        return response(['success' => ['order_request_code' => $new_order_request->code]], 200);
     }
 
     public function show(Request $request, OrderRequest $order_request) {
@@ -107,7 +115,7 @@ class OrderRequestController extends Controller
 
         return response(['success' => [
             'order_request_information' => [
-                'supplier' => $order_request->supplier->name,
+                // 'supplier' => $order_request->supplier->name,
                 'total' => $total,
                 'datetime' => date('d-m-Y H:m:s', strtotime($order_request->created_at)),
                 'details' => $details,
@@ -123,9 +131,9 @@ class OrderRequestController extends Controller
         ]);
 
         $order_request->delete();
-        event(new \App\Events\OrderRequest([
-            'user_id' => $supplier->user()->id, 'code' => $new_order_request->code, 'type' => 'Deleted'
-        ]));
+        // event(new \App\Events\OrderRequest([
+        //     'user_id' => $supplier->user()->id, 'code' => $new_order_request->code, 'type' => 'Deleted'
+        // ]));
         return response(['success' => ['message' => 'Order Request Deleted']], 201);
     }
 
