@@ -233,6 +233,7 @@ class SMSController extends Controller
         return response("SMS Saved!");
         
         } catch (\Throwable $th) {
+            
             return response("An error occurred!");
         }
     }

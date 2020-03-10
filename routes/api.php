@@ -6,6 +6,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
     // public routes
     Route::post('/login', 'AuthController@login');
+
     Route::post('/webhook/itextmo', 'SMSController@itextmo_webhook');
 
     // private routes

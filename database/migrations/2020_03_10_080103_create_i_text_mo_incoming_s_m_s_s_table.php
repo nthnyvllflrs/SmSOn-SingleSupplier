@@ -19,6 +19,7 @@ class CreateITextMoIncomingSMSSTable extends Migration
             $table->string('gateway');
             $table->string('message');
             $table->string('timestamp');
+            
             $table->timestamps();
         });
     }
