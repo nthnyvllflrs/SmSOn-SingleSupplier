@@ -176,6 +176,8 @@ class SMSController extends Controller
 
     public function itextmo_webhook(Request $request) 
     {
+        try {
+            //code...
         
         ########################################################################################
         //ITEXMO CUSTOM RECEIVED SMS API VERSION 1.2 #############################################
@@ -228,5 +230,10 @@ class SMSController extends Controller
             'timestamp' => $timestamp,
         ]);
 
+        return response("SMS Saved!");
+        
+        } catch (\Throwable $th) {
+            return response("An error occurred!");
+        }
     }
 }
