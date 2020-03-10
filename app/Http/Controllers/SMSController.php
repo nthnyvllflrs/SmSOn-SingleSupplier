@@ -173,4 +173,60 @@ class SMSController extends Controller
         $response = $response.'To order send ORDER PRODUCTCODE_QUANTITY. E.g. ORDER PROD01_100 PROD02_200';
         return response($response);
     }
+
+    public function itextmo_webhook(Request $request) 
+    {
+        
+        ########################################################################################
+        //ITEXMO CUSTOM RECEIVED SMS API VERSION 1.2 #############################################
+        //########################################################################################
+        //IMPORTANT: Create a database with the folowing exact coloumn name:
+        // -> "originator" -> Varchar with 15 characters atleast - > SMS Originator number
+        // -> "gateway" -> Varchar with 15 characters atleast - > SMS Server Number
+        // -> "message"    -> Varchar with 480 characters atleast -> SMS Content
+        // -> "timestamp"  -> Varchar with 50 characters atleast -> SMS SERVER TimeStamp        
+        //########################################################################################
+        //########################################################################################
+        //Insert your database information here...
+        //########################################################################################
+        // $a = "localhost"; //Database address eg. localhost 
+        // $b = "username"; //Database username with insert permissions
+        // $c = "password"; //Database password
+        // $d = "mytable"; //Database Name
+        // $f = "messages_received"; //Table Name
+        //########################################################################################
+        //########################################################################################
+        //Do not edit below codes unless you know what you are doing.
+        //########################################################################################
+        // $conn = new mysqli($a, $b, $c);
+        // if ($conn->connect_error) {die("ERROR");}     
+        //Variables from itexmo's server calls
+        $originator = ""; 
+        if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
+        $gateway = ""; 
+        if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
+        $message = ""; 
+        if(isset($_POST['message'])){ $message = $_POST['message']; }
+        $timestamp = ""; 
+        if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
+        // //Escapes
+        // $gateway = mysqli_real_escape_string($conn,$gateway);
+        // $originator = mysqli_real_escape_string($conn,$originator);
+        // $message = mysqli_real_escape_string($conn,$message);
+        // $timestamp = mysqli_real_escape_string($conn,$timestamp);
+        //Query
+        // $sql = "INSERT INTO `$d`.`$f` (`gateway`,`originator`,`message`,`timestamp`) VALUES ('$gateway','$originator','$message','$timestamp')  ";
+        // if ($conn->query($sql) === TRUE) {echo "SUCCESS";    }else{echo "ERROR";}
+        // $conn->close();
+        //########################################################################################
+        //########################################################################################
+
+        \App\ITextMoIncomingSMS::create([
+            'originator' => $originator,
+            'gateway' => $gateway,
+            'message' => $message,
+            'timestamp' => $timestamp,
+        ]);
+
+    }
 }
