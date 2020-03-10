@@ -230,10 +230,10 @@ class SMSController extends Controller
             'timestamp' => $timestamp,
         ]);
 
-        return response("SMS Saved!");
+        return response("SUCCESS");
         
         } catch (\Throwable $th) {
-            
+
             return response("An error occurred!");
         }
     }
