@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
+use Request;
+
 use Illuminate\Support\Facades\Validator;
 
 class SMSController extends Controller
@@ -176,8 +178,10 @@ class SMSController extends Controller
 
     public function itextmo_webhook(Request $request) 
     {
+        // $input = Request::all();
+        // return $input;
+        
         try {
-            //code...
         
         ########################################################################################
         //ITEXMO CUSTOM RECEIVED SMS API VERSION 1.2 #############################################
@@ -203,17 +207,21 @@ class SMSController extends Controller
         // $conn = new mysqli($a, $b, $c);
         // if ($conn->connect_error) {die("ERROR");}     
         //Variables from itexmo's server calls
-        $originator = $request['originator'] ? $request['originator']: ''; 
-        $gateway = $request['gateway'] ? $request['gateway']: ''; 
-        $message = $request['message'] ? $request['message']: ''; 
-        $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
-        // if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
-        // $gateway = ""; 
-        // if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
-        // $message = ""; 
-        // if(isset($_POST['message'])){ $message = $_POST['message']; }
-        // $timestamp = ""; 
-        // if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
+
+
+        // $originator = $request['originator'] ? $request['originator']: ''; 
+        // $gateway = $request['gateway'] ? $request['gateway']: ''; 
+        // $message = $request['message'] ? $request['message']: ''; 
+        // $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
+
+        if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
+        $gateway = ""; 
+        if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
+        $message = ""; 
+        if(isset($_POST['message'])){ $message = $_POST['message']; }
+        $timestamp = ""; 
+        if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
+
         // //Escapes
         // $gateway = mysqli_real_escape_string($conn,$gateway);
         // $originator = mysqli_real_escape_string($conn,$originator);
