@@ -31,6 +31,7 @@ class ProductController extends Controller
                     'unit' => $product->unit,
                     'price' => $product->price,
                     'stock' => $product->stock,
+                    'stockStatus' => $product->stock->stock_status,
                 ];
             }
             return response(['success' => ['products' => $products]], 200);
@@ -96,7 +97,8 @@ class ProductController extends Controller
 
     public function stock(Request $request, Product $product) {
         $validator = Validator::make($request->all(), [
-            'available' => 'required|numeric|min:1',
+            'available' => 'required|numeric|min:0',
+            'threshold' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}

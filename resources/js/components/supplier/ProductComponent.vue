@@ -60,6 +60,12 @@
                         </v-dialog>
                     </v-toolbar>
                 </template>
+
+                <template v-slot:item.stockStatus="{ item }">
+                    <v-chip class="ma-2" color="red" text-color="white" v-if="item.stockStatus == 'Critical'">Critical</v-chip>
+                    <v-chip class="ma-2" color="green" text-color="white" v-if="item.stockStatus == 'Good'">Good</v-chip>
+                </template>
+
                 <template v-slot:item.action="{ item }">
                     <v-icon class="mx-1" @click="openStockDialog(item)">fa-boxes</v-icon>
                     <v-icon class="mx-1" @click="editProduct(item)">fa-pen</v-icon>
@@ -68,17 +74,31 @@
             </v-data-table>
         </v-card>
 
-        <v-dialog v-model="stockDialog" max-width="300px">
+        <v-dialog v-model="stockDialog" max-width="500px">
             <v-card>
                 <v-card-title>Available Stock</v-card-title>
                 <v-card-text>
                     <v-row>
-                        <v-col cols=9 align="center" justify="center">
-                            <v-text-field type="number" label="Available Stock(s)" v-model="productStock"/>
+                        <v-col cols=12 md=6 align="center" justify="center">
+                            <v-text-field type="number" label="Stock(s) Threshold" v-model="productStock.threshold"/>
                         </v-col>
-                        <v-col cols=3 align="center" justify="center">
-                            <v-btn color="primary" dark small fab @click="updateStock()" :loading="loading">
-                                <v-icon dark small>fa-check</v-icon>
+                        <v-col cols=12 md=6 align="center" justify="center">
+                            <v-text-field type="number" label="Available Stock(s)" v-model="productStock.available"/>
+                        </v-col>
+                        <v-col cols=12 md=4 align="center" justify="center">
+                            <v-text-field label="Pending Stock(s)" v-model="productStock.pending" readonly/>
+                        </v-col>
+                        <v-col cols=12 md=4 align="center" justify="center">
+                            <v-text-field label="Approved Stock(s)" v-model="productStock.approved" readonly/>
+                        </v-col>
+                        <v-col cols=12 md=4 align="center" justify="center">
+                            <v-text-field label="Delivered Stock(s)" v-model="productStock.delivered" readonly/>
+                        </v-col>
+                        <v-col cols=12 align="center" justify="center">
+                            <!-- <v-btn color="primary" dark small fab @click="updateStock()" :loading="loading"> -->
+                            <v-btn class="full-width" color="primary" dark @click="updateStock()" :loading="loading">
+                                Update Product Stock
+                                <!-- <v-icon dark small>fa-check</v-icon> -->
                             </v-btn>
                         </v-col>
                     </v-row>
@@ -102,6 +122,7 @@
                     { text: 'Description', value: 'description' },
                     { text: 'Unit', value: 'unit' },
                     { text: 'Price', value: 'price' },
+                    { text: 'Stock Status', value: 'stockStatus' },
                     { text: 'Actions', value: 'action', sortable: false },
                 ],
                 products: [],
@@ -110,7 +131,7 @@
                 editedProductInformation: { code: null, name: null, description: null, unit: null, price: null, supplier_id: sessionStorage.getItem('user-information-id')},
                 formErrors: { code: null, name: null, description: null, unit: null, price: null,},
 
-                productStock: 0,
+                productStock: { available: 0, threshold: 0, pending: 0, approved: 0, delivered: 0, }
             }
         },
         mounted() {
@@ -124,7 +145,8 @@
         methods: {
             openStockDialog(product) {
                 this.stockDialog = true
-                this.productStock = product.stock.available
+                // this.productStock = product.stock.available
+                this.productStock = product.stock
                 this.editedIndex = this.products.indexOf(product)
                 this.editedProductInformation = Object.assign({}, product)
             },
@@ -235,10 +257,12 @@
             updateStock() {
                 this.loading = true
                 axios.put('/api/product/' + this.editedProductInformation.product_id + '/stock', {
-                    available: this.productStock
+                    // available: this.productStock
+                    ...this.productStock
                 })
                 .then( response => {
-                    this.editedProductInformation.stock.available = this.productStock
+                    // this.editedProductInformation.stock.available = this.productStock
+                    this.retrieveProducts()
                     this.cancel()
                     toastr.success("Product Stock Updated")
                 })

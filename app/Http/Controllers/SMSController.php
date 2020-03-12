@@ -214,6 +214,7 @@ class SMSController extends Controller
         // $message = $request['message'] ? $request['message']: ''; 
         // $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
 
+        $originator = ""; 
         if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
         $gateway = ""; 
         if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }

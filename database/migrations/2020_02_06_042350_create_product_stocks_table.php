@@ -20,6 +20,7 @@ class CreateProductStocksTable extends Migration
             $table->bigInteger('pending')->default(0);
             $table->bigInteger('approved')->default(0);
             $table->bigInteger('delivered')->default(0);
+            $table->bigInteger('threshold')->default(0);
             $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
