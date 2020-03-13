@@ -22,14 +22,21 @@ export const store = new Vuex.Store({
             var productDoesntExist = true
             state.cart.forEach(product => {
                 if (product.product_id == payload.product_id) {
-                    product.quantity = Number(product.quantity) + Number(payload.quantity)
-                    product.total = Number(product.quantity) * Number(product.price)
+                    var newQuantity = Number(product.quantity) + Number(payload.quantity)
+                    if (newQuantity > payload.stock.available) {
+                        toastr.info("Entered product quantity exceeds available product stock or is zero (0).")
+                    } else {
+                        product.quantity = Number(product.quantity) + Number(payload.quantity)
+                        product.total = Number(product.quantity) * Number(product.price)
+                        toastr.success("Product Added")
+                    }
                     productDoesntExist = false
                 }
             })
             if (productDoesntExist ) {
                 payload.total = Number(payload.quantity) * Number(payload.price)
                 state.cart.push(payload)
+                toastr.success("Product Added")
             }
         },
         removeCartProduct: (state, payload) => {

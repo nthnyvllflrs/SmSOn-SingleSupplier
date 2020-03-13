@@ -252,7 +252,7 @@
                                     {{ notification.data.status }}
                                 </template>
                             </v-list-item-title>
-                            <v-list-item-subtitle>
+                            <v-list-item-subtitle v-if="notification.type != 'App\\Notifications\\StockCriticalNotification'">
                                 <template v-if="userRole == 'Administrator'">
                                     U: {{ notification.data.username }} - N: {{ notification.data.name }} - R: {{ notification.data.role }}
                                 </template>
@@ -282,6 +282,12 @@
                             <v-chip small v-if="notification.type == 'App\\Notifications\\OrderRequestCreationNotification'" color="success">
                                 {{ notification.type|substr(18) }}
                             </v-chip>
+
+                            <!-- Stock Notifications -->
+                            <v-chip small v-if="notification.type == 'App\\Notifications\\StockCriticalNotification'" color="error">
+                                Stock Quantity Critical
+                            </v-chip>
+
 
                         </v-list-item-action>
                     </v-list-item>
@@ -345,6 +351,14 @@ import {mapGetters, mapActions} from 'vuex'
                 .listen('OrderRequestStatus', (data) => {
                     if(data.order_request.user_id == sessionStorage.getItem('user-id')) {
                         toastr.info(data.order_request.status, data.order_request.code)
+                    }
+                })
+
+            Echo.channel('stock')
+                .listen('StockStatus', (data) => {
+                    console.log(data, 5000)
+                    if(data.stock.user_id == sessionStorage.getItem('user-id')) {
+                        toastr.error('Stock Status ' + data.stock.status, data.stock.code)
                     }
                 })
         },

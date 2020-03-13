@@ -209,6 +209,7 @@
                 })
                 .then( response => {
                     this.editedProductInformation.product_id = response.data.success.product.id
+                    this.editedProductInformation.stockStatus = 'Critical'
                     this.editedProductInformation.stock = response.data.success.product.stock
                     this.products.push(this.editedProductInformation)
                     this.cancel()

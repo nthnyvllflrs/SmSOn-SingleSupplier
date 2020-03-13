@@ -211,6 +211,15 @@ class OrderRequestController extends Controller
                 }
 
                 $stock->save();    
+
+                if($stock->stock_status == 'Critical') {
+                    Notification::send([\App\User::find(1)], new \App\Notifications\StockCriticalNotification($stock));
+                    event(new \App\Events\StockStatus([
+                        'user_id' => \App\User::find(1)->id,
+                        'code' => $stock->product->code,
+                        'status' => $stock->stock_status
+                    ]));
+                }
             }
         } else if($request->status == 'Disapproved') {
             foreach($order_request->details as $order_request_detail) {

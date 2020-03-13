@@ -40,6 +40,9 @@
                                     <v-icon small dark>fa-check</v-icon>
                                 </v-btn>
                             </v-col>
+                            <v-col cols=12 align="center" justify="center" v-if="quantityGreaterThanAvailable">
+                                <span class="overline" color="error">Entered product quantity greater than available product stock.</span>
+                            </v-col>
                         </v-row>
                     </v-card-text>
                 </v-card>
@@ -53,7 +56,7 @@ import {mapActions} from 'vuex'
     export default {
         data() {
             return {
-                search: null, quantityModal: false, productQuantity: 0,
+                search: null, quantityModal: false, productQuantity: 0, quantityGreaterThanAvailable: false,
                 selectedProduct: { stock: { available: 0}}, loading: false,
 
                 productTableHeaders: [
@@ -104,8 +107,11 @@ import {mapActions} from 'vuex'
                 if(this.selectedProduct.quantity > 0 && this.selectedProduct.quantity <= this.selectedProduct.stock.available) {
                     var product = Object.assign({}, this.selectedProduct)
                     this.addCartProduct(product)
-                    toastr.success("Product Added")
                     this.quantityModal = false
+                    // this.quantityGreaterThanAvailable = false
+                } else {
+                    // this.quantityGreaterThanAvailable = true
+                    toastr.info("Entered product quantity exceeds available product stock or is zero (0).")
                 }
             }
         }
