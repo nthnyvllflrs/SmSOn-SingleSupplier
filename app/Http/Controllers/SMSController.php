@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-// use Illuminate\Http\Request;
+use Illuminate\Http\Request as TheRequest;
 use Request;
 
 use Illuminate\Support\Facades\Validator;
@@ -13,7 +13,7 @@ class SMSController extends Controller
         return response('Webhook Successful!', 200);
     }
 
-    public function send_sms(Request $request) {
+    public function send_sms(TheRequest $request) {
         $validator = Validator::make($request->all(), [
             'phone_number' => 'required|string',
             'message' => 'required|string',
