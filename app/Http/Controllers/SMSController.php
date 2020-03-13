@@ -70,9 +70,11 @@ class SMSController extends Controller
                     $product = \App\Product::where('code', $order_[0])->first();
                     $quantity = is_numeric($order_[1]);
 
-                    if(!$product) { return response('A non-existing product code was detected. Please double check order code and then try again. Thank you.');}
+                    if(!$product) { return response($order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.');}
 
-                    if(!$quantity) { return response('Incorrect quantity format. Please double check order quantity and then try again. Thank you.');}
+                    if(!$quantity) { return response($order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.');}
+
+                    if($quantity > $product->stock->available) { return response($order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.');}
 
                     $orders[] = [ 'product_id' => $product->id, 'quantity' => (integer) $order_[1],];
                 }
