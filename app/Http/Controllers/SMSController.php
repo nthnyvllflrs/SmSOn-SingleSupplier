@@ -211,18 +211,21 @@ class SMSController extends Controller
         //Variables from itexmo's server calls
 
 
-        // $originator = $request['originator'] ? $request['originator']: ''; 
-        // $gateway = $request['gateway'] ? $request['gateway']: ''; 
-        // $message = $request['message'] ? $request['message']: ''; 
-        // $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
+        \App\ErrorLog::create(['data' => $request->getContent()]);
 
         $originator = ""; 
-        if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
         $gateway = ""; 
-        if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
         $message = ""; 
-        if(isset($_POST['message'])){ $message = $_POST['message']; }
         $timestamp = ""; 
+
+        $originator = $request['originator'] ? $request['originator']: ''; 
+        $gateway = $request['gateway'] ? $request['gateway']: ''; 
+        $message = $request['message'] ? $request['message']: ''; 
+        $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
+        
+        if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
+        if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
+        if(isset($_POST['message'])){ $message = $_POST['message']; }
         if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
 
         // //Escapes
