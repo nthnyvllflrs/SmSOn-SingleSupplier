@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request as TheRequest;
-use Request;
+use Illuminate\Http\Request;
+// use Request;
 
 use Illuminate\Support\Facades\Validator;
 
@@ -13,7 +13,7 @@ class SMSController extends Controller
         return response('Webhook Successful!', 200);
     }
 
-    public function send_sms(TheRequest $request) {
+    public function send_sms(Request $request) {
         $validator = Validator::make($request->all(), [
             'phone_number' => 'required|string',
             'message' => 'required|string',
@@ -178,7 +178,7 @@ class SMSController extends Controller
         return response($response);
     }
 
-    public function itextmo_webhook(TheRequest $request) 
+    public function itextmo_webhook(Request $request) 
     {
         // $input = Request::all();
         // return $input;
@@ -210,18 +210,12 @@ class SMSController extends Controller
         // if ($conn->connect_error) {die("ERROR");}     
         //Variables from itexmo's server calls
 
+        // $originator = ""; $gateway = ""; $message = ""; $timestamp = ""; 
 
-        \App\ErrorLog::create(['data' => $request->all()]);
-
-        $originator = ""; 
-        $gateway = ""; 
-        $message = ""; 
-        $timestamp = ""; 
-
-        $originator = $request['originator'] ? $request['originator']: ''; 
-        $gateway = $request['gateway'] ? $request['gateway']: ''; 
-        $message = $request['message'] ? $request['message']: ''; 
-        $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
+        // $originator = $request['originator'] ? $request['originator']: ''; 
+        // $gateway = $request['gateway'] ? $request['gateway']: ''; 
+        // $message = $request['message'] ? $request['message']: ''; 
+        // $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
         
         // if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
         // if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
@@ -240,12 +234,7 @@ class SMSController extends Controller
         //########################################################################################
         //########################################################################################
 
-        \App\ITextMoIncomingSMS::create([
-            'originator' => $originator,
-            'gateway' => $gateway,
-            'message' => $message,
-            'timestamp' => $timestamp,
-        ]);
+        \App\ITextMoIncomingSMS::create($request->toArray());
 
         echo "SUCCESS";
         
