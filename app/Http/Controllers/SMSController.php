@@ -178,7 +178,7 @@ class SMSController extends Controller
         return response($response);
     }
 
-    public function itextmo_webhook(Request $request) 
+    public function itextmo_webhook(TheRequest $request) 
     {
         // $input = Request::all();
         // return $input;
