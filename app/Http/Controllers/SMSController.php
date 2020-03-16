@@ -245,6 +245,15 @@ class SMSController extends Controller
         $gateway = $request->input('to') ? $request->input('to'): ''; 
         $message = $request->input('text') ? $request->input('text'): ''; 
         $timestamp = $request->input('timestamp') ? $request->input('timestamp'): ''; 
+
+        \App\ITextMoIncomingSMS::create($request->toArray());
+        
+        \App\ITextMoIncomingSMS::create([
+            'originator' => $originator,
+            'gateway' => $gateway,
+            'message' => $message,
+            'timestamp' => $timestamp,
+        ]);
         
         \App\ErrorLog::create(['data' => json_encode([
             $request->fullUrl(),
