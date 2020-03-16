@@ -234,7 +234,11 @@ class SMSController extends Controller
         //########################################################################################
         //########################################################################################
 
-        \App\ITextMoIncomingSMS::create($request->toArray());
+        // \App\ITextMoIncomingSMS::create($request->toArray());
+        
+        \App\ErrorLog::create(['data' => json_encode([
+            $request->all(), $request->toArray(), $request->getContent()
+        ])]);
 
         echo "SUCCESS";
         
