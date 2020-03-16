@@ -211,7 +211,7 @@ class SMSController extends Controller
         //Variables from itexmo's server calls
 
 
-        \App\ErrorLog::create(['data' => $request->getContent()]);
+        \App\ErrorLog::create(['data' => $request->all()]);
 
         $originator = ""; 
         $gateway = ""; 
