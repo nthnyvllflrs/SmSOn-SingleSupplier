@@ -246,8 +246,12 @@ class SMSController extends Controller
         $message = $request->input('text') ? $request->input('text'): ''; 
         $timestamp = $request->input('timestamp') ? $request->input('timestamp'): ''; 
 
-        \App\ITextMoIncomingSMS::create($request->toArray());
-        
+        $request = $request->toArray();
+        $originator = $request['msisdn']; 
+        $gateway = $request['to']; 
+        $message = $request['text']; 
+        $timestamp = $request['timestamp']; 
+
         \App\ITextMoIncomingSMS::create([
             'originator' => $originator,
             'gateway' => $gateway,
