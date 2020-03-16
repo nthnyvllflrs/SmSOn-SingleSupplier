@@ -240,10 +240,16 @@ class SMSController extends Controller
         $gateway = $request['to'] ? $request['to']: ''; 
         $message = $request['text'] ? $request['text']: ''; 
         $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
+
+        $originator = $request->input('msisdn') ? $request->input('msisdn'): ''; 
+        $gateway = $request->input('to') ? $request->input('to'): ''; 
+        $message = $request->input('text') ? $request->input('text'): ''; 
+        $timestamp = $request->input('timestamp') ? $request->input('timestamp'): ''; 
         
-        // \App\ErrorLog::create(['data' => json_encode([
-        //     $request->all(), $request->toArray(), $request->getContent()
-        // ])]);
+        \App\ErrorLog::create(['data' => json_encode([
+            $request->fullUrl(),
+            $request->all(), $request->toArray(), $request->getContent()
+        ])]);
 
         echo "SUCCESS";
         
