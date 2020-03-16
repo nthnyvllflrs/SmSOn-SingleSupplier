@@ -8,6 +8,5 @@ class ITextMoIncomingSMS extends Model
 {
     protected $fillable = [
         'originator', 'gateway', 'message', 'timestamp'
-        
     ];
 }

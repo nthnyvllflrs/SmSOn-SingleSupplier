@@ -223,10 +223,10 @@ class SMSController extends Controller
         $message = $request['message'] ? $request['message']: ''; 
         $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
         
-        if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
-        if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
-        if(isset($_POST['message'])){ $message = $_POST['message']; }
-        if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
+        // if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
+        // if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
+        // if(isset($_POST['message'])){ $message = $_POST['message']; }
+        // if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
 
         // //Escapes
         // $gateway = mysqli_real_escape_string($conn,$gateway);
