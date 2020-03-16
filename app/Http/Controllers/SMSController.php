@@ -246,8 +246,8 @@ class SMSController extends Controller
 
         echo "SUCCESS";
         
-        } catch (\Throwable $th) {
-
+        } catch (\Exception $error) {
+            report($error);
             echo "ERROR";
         }
     }

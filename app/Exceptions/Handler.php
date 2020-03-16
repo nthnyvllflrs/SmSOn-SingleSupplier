@@ -34,6 +34,7 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
+        \App\ErrorLog::create(['data' => json_encode([ 'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile()])]);
         parent::report($exception);
     }
 
