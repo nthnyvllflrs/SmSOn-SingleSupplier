@@ -235,10 +235,15 @@ class SMSController extends Controller
         //########################################################################################
 
         // \App\ITextMoIncomingSMS::create($request->toArray());
+
+        $originator = $request['msisdn'] ? $request['msisdn']: ''; 
+        $gateway = $request['to'] ? $request['to']: ''; 
+        $message = $request['text'] ? $request['text']: ''; 
+        $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
         
-        \App\ErrorLog::create(['data' => json_encode([
-            $request->all(), $request->toArray(), $request->getContent()
-        ])]);
+        // \App\ErrorLog::create(['data' => json_encode([
+        //     $request->all(), $request->toArray(), $request->getContent()
+        // ])]);
 
         echo "SUCCESS";
         
