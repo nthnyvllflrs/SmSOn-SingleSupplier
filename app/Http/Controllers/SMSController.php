@@ -61,7 +61,7 @@ class SMSController extends Controller
         }
     }
 
-    private function order_request($sms_request, $phone_number) {
+    private function order_request($sms_request, $customer_phone_number) {
         if(count(array_slice($sms_request, 1)) != 0) {
             try {
                 $orders = [];
@@ -70,16 +70,34 @@ class SMSController extends Controller
                     $product = \App\Product::where('code', $order_[0])->first();
                     $quantity = is_numeric($order_[1]);
 
-                    if(!$product) { return response($order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.');}
+                    if(!$product) { 
+                        // return response($order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.');
+                        return reply_to_customer(
+                            $customer_phone_number, 
+                            $order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.'
+                        );
+                    }
 
-                    if(!$quantity) { return response($order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.');}
+                    if(!$quantity) { 
+                        // return response($order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.');
+                        return reply_to_customer(
+                            $customer_phone_number, 
+                            $order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.'
+                        );
+                    }
 
-                    if($quantity > $product->stock->available) { return response($order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.');}
+                    if($quantity > $product->stock->available) { 
+                        // return response($order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.');
+                        return reply_to_customer(
+                            $customer_phone_number, 
+                            $order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.'
+                        );
+                    }
 
                     $orders[] = [ 'product_id' => $product->id, 'quantity' => (integer) $order_[1],];
                 }
 
-                $customer = \App\Customer::where('contact_number', $phone_number)->first();
+                $customer = \App\Customer::where('contact_number', $customer_phone_number)->first();
 
                 $new_order_request = \App\OrderRequest::create(['customer_id' => $customer->id]);
                 foreach ($orders as $order) {
@@ -98,12 +116,6 @@ class SMSController extends Controller
                     }
                 }
 
-                // $broadcast = [ 'username' => $new_order_request->user->username, 'request_code' => $new_order_request->code, 'date_time' => date('d-m-Y H:m:s', strtotime($new_order_request->updated_at))];
-                // event(new \App\Events\NewRequest($broadcast));
-
-                // Notification::send([\App\User::find(1)], new \App\Notifications\RequestNotification($new_order_request));
-                // \App\Log::create(['type' => 'Creation', 'code' => $new_order_request->code]);
-
                 \Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestCreationNotification($new_order_request));
                 event(new \App\Events\OrderRequest([
                     'user_id' => \App\User::find(1)->id, 'code' => $new_order_request->code, 'type' => 'Created'
@@ -114,12 +126,24 @@ class SMSController extends Controller
                     'remarks' => $new_order_request->code." Created."
                 ]);
 
-                return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
+                // return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
+                return reply_to_customer(
+                    $customer_phone_number, 
+                    'Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.'
+                );
             } catch (\Exception $e) {
-                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
+                // return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
+                return reply_to_customer(
+                    $customer_phone_number, 
+                    'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!'
+                );
             }
         } else {
-            return response('Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.');
+            // return response('Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.');
+            return reply_to_customer(
+                $customer_phone_number, 
+                'Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.'
+            );
         }
     }
 
@@ -128,7 +152,13 @@ class SMSController extends Controller
             try {
                 $customer = \App\Customer::where('contact_number', $phone_number)->first();
                 $order_request = \App\OrderRequest::where([['code', $sms_request[1]], ['customer_id', $customer->id]])->exists();
-                if(!$order_request) { return response('Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');}
+                if(!$order_request) { 
+                    // return response('Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
+                    return reply_to_customer(
+                        $phone_number, 
+                        'Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.'
+                    );
+                }
 
                 $order_request = \App\OrderRequest::where('code', $sms_request[1])->first();
                 if($order_request->status == 'Pending') {
@@ -141,12 +171,6 @@ class SMSController extends Controller
 
                     $order_request->delete();
 
-                    // $broadcast = [ 'username' => $order_request->user->username,  'request_code' => $order_request->code,  'status' => $order_request->status, 'date_time' => date('d-m-Y H:m:s', strtotime($order_request->updated_at))];
-                    // event(new \App\Events\UpdateRequest($broadcast));
-
-                    // Notification::send([\App\User::find(1)], new \App\Notifications\RequestNotification($order_request));
-                    // \App\Log::create(['type' => 'Cancelation', 'code' => $order_request->code]);
-
                     \Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestDeletionNotification($order_request));
                     event(new \App\Events\OrderRequest([
                         'user_id' => \App\User::find(1)->id, 'code' => $order_request->code, 'type' => 'Deleted'
@@ -156,15 +180,32 @@ class SMSController extends Controller
                         'type' => 'Order Request',
                         'remarks' => $order_request->code." Deleted."
                     ]);
-                    return response('('.$order_request->code.') Request successfuly canceled. Thank you.');
+
+                    // return response('('.$order_request->code.') Request successfuly canceled. Thank you.');
+                    return reply_to_customer(
+                        $phone_number, 
+                        '('.$order_request->code.') Request successfuly canceled. Thank you.'
+                    );
                 } else {
-                    return response('Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.');
+                    // return response('Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.');
+                    return reply_to_customer(
+                        $phone_number, 
+                        'Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.'
+                    );
                 }
             } catch (\Exception $e) {
-                return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+                // return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
+                return reply_to_customer(
+                    $phone_number, 
+                    'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.'
+                );
             }
         } else {
-            return response('Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
+            // return response('Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
+            return reply_to_customer(
+                $phone_number, 
+                'Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.'
+            );
         }
     }
 
@@ -175,100 +216,81 @@ class SMSController extends Controller
             $response = $response.$product->code.'\n';
         }
         $response = $response.'To order send ORDER PRODUCTCODE_QUANTITY. E.g. ORDER PROD01_100 PROD02_200';
-        return response($response);
+
+        $timesToSend = ceil(strlen($response) / 150);
+        
+        $startPosition = 0; $lenghtToCut = 150;
+        while($timesToSend > 0) {
+            reply_to_customer($phone_number, substr($response, $startPosition, $lenghtToCut));
+            $startPosition = $lenghtToCut;
+            $lenghtToCut*=2;
+            $timesToSend-=1;
+        }
     }
 
-    public function itextmo_webhook(Request $request) 
-    {
-        // $input = Request::all();
-        // return $input;
-        
+    public function itextmo_webhook(Request $request) {
         try {
-        
-        ########################################################################################
-        //ITEXMO CUSTOM RECEIVED SMS API VERSION 1.2 #############################################
-        //########################################################################################
-        //IMPORTANT: Create a database with the folowing exact coloumn name:
-        // -> "originator" -> Varchar with 15 characters atleast - > SMS Originator number
-        // -> "gateway" -> Varchar with 15 characters atleast - > SMS Server Number
-        // -> "message"    -> Varchar with 480 characters atleast -> SMS Content
-        // -> "timestamp"  -> Varchar with 50 characters atleast -> SMS SERVER TimeStamp        
-        //########################################################################################
-        //########################################################################################
-        //Insert your database information here...
-        //########################################################################################
-        // $a = "localhost"; //Database address eg. localhost 
-        // $b = "username"; //Database username with insert permissions
-        // $c = "password"; //Database password
-        // $d = "mytable"; //Database Name
-        // $f = "messages_received"; //Table Name
-        //########################################################################################
-        //########################################################################################
-        //Do not edit below codes unless you know what you are doing.
-        //########################################################################################
-        // $conn = new mysqli($a, $b, $c);
-        // if ($conn->connect_error) {die("ERROR");}     
-        //Variables from itexmo's server calls
 
-        // $originator = ""; $gateway = ""; $message = ""; $timestamp = ""; 
+            $request = $request->toArray();
+            $originator = $request['msisdn']; 
+            $gateway = $request['to']; 
+            $message = $request['text']; 
+            $timestamp = $request['timestamp']; 
 
-        // $originator = $request['originator'] ? $request['originator']: ''; 
-        // $gateway = $request['gateway'] ? $request['gateway']: ''; 
-        // $message = $request['message'] ? $request['message']: ''; 
-        // $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
-        
-        // if(isset($_POST['originator'])){ $originator = $_POST['originator']; }
-        // if(isset($_POST['gateway'])){ $gateway = $_POST['gateway']; }
-        // if(isset($_POST['message'])){ $message = $_POST['message']; }
-        // if(isset($_POST['timestamp'])){ $timestamp = $_POST['timestamp']; }
+            \App\ITextMoIncomingSMS::create([
+                'originator' => $originator,
+                'gateway' => $gateway,
+                'message' => $message,
+                'timestamp' => $timestamp,
+            ]);
 
-        // //Escapes
-        // $gateway = mysqli_real_escape_string($conn,$gateway);
-        // $originator = mysqli_real_escape_string($conn,$originator);
-        // $message = mysqli_real_escape_string($conn,$message);
-        // $timestamp = mysqli_real_escape_string($conn,$timestamp);
-        //Query
-        // $sql = "INSERT INTO `$d`.`$f` (`gateway`,`originator`,`message`,`timestamp`) VALUES ('$gateway','$originator','$message','$timestamp')  ";
-        // if ($conn->query($sql) === TRUE) {echo "SUCCESS";    }else{echo "ERROR";}
-        // $conn->close();
-        //########################################################################################
-        //########################################################################################
-
-        // \App\ITextMoIncomingSMS::create($request->toArray());
-
-        $originator = $request['msisdn'] ? $request['msisdn']: ''; 
-        $gateway = $request['to'] ? $request['to']: ''; 
-        $message = $request['text'] ? $request['text']: ''; 
-        $timestamp = $request['timestamp'] ? $request['timestamp']: ''; 
-
-        $originator = $request->input('msisdn') ? $request->input('msisdn'): ''; 
-        $gateway = $request->input('to') ? $request->input('to'): ''; 
-        $message = $request->input('text') ? $request->input('text'): ''; 
-        $timestamp = $request->input('timestamp') ? $request->input('timestamp'): ''; 
-
-        $request = $request->toArray();
-        $originator = $request['msisdn']; 
-        $gateway = $request['to']; 
-        $message = $request['text']; 
-        $timestamp = $request['timestamp']; 
-
-        \App\ITextMoIncomingSMS::create([
-            'originator' => $originator,
-            'gateway' => $gateway,
-            'message' => $message,
-            'timestamp' => $timestamp,
-        ]);
-        
-        \App\ErrorLog::create(['data' => json_encode([
-            $request->fullUrl(),
-            $request->all(), $request->toArray(), $request->getContent()
-        ])]);
-
-        echo "SUCCESS";
+            if(!(isEmptyOrNullString($originator)) && !(isEmptyOrNullString($message))) {
+                $this->sms_filter($originator, $message);
+            }
+            
+            echo "SUCCESS";
         
         } catch (\Exception $error) {
             report($error);
             echo "ERROR";
+        }
+    }
+
+    public function sms_filter($customer_phone_number, $message) {
+
+        // Check if contact number exist
+        $customer = \App\Customer::where('contact_number', $customer_phone_number)->exists();
+        if(!$customer) { 
+            return reply_to_customer(
+                $customer_phone_number, 
+                'Phone number not tied to any registered customer. Please use a registered phone number. Thank you.'
+            );
+        }
+
+        $sms_request = explode(' ', $message);
+        if(strtoupper($sms_request[0]) == 'PRODUCTLIST') {
+            return $this->product_list();
+        } else if (strtoupper($sms_request[0]) == 'ORDER'){
+            return $this->order_request($sms_request, $request->phone_number);
+        } else if (strtoupper($sms_request[0]) == 'CANCEL'){
+            return $this->cancel_request($sms_request, $request->phone_number);
+        } else {
+            return reply_to_customer(
+                $customer_phone_number, 
+                'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.'
+            );
+        }
+    }
+
+    public function reply_to_customer($customer_phone_number, $message) {
+        $result = iTextMo($customer_phone_number, $message);
+
+        if ($result == ""){
+            \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => "No response from itextmo server." ]);
+        } else if ($result == 0){
+            \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => $request->phone_number." Sent." ]);
+        } else {
+            \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => "Error Num ". $result . " was encountered!" ]);
         }
     }
 }
