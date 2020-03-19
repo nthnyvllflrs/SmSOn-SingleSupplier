@@ -99,6 +99,7 @@ class SMSController extends Controller
 
                 $customer = \App\Customer::where('contact_number', $customer_phone_number)->first();
 
+                $totalAmount = 0;
                 $new_order_request = \App\OrderRequest::create(['customer_id' => $customer->id]);
                 foreach ($orders as $order) {
                     if($order['quantity'] > 0) {
@@ -113,6 +114,8 @@ class SMSController extends Controller
 
                         $product_->stock->pending = (integer) $product_->stock->pending + (integer) $order['quantity'];
                         $product_->stock->save();
+
+                        $totalAmount = $totalAmount + ($product_->price * $order['quantity']);
                     }
                 }
 
@@ -129,7 +132,7 @@ class SMSController extends Controller
                 // return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
                 return $this->reply_to_customer(
                     $customer_phone_number, 
-                    'Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.'
+                    'Order Request Successful with a total of Php '.$totalAmount.'. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.'
                 );
             } catch (\Exception $e) {
                 // return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
