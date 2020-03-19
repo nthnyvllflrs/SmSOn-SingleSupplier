@@ -209,7 +209,7 @@ class SMSController extends Controller
         }
     }
 
-    private function product_list() {
+    private function product_list($phone_number) {
         $product_list = \App\Product::all();
         $response = 'Product Code List\n';
         foreach ($product_list as $product) {
@@ -259,7 +259,7 @@ class SMSController extends Controller
     public function sms_filter($customer_phone_number, $message) {
 
         // Check if contact number exist
-        $customer = \App\Customer::where('contact_number', $customer_phone_number)->exists();
+        $customer = \App\Customer::where('contact_number', 'like', '%'.$customer_phone_number.'%')->exists();
         if(!$customer) { 
             return $this->reply_to_customer(
                 $customer_phone_number, 
@@ -269,7 +269,7 @@ class SMSController extends Controller
 
         $sms_request = explode(' ', $message);
         if(strtoupper($sms_request[0]) == 'PRODUCTLIST') {
-            return $this->product_list();
+            return $this->product_list($customer_phone_number);
         } else if (strtoupper($sms_request[0]) == 'ORDER'){
             return $this->order_request($sms_request, $request->phone_number);
         } else if (strtoupper($sms_request[0]) == 'CANCEL'){
