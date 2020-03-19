@@ -72,7 +72,7 @@ class SMSController extends Controller
 
                     if(!$product) { 
                         // return response($order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.');
-                        return reply_to_customer(
+                        return $this->reply_to_customer(
                             $customer_phone_number, 
                             $order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.'
                         );
@@ -80,7 +80,7 @@ class SMSController extends Controller
 
                     if(!$quantity) { 
                         // return response($order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.');
-                        return reply_to_customer(
+                        return $this->reply_to_customer(
                             $customer_phone_number, 
                             $order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.'
                         );
@@ -88,7 +88,7 @@ class SMSController extends Controller
 
                     if($quantity > $product->stock->available) { 
                         // return response($order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.');
-                        return reply_to_customer(
+                        return $this->reply_to_customer(
                             $customer_phone_number, 
                             $order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.'
                         );
@@ -127,20 +127,20 @@ class SMSController extends Controller
                 ]);
 
                 // return response('Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.');
-                return reply_to_customer(
+                return $this->reply_to_customer(
                     $customer_phone_number, 
                     'Order Request Successful. ('.$new_order_request->code.') Order Request is now on pending status. A text message will be sent if your order request was approved. Thank you.'
                 );
             } catch (\Exception $e) {
                 // return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
-                return reply_to_customer(
+                return $this->reply_to_customer(
                     $customer_phone_number, 
                     'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!'
                 );
             }
         } else {
             // return response('Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.');
-            return reply_to_customer(
+            return $this->reply_to_customer(
                 $customer_phone_number, 
                 'Order Request empty. Please add your order request. E.g. ORDER PROD01_100 PROD02_200. Thank you.'
             );
@@ -154,7 +154,7 @@ class SMSController extends Controller
                 $order_request = \App\OrderRequest::where([['code', $sms_request[1]], ['customer_id', $customer->id]])->exists();
                 if(!$order_request) { 
                     // return response('Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
-                    return reply_to_customer(
+                    return $this->reply_to_customer(
                         $phone_number, 
                         'Request code non-existing. Please add your correct request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.'
                     );
@@ -182,27 +182,27 @@ class SMSController extends Controller
                     ]);
 
                     // return response('('.$order_request->code.') Request successfuly canceled. Thank you.');
-                    return reply_to_customer(
+                    return $this->reply_to_customer(
                         $phone_number, 
                         '('.$order_request->code.') Request successfuly canceled. Thank you.'
                     );
                 } else {
                     // return response('Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.');
-                    return reply_to_customer(
+                    return $this->reply_to_customer(
                         $phone_number, 
                         'Request cannot be canceled. Request status already '.$order_request->status.'. For more information, contact 999-9999 / 09999999999. Thank you.'
                     );
                 }
             } catch (\Exception $e) {
                 // return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.');
-                return reply_to_customer(
+                return $this->reply_to_customer(
                     $phone_number, 
                     'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.'
                 );
             }
         } else {
             // return response('Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.');
-            return reply_to_customer(
+            return $this->reply_to_customer(
                 $phone_number, 
                 'Request code empty. Please add your request code. E.g. CANCEL R9999-99999. Only pending request are cancelable. Thank you.'
             );
@@ -221,7 +221,7 @@ class SMSController extends Controller
         
         $startPosition = 0; $lenghtToCut = 150;
         while($timesToSend > 0) {
-            reply_to_customer($phone_number, substr($response, $startPosition, $lenghtToCut));
+            $this->reply_to_customer($phone_number, substr($response, $startPosition, $lenghtToCut));
             $startPosition = $lenghtToCut;
             $lenghtToCut*=2;
             $timesToSend-=1;
@@ -244,7 +244,7 @@ class SMSController extends Controller
                 'timestamp' => $timestamp,
             ]);
 
-            if(!(isEmptyOrNullString($originator)) && !(isEmptyOrNullString($message))) {
+            if(!(is_null($originator)) && !(is_null($message))) {
                 $this->sms_filter($originator, $message);
             }
             
@@ -261,7 +261,7 @@ class SMSController extends Controller
         // Check if contact number exist
         $customer = \App\Customer::where('contact_number', $customer_phone_number)->exists();
         if(!$customer) { 
-            return reply_to_customer(
+            return $this->reply_to_customer(
                 $customer_phone_number, 
                 'Phone number not tied to any registered customer. Please use a registered phone number. Thank you.'
             );
@@ -275,7 +275,7 @@ class SMSController extends Controller
         } else if (strtoupper($sms_request[0]) == 'CANCEL'){
             return $this->cancel_request($sms_request, $request->phone_number);
         } else {
-            return reply_to_customer(
+            return $this->reply_to_customer(
                 $customer_phone_number, 
                 'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.'
             );
@@ -288,7 +288,7 @@ class SMSController extends Controller
         if ($result == ""){
             \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => "No response from itextmo server." ]);
         } else if ($result == 0){
-            \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => $request->phone_number." Sent." ]);
+            \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => $customer_phone_number." Sent." ]);
         } else {
             \App\SystemLog::create([ 'type' => 'SMS', 'remarks' => "Error Num ". $result . " was encountered!" ]);
         }
