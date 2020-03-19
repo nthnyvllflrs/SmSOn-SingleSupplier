@@ -211,9 +211,9 @@ class SMSController extends Controller
 
     private function product_list($phone_number) {
         $product_list = \App\Product::all();
-        $response = 'Product Code List\n';
+        $response = 'Product Code List ';
         foreach ($product_list as $product) {
-            $response = $response.$product->code.' ('.$product->stock->available.')\n';
+            $response = $response.$product->code.' ('.$product->stock->available.') ';
         }
         $response = $response.'To order send ORDER PRODUCTCODE_QUANTITY. E.g. ORDER PROD01_100 PROD02_200';
 
