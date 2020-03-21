@@ -113,7 +113,7 @@
 
                             <v-card-text>
                                 <v-container>
-                                    <v-text-field v-model="message.phone_number" label="Phone Number" disabled=""></v-text-field>
+                                    <v-text-field v-model="message.phone_number" label="Phone Number" disabled></v-text-field>
                                     <v-textarea v-model="message.message" label="Body"></v-textarea>
                                 </v-container>
                             </v-card-text>
