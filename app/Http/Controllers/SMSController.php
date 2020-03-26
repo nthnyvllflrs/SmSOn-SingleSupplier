@@ -64,37 +64,64 @@ class SMSController extends Controller
     private function order_request($sms_request, $customer_phone_number) {
         if(count(array_slice($sms_request, 1)) != 0) {
             try {
-                $orders = [];
+
+                $orders = []; 
+                $productErrors = [];
+                $quantityErrors = [];
+                $stockErrors = [];
+
                 foreach(array_slice($sms_request, 1) as $order) {
                     $order_ = explode('_', $order);
                     $product = \App\Product::where('code', $order_[0])->first();
                     $quantity = is_numeric($order_[1]);
 
                     if(!$product) { 
-                        // return response($order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.');
-                        return $this->reply_to_customer(
-                            $customer_phone_number, 
-                            $order_[0].' .A non-existing product code was detected. Please double check order code and then try again. Thank you.'
-                        );
+                        $productErrors[] = $order_[0];
+                    } else {
+                        if($quantity > $product->stock->available) { 
+                            $stockErrors[] = $order_[0];
+                        }
                     }
 
                     if(!$quantity) { 
-                        // return response($order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.');
-                        return $this->reply_to_customer(
-                            $customer_phone_number, 
-                            $order_[1].' .Incorrect quantity format. Please double check order quantity and then try again. Thank you.'
-                        );
+                        $quantityErrors[] = $order_[1];
                     }
 
-                    if($quantity > $product->stock->available) { 
-                        // return response($order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.');
-                        return $this->reply_to_customer(
-                            $customer_phone_number, 
-                            $order_[0].' .Quantity exceeds stock availability. Please double check order quantity and then try again. Thank you.'
-                        );
+                    if($product && $quantity) {
+                        $orders[] = [ 'product_id' => $product->id, 'quantity' => (integer) $order_[1],];
+                    }
+                    
+                }
+
+                if((count($productErrors) > 0) || (count($quantityErrors) > 0 || (count($stockErrors) > 0))) {
+                    $message = "";
+                    
+                    if((count($productErrors) > 0)) {
+                        $message = $message.'(';
+                        foreach($productErrors as $error) {
+                            $message = $message.$error.',';
+                        }
+                        $message = $message.'). Non-existing product codes detected. ';
                     }
 
-                    $orders[] = [ 'product_id' => $product->id, 'quantity' => (integer) $order_[1],];
+                    if((count($quantityErrors) > 0)) {
+                        $message = $message.'(';
+                        foreach($quantityErrors as $error) {
+                            $message = $message.$error.',';
+                        }
+
+                        $message = $message.'). Incorrect quantity format. ';
+                    }
+
+                    if((count($stockErrors) > 0)) {
+                        $message = $message.'(';
+                        foreach($stockErrors as $error) {
+                            $message = $message.$error.',';
+                        }
+                        $message = $message.'). Quantity exceeds stock availability. ';
+                    }
+
+                    return $this->reply_to_customer($customer_phone_number, $message);
                 }
 
                 $customer = \App\Customer::where('contact_number', $customer_phone_number)->first();
@@ -120,6 +147,7 @@ class SMSController extends Controller
                 }
 
                 \Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestCreationNotification($new_order_request));
+
                 event(new \App\Events\OrderRequest([
                     'user_id' => \App\User::find(1)->id, 'code' => $new_order_request->code, 'type' => 'Created'
                 ]));
@@ -138,7 +166,7 @@ class SMSController extends Controller
                 // return response('You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!');
                 return $this->reply_to_customer(
                     $customer_phone_number, 
-                    'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.!!!!'
+                    'You have entered an invalid keyword. Please make sure your keyword is correct. Thank you.'
                 );
             }
         } else {
@@ -214,11 +242,11 @@ class SMSController extends Controller
 
     private function product_list($phone_number) {
         $product_list = \App\Product::all();
-        $response = 'Product Code List ';
+        $response = 'Product Code List (ProdCode (Available Stock)). ';
         foreach ($product_list as $product) {
             $response = $response.$product->code.' ('.$product->stock->available.') ';
         }
-        $response = $response.'To order send ORDER PRODUCTCODE_QUANTITY. E.g. ORDER PROD01_100 PROD02_200';
+        $response = $response.'. To order send ORDER PRODUCTCODE_QUANTITY. E.g. ORDER PROD01_100 PROD02_200';
 
         $timesToSend = ceil(strlen($response) / 150);
         
@@ -274,9 +302,9 @@ class SMSController extends Controller
         if(strtoupper($sms_request[0]) == 'PRODUCTLIST') {
             return $this->product_list($customer_phone_number);
         } else if (strtoupper($sms_request[0]) == 'ORDER'){
-            return $this->order_request($sms_request, $request->phone_number);
+            return $this->order_request($sms_request, $customer_phone_number);
         } else if (strtoupper($sms_request[0]) == 'CANCEL'){
-            return $this->cancel_request($sms_request, $request->phone_number);
+            return $this->cancel_request($sms_request, $customer_phone_number);
         } else {
             return $this->reply_to_customer(
                 $customer_phone_number, 

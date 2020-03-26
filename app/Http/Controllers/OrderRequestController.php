@@ -208,6 +208,9 @@ class OrderRequestController extends Controller
                 } else if($previous_status == 'Pending') {
                     $stock->pending = $stock->pending - $order_request_detail->quantity;
                     $stock->available = $stock->available - $order_request_detail->quantity;
+
+                    $customer_contact_number = $order_request->customer->contact_number;
+                    iTextMo($customer_contact_number, "Order Request (".$order_request->code.") approved. Thank you.");
                 }
 
                 $stock->save();    
