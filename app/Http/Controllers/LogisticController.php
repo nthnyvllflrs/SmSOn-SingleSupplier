@@ -44,7 +44,7 @@ class LogisticController extends Controller
             // logistic Model Data
             // 'supplier_id' => 'required|exists:suppliers,id',
             'name' => 'required|min:8|max:255',
-            'contact_number' => 'required|max:11|unique:logistics,contact_number',
+            'contact_number' => 'required|max:12|unique:logistics,contact_number',
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
@@ -80,7 +80,7 @@ class LogisticController extends Controller
 
             // logistic Model Data
             'name' => 'required|min:8|max:255',
-            'contact_number' => 'required|max:11|unique:logistics,contact_number,'.$logistic->information->id,
+            'contact_number' => 'required|max:12|unique:logistics,contact_number,'.$logistic->information->id,
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}

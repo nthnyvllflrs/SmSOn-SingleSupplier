@@ -40,7 +40,7 @@ class CustomerController extends Controller {
             'address' => 'required|min:8|max:255',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
-            'contact_number' => 'required|max:11|unique:customers,contact_number',
+            'contact_number' => 'required|max:12|unique:customers,contact_number',
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
@@ -79,7 +79,7 @@ class CustomerController extends Controller {
             'address' => 'required|min:8|max:255',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
-            'contact_number' => 'required|max:11|unique:customers,contact_number,'.$customer->information->id,
+            'contact_number' => 'required|max:12|unique:customers,contact_number,'.$customer->information->id,
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}

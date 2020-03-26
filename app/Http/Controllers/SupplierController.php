@@ -40,7 +40,7 @@ class SupplierController extends Controller
             'name' => 'required|min:8|max:255',
             'description' => 'required|max:500',
             'address' => 'required|min:8|max:255',
-            'contact_number' => 'required|max:11|unique:suppliers,contact_number',
+            'contact_number' => 'required|max:12|unique:suppliers,contact_number',
 
             'image' => 'required',
         ]);
@@ -90,7 +90,7 @@ class SupplierController extends Controller
             'name' => 'required|min:8|max:255',
             'description' => 'required|max:500',
             'address' => 'required|min:8|max:255',
-            'contact_number' => 'required|max:11|unique:suppliers,contact_number,'.$supplier->information->id,
+            'contact_number' => 'required|max:12|unique:suppliers,contact_number,'.$supplier->information->id,
         ]);
 
         if ($validator->fails()) { return response(['errors'=>$validator->errors()], 422);}
