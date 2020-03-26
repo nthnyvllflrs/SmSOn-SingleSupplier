@@ -148,9 +148,9 @@ class SMSController extends Controller
 
                 \Notification::send([\App\User::find(1)], new \App\Notifications\OrderRequestCreationNotification($new_order_request));
 
-                // event(new \App\Events\OrderRequest([
-                //     'user_id' => \App\User::find(1)->id, 'code' => $new_order_request->code, 'type' => 'Created'
-                // ]));
+                event(new \App\Events\OrderRequest([
+                    'user_id' => \App\User::find(1)->id, 'code' => $new_order_request->code, 'type' => 'Created'
+                ]));
                 
                 \App\SystemLog::create([
                     'type' => 'Order Request',
